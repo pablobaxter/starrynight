@@ -33,13 +33,9 @@ import org.gradle.kotlin.dsl.apply
 internal class FrybitsSettingsPlugin : Plugin<Settings> {
 
     override fun apply(target: Settings) = target.run {
-        gradle.beforeProject {
-            @Suppress("UnstableApiUsage")
-            if (isolated == isolated.rootProject) {
-                apply<FrybitsRootPlugin>()
-            } else {
-                apply<FrybitsPlugin>()
-            }
+        @Suppress("UnstableApiUsage")
+        gradle.lifecycle.beforeProject {
+            apply<FrybitsPlugin>()
         }
 
         setRepositories()

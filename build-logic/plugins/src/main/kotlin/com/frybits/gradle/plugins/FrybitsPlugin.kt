@@ -19,6 +19,7 @@
 package com.frybits.gradle.plugins
 
 import com.frybits.gradle.definitions.BuildFile
+import com.frybits.gradle.utils.isRoot
 import kotlinx.serialization.json.Json
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -29,12 +30,20 @@ import org.gradle.api.Project
 internal class FrybitsPlugin : Plugin<Project> {
 
     override fun apply(target: Project) = target.run {
-        require(!layout.projectDirectory.file("build.gradle").asFile.exists() && !layout.projectDirectory.file("build.gradle.kts").asFile.exists()) { "Gradle build scripts are not allowed" }
-        val buildFile = providers.fileContents(layout.projectDirectory.file("build.json"))
-            .asText
-            .map { Json.decodeFromString<BuildFile>(it) }
-            .get()
+        if (isRoot) {
+            logger.lifecycle("I am root!")
+        } else {
+            require(
+                !layout.projectDirectory.file("build.gradle").asFile.exists() && !layout.projectDirectory.file(
+                    "build.gradle.kts"
+                ).asFile.exists()
+            ) { "Gradle build scripts are not allowed" }
+            val buildFile = providers.fileContents(layout.projectDirectory.file("build.json"))
+                .asText
+                .map { Json.decodeFromString<BuildFile>(it) }
+                .get()
 
-        println(buildFile)
+            println(buildFile)
+        }
     }
 }
