@@ -18,16 +18,23 @@
 
 package com.frybits.gradle.plugins
 
+import com.frybits.gradle.definitions.BuildFile
+import kotlinx.serialization.json.Json
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * All top level tasks and plugins that are required to be applied to the root project should be added here.
+ * Generic plugin that is applied to projects (except root)
  */
-internal class FrybitsRootPlugin : Plugin<Project> {
+internal class FrybitsPlugin : Plugin<Project> {
 
     override fun apply(target: Project) = target.run {
-        @Suppress("UnstableApiUsage")
-        require(path == isolated.rootProject.path) { "The root plugin should only be applied to the root project" }
+        require(!layout.projectDirectory.file("build.gradle").asFile.exists() && !layout.projectDirectory.file("build.gradle.kts").asFile.exists()) { "Gradle build scripts are not allowed" }
+        val buildFile = providers.fileContents(layout.projectDirectory.file("build.json"))
+            .asText
+            .map { Json.decodeFromString<BuildFile>(it) }
+            .get()
+
+        println(buildFile)
     }
 }

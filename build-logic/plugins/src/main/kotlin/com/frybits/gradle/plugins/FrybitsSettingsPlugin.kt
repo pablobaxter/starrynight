@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -18,8 +18,10 @@
 
 package com.frybits.gradle.plugins
 
+import com.frybits.gradle.utils.FrybitsProperties
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
+import org.gradle.api.initialization.resolve.RepositoriesMode
 import org.gradle.kotlin.dsl.apply
 
 /**
@@ -28,14 +30,44 @@ import org.gradle.kotlin.dsl.apply
  *
  * id: com.frybits.settings
  */
-class FrybitsSettingsPlugin : Plugin<Settings> {
+internal class FrybitsSettingsPlugin : Plugin<Settings> {
 
     override fun apply(target: Settings) = target.run {
         gradle.beforeProject {
             @Suppress("UnstableApiUsage")
             if (isolated == isolated.rootProject) {
                 apply<FrybitsRootPlugin>()
+            } else {
+                apply<FrybitsPlugin>()
             }
+        }
+
+        setRepositories()
+
+        loadProjects()
+
+        val frybits = FrybitsProperties(providers)
+        rootProject.name = frybits.name
+    }
+}
+
+@Suppress("UnstableApiUsage")
+private fun Settings.loadProjects() {
+    val projectList = providers.fileContents(layout.rootDirectory.dir("gradle").file("all-projects.txt"))
+        .asText
+        .map { text ->
+            return@map text.lines().toTypedArray()
+        }
+    include(*projectList.get())
+}
+
+private fun Settings.setRepositories() {
+    @Suppress("UnstableApiUsage")
+    dependencyResolutionManagement {
+        repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+        repositories {
+            google()
+            mavenCentral()
         }
     }
 }

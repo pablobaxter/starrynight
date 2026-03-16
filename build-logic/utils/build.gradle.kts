@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,18 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.plugins
+plugins {
+    `kotlin-dsl`
+}
 
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-
-/**
- * All top level tasks and plugins that are required to be applied to the root project should be added here.
- */
-internal class FrybitsRootPlugin : Plugin<Project> {
-
-    override fun apply(target: Project) = target.run {
-        @Suppress("UnstableApiUsage")
-        require(path == isolated.rootProject.path) { "The root plugin should only be applied to the root project" }
-    }
+dependencies {
+    compileOnly(gradleApi())
+    compileOnly(gradleKotlinDsl())
 }

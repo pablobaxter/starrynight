@@ -1,0 +1,9 @@
+[versions]
+kotlinx-serialization = "1.10.0"
+
+[libraries]
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+[bundles]
+
+[plugins]

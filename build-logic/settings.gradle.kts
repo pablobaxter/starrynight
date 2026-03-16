@@ -18,10 +18,11 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        create("build") {
-            from(files("build.versions.toml"))
+        create("logic") {
+            from(files("logic.versions.toml"))
         }
     }
 }
 
 include(":plugins")
+include(":utils")
