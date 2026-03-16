@@ -23,3 +23,5 @@ dependencyResolutionManagement {
         }
     }
 }
+
+include(":plugins")
