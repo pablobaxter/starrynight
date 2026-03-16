@@ -24,6 +24,13 @@ val pluginsUnderTest by configurations.registering {
 }
 
 gradlePlugin {
+    plugins {
+        // Root project plugin
+        register("frybitsSettingPlugin") {
+            id = "com.frybits.settings"
+            implementationClass = "com.frybits.gradle.plugins.FrybitsSettingsPlugin"
+        }
+    }
 
     // These functional tests are performing actual Gradle builds, and aren't automatically added by the testing suite. Adding here instead.
     @Suppress("UnstableApiUsage")
