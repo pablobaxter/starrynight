@@ -37,5 +37,5 @@ private fun Project.logVersions() {
         return@map "$name: $version"
     }
 
-    logger.lifecycle(list.joinToString(separator = ", ", prefix = "[ ", postfix = " ]"))
+    logger.lifecycle("Versions: ${list.joinToString(separator = ", ", prefix = "[ ", postfix = " ]")}")
 }
