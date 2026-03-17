@@ -5,3 +5,5 @@
 [bundles]
 
 [plugins]
+android-application = { id = "com.android.application", version.ref = "agp-version" }
+android-library = { id = "com.android.library", version.ref = "agp-version" }

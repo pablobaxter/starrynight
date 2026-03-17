@@ -26,7 +26,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Generic plugin that is applied to projects (except root)
+ * Generic plugin that is applied to all projects
+ *
+ * id: com.frybits.plugin
  */
 internal class FrybitsPlugin : Plugin<Project> {
 
@@ -45,7 +47,7 @@ internal class FrybitsPlugin : Plugin<Project> {
                 // Ignore intermediate projects
                 return@run
             }
-            println(buildFile.get())
+            logger.lifecycle(buildFile.get().toString())
         }
     }
 }

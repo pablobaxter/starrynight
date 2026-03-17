@@ -17,12 +17,10 @@
  */
 
 plugins {
-    id("com.android.application") version "9.1.0" apply false
-    id("com.frybits")
-//    id("com.android.library") version providers.gradleProperty("com.frybits.agp.version")
+    alias(libs.plugins.android.application) apply false
+    id("com.frybits.plugin")
 }
 
-@Suppress("UnstableApiUsage")
 subprojects {
-    apply(plugin = "com.frybits")
+    apply(plugin = "com.frybits.plugin")
 }
