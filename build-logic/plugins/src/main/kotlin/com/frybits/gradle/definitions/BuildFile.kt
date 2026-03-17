@@ -22,5 +22,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class BuildFile(
-    val type: ProjectType
+    val type: ProjectType,
+    val libraries: List<String> = emptyList(),
+    val projects: List<String> = emptyList()
 )

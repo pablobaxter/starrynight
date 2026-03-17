@@ -29,6 +29,8 @@ dependencyResolutionManagement {
     versionCatalogs {
         register("libs") {
             version("agp-version", providers.gradleProperty("com.frybits.agp.version").get())
+            version("kotlin-version", providers.gradleProperty("com.frybits.kotlin.version").get())
+            version("ksp-version", providers.gradleProperty("com.frybits.ksp.version").get())
         }
     }
 }

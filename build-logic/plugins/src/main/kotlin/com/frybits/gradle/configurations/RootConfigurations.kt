@@ -19,9 +19,12 @@
 package com.frybits.gradle.configurations
 
 import com.android.build.api.AndroidPluginVersion
+import com.android.tools.r8.Version
 import com.frybits.gradle.utils.isRoot
+import com.google.devtools.ksp.gradle.KSP_VERSION
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
+import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
 
 internal fun Project.configureRootProject() {
     require(isRoot) { "This method should only be used with the root project" }
@@ -33,6 +36,9 @@ private fun Project.logVersions() {
     val list = buildMap {
         put("Gradle", GradleVersion.current().version)
         put("AGP", AndroidPluginVersion.getCurrent().version)
+        put("R8", Version.getVersionString().substringBefore(" "))
+        put("Kotlin", kotlinToolingVersion)
+        put("KSP", KSP_VERSION)
     }.map { (name, version) ->
         return@map "$name: $version"
     }

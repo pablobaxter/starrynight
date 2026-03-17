@@ -45,6 +45,9 @@ dependencies {
     compileOnly(gradleKotlinDsl())
 
     compileOnly(logic.agp)
+    compileOnly(logic.kotlin.gradle)
+    compileOnly(logic.ksp)
+    compileOnly(logic.r8)
 
     implementation(logic.kotlinx.serialization)
 }
