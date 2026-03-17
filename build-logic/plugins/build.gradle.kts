@@ -31,11 +31,6 @@ gradlePlugin {
             id = "com.frybits.settings"
             implementationClass = "com.frybits.gradle.plugins.FrybitsSettingsPlugin"
         }
-
-        register("frybitsPlugin") {
-            id = "com.frybits"
-            implementationClass = "com.frybits.gradle.plugins.FrybitsPlugin"
-        }
     }
 
     // These functional tests are performing actual Gradle builds, and aren't automatically added by the testing suite. Adding here instead.
