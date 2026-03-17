@@ -20,15 +20,22 @@ package com.frybits.gradle.configurations
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.tools.r8.Version
+import com.frybits.gradle.plugins.FrybitsPlugin
 import com.frybits.gradle.utils.isRoot
 import com.google.devtools.ksp.gradle.KSP_VERSION
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
 
 internal fun Project.configureRootProject() {
     require(isRoot) { "This method should only be used with the root project" }
     logVersions()
+
+    // TODO: This breaks isolated projects!
+    subprojects {
+        apply<FrybitsPlugin>()
+    }
 }
 
 

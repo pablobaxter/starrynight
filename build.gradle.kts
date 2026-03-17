@@ -14,7 +14,3 @@ plugins {
     alias(libs.plugins.kotlin) apply false
     alias(libs.plugins.ksp) apply false
 }
-
-subprojects {
-    apply(plugin = "com.frybits.plugin")
-}
