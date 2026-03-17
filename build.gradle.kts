@@ -16,15 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.utils
+plugins {
+    id("com.android.application") version "9.1.0" apply false
+    id("com.frybits")
+//    id("com.android.library") version providers.gradleProperty("com.frybits.agp.version")
+}
 
-import org.gradle.api.provider.ProviderFactory
-
-class FrybitsProperties(providerFactory: ProviderFactory) {
-
-    private val properties = providerFactory.gradlePropertiesPrefixedBy("com.frybits").get()
-
-    val name = properties["com.frybits.name"].orEmpty()
-
-    val agpVersion = properties["com.frybits.agp.version"].orEmpty()
+@Suppress("UnstableApiUsage")
+subprojects {
+    apply(plugin = "com.frybits")
 }

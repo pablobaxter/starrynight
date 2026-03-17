@@ -20,6 +20,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("logic") {
             from(files("logic.versions.toml"))
+//            version("agp-version", )
         }
     }
 }

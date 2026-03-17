@@ -18,6 +18,7 @@
 
 package com.frybits.gradle.plugins
 
+import com.frybits.gradle.configurations.configureRootProject
 import com.frybits.gradle.definitions.BuildFile
 import com.frybits.gradle.utils.isRoot
 import kotlinx.serialization.json.Json
@@ -31,19 +32,20 @@ internal class FrybitsPlugin : Plugin<Project> {
 
     override fun apply(target: Project) = target.run {
         if (isRoot) {
-            logger.lifecycle("I am root!")
+            configureRootProject()
         } else {
-            require(
-                !layout.projectDirectory.file("build.gradle").asFile.exists() && !layout.projectDirectory.file(
-                    "build.gradle.kts"
-                ).asFile.exists()
-            ) { "Gradle build scripts are not allowed" }
+            val buildScript = layout.projectDirectory.file("build.gradle").asFile
+            val kotlinBuildScript = layout.projectDirectory.file("build.gradle.kts").asFile
+            require(!buildScript.exists() && !kotlinBuildScript.exists()) { "Gradle build scripts are not allowed" }
             val buildFile = providers.fileContents(layout.projectDirectory.file("build.json"))
                 .asText
                 .map { Json.decodeFromString<BuildFile>(it) }
-                .get()
 
-            println(buildFile)
+            if (!buildFile.isPresent) {
+                // Ignore intermediate projects
+                return@run
+            }
+            println(buildFile.get())
         }
     }
 }

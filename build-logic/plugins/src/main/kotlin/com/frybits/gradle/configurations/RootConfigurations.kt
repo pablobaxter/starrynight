@@ -16,15 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.utils
+package com.frybits.gradle.configurations
 
-import org.gradle.api.provider.ProviderFactory
+import com.android.build.api.AndroidPluginVersion
+import com.frybits.gradle.utils.isRoot
+import org.gradle.api.Project
+import org.gradle.util.GradleVersion
 
-class FrybitsProperties(providerFactory: ProviderFactory) {
+internal fun Project.configureRootProject() {
+    require(isRoot) { "This method should only be used with the root project" }
+    logVersions()
+}
 
-    private val properties = providerFactory.gradlePropertiesPrefixedBy("com.frybits").get()
 
-    val name = properties["com.frybits.name"].orEmpty()
+private fun Project.logVersions() {
+    val list = buildMap {
+        put("Gradle", GradleVersion.current().version)
+        put("AGP", AndroidPluginVersion.getCurrent().version)
+    }.map { (name, version) ->
+        return@map "$name: $version"
+    }
 
-    val agpVersion = properties["com.frybits.agp.version"].orEmpty()
+    logger.lifecycle(list.joinToString(separator = ", ", prefix = "[ ", postfix = " ]"))
 }

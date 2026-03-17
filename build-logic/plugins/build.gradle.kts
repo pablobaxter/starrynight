@@ -26,10 +26,15 @@ val pluginsUnderTest by configurations.registering {
 
 gradlePlugin {
     plugins {
-        // Root project plugin
+        // Settings plugin
         register("frybitsSettingPlugin") {
             id = "com.frybits.settings"
             implementationClass = "com.frybits.gradle.plugins.FrybitsSettingsPlugin"
+        }
+
+        register("frybitsPlugin") {
+            id = "com.frybits"
+            implementationClass = "com.frybits.gradle.plugins.FrybitsPlugin"
         }
     }
 
@@ -43,6 +48,8 @@ dependencies {
 
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
+
+    compileOnly(logic.agp)
 
     implementation(logic.kotlinx.serialization)
 }

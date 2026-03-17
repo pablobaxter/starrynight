@@ -1,8 +1,10 @@
 [versions]
 kotlinx-serialization = "1.10.0"
+agp-version = "9.1.0"
 
 [libraries]
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+agp = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp-version" }
 
 [bundles]
 
