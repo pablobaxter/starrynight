@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations
+package com.frybits.gradle.configurations.core
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.tools.r8.Version
@@ -28,7 +28,10 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
 
-internal fun Project.configureRootProject() {
+/**
+ * Configuration that will only apply to the root
+ */
+internal fun Project.rootProjectConfiguration() {
     require(isRoot) { "This method should only be used with the root project" }
     logVersions()
 
@@ -38,7 +41,7 @@ internal fun Project.configureRootProject() {
     }
 }
 
-
+// Helper function to log the versions of major tools used for the build
 private fun Project.logVersions() {
     val list = buildMap {
         put("Gradle", GradleVersion.current().version)

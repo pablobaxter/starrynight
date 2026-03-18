@@ -16,26 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.plugins
+package com.frybits.gradle.configurations.core
 
-import com.frybits.gradle.configurations.core.projectConfiguration
-import com.frybits.gradle.configurations.core.rootProjectConfiguration
-import com.frybits.gradle.utils.isRoot
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Generic plugin that is applied to all projects
- *
- * id: com.frybits.plugin
+ * Configuration that should be common to all projects (excluding root)
  */
-internal class FrybitsPlugin : Plugin<Project> {
+internal fun Project.baseProjectConfiguration() {
 
-    override fun apply(target: Project) = target.run {
-        if (isRoot) {
-            rootProjectConfiguration()
-        } else {
-            projectConfiguration()
-        }
-    }
 }

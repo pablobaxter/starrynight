@@ -5,4 +5,6 @@ plugins {
 dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
+
+    compileOnly(logic.kotlin.gradle)
 }

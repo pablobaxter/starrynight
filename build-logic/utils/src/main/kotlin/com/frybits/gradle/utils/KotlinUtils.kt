@@ -16,26 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.plugins
+package com.frybits.gradle.utils
 
-import com.frybits.gradle.configurations.core.projectConfiguration
-import com.frybits.gradle.configurations.core.rootProjectConfiguration
-import com.frybits.gradle.utils.isRoot
-import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-/**
- * Generic plugin that is applied to all projects
- *
- * id: com.frybits.plugin
- */
-internal class FrybitsPlugin : Plugin<Project> {
-
-    override fun apply(target: Project) = target.run {
-        if (isRoot) {
-            rootProjectConfiguration()
-        } else {
-            projectConfiguration()
-        }
-    }
-}
+public val Project.kotlinJvmTarget: Provider<JvmTarget>
+    get() = providers.gradleProperty("com.frybits.kotlin.jvm.target")
+        .map { jvmTarget -> JvmTarget.fromTarget(jvmTarget) }
