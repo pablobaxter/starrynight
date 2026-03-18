@@ -16,13 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.definitions
+package com.frybits.gradle.configurations
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-internal data class BuildFile(
-    val type: ProjectType,
-    val libraries: List<String> = emptyList(),
-    val projects: List<String> = emptyList()
-)
+class ProjectConfiguration {
+}
