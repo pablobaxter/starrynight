@@ -16,20 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.definitions
+package com.frybits.gradle.configurations.core
 
-import kotlinx.serialization.SerialName
+import com.frybits.gradle.definitions.BuildFile
+import com.frybits.gradle.definitions.ProjectType
+import org.gradle.api.Project
 
 /**
- * Currently supported project types
+ * Configure based off the provided [BuildFile]
  */
-internal enum class ProjectType {
-    @SerialName("androidApplication")
-    ANDROID_APPLICATION,
+internal fun Project.buildFileConfiguration(buildFile: BuildFile) {
+    with(buildFile) {
+        when (type) {
+            ProjectType.ANDROID_APPLICATION -> {
 
-    @SerialName("androidLibrary")
-    ANDROID_LIBRARY,
+            }
+            ProjectType.ANDROID_LIBRARY -> {
 
-    @SerialName("javaLibrary")
-    JAVA_LIBRARY
+            }
+            ProjectType.JAVA_LIBRARY -> {
+
+            }
+        }
+    }
 }

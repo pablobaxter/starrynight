@@ -31,7 +31,7 @@ internal fun Project.projectConfiguration() {
     // Intermediate projects will not have build files, so skip those
     val buildFile = buildJson() ?: return
 
-    logger.lifecycle(buildFile.toString())
+    buildFileConfiguration(buildFile)
 }
 
 // Returns the [BuildFile] object generated from the build.json file

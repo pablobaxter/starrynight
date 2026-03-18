@@ -20,6 +20,9 @@ package com.frybits.gradle.definitions
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Defines the structure of the build.json file
+ */
 @Serializable
 internal data class BuildFile(
     val type: ProjectType,
