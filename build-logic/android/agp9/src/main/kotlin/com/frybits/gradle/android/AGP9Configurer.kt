@@ -18,20 +18,33 @@
 
 package com.frybits.gradle.android
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
 import com.frybits.gradle.Configurer
 import com.frybits.gradle.definitions.BuildFile
+import org.gradle.api.Project
 import javax.inject.Inject
 
 public abstract class AGP9Configurer @Inject internal constructor(
+    private val project: Project,
     private val commonExtension: CommonExtension,
     private val componentsExtension: AndroidComponentsExtension<CommonExtension, VariantBuilder, Variant>
 ): Configurer {
 
     override fun configureBuild(buildFile: BuildFile) {
-        println("I'm 9!")
+        project.androidCommonConfiguration(buildFile, AGP9CommonExtensionWrapper(commonExtension))
+
+        when(commonExtension) {
+            is ApplicationExtension -> {
+                project.androidAppConfiguration(buildFile, commonExtension)
+            }
+            is LibraryExtension -> {
+                project.androidLibraryConfiguration(buildFile, commonExtension)
+            }
+        }
     }
 }
