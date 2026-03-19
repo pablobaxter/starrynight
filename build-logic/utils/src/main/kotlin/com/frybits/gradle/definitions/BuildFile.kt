@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * Defines the structure of the build.json file
  */
 @Serializable
-internal data class BuildFile(
+public data class BuildFile(
     val type: ProjectType,
     val libraries: List<String> = emptyList(),
     val projects: List<String> = emptyList()

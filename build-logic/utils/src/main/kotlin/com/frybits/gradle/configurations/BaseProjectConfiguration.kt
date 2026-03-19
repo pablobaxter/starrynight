@@ -16,20 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.definitions
+package com.frybits.gradle.configurations
 
-import kotlinx.serialization.SerialName
+import org.gradle.api.Project
 
 /**
- * Currently supported project types
+ * Configuration that should be common to all projects (excluding root)
  */
-internal enum class ProjectType {
-    @SerialName("androidApplication")
-    ANDROID_APPLICATION,
+fun Project.baseProjectConfiguration() {
 
-    @SerialName("androidLibrary")
-    ANDROID_LIBRARY,
-
-    @SerialName("javaLibrary")
-    JAVA_LIBRARY
 }

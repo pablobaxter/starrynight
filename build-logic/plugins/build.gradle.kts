@@ -40,11 +40,14 @@ gradlePlugin {
 
 dependencies {
     implementation(project(":utils"))
+    implementation(project(":android"))
+    implementation(project(":android:agp8"))
+    implementation(project(":android:agp9"))
 
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
 
-    compileOnly(logic.agp)
+    compileOnly(logic.agp.zip(providers.gradleProperty("agp")) { lib, version -> "$lib:$version" })
     compileOnly(logic.kotlin.gradle)
     compileOnly(logic.ksp)
     compileOnly(logic.r8)

@@ -16,20 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations.core
+package com.frybits.gradle.android
 
-import com.frybits.gradle.utils.javaSourceCompatibility
-import com.frybits.gradle.utils.javaTargetCompatibility
-import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.kotlin.dsl.configure
+import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Variant
+import com.android.build.api.variant.VariantBuilder
+import com.frybits.gradle.Configurer
+import com.frybits.gradle.definitions.BuildFile
+import javax.inject.Inject
 
-/**
- * Configuration common to all JVM projects
- */
-internal fun Project.jvmProjectConfiguration() {
-    configure<JavaPluginExtension> {
-        targetCompatibility = javaTargetCompatibility.get()
-        sourceCompatibility = javaSourceCompatibility.get()
+public abstract class AGP9Configurer @Inject internal constructor(
+    private val commonExtension: CommonExtension,
+    private val componentsExtension: AndroidComponentsExtension<CommonExtension, VariantBuilder, Variant>
+): Configurer {
+
+    override fun configureBuild(buildFile: BuildFile) {
+        println("I'm 9!")
     }
 }

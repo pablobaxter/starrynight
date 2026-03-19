@@ -16,13 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations.core
+package com.frybits.gradle.configurations
 
+import com.frybits.gradle.utils.javaSourceCompatibility
+import com.frybits.gradle.utils.javaTargetCompatibility
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.kotlin.dsl.configure
 
 /**
- * Configuration that should be common to all projects (excluding root)
+ * Configuration common to all JVM projects
  */
-internal fun Project.baseProjectConfiguration() {
-
+fun Project.jvmProjectConfiguration() {
+    configure<JavaPluginExtension> {
+        targetCompatibility = javaTargetCompatibility.get()
+        sourceCompatibility = javaSourceCompatibility.get()
+    }
 }

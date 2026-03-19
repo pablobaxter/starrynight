@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations.core
+package com.frybits.gradle.configurations
 
 import com.frybits.gradle.utils.kotlinJvmTarget
 import org.gradle.api.Project
@@ -28,7 +28,7 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 /**
  * Configures all Kotlin projects
  */
-internal fun Project.kotlinProjectConfiguration() {
+fun Project.kotlinProjectConfiguration() {
     apply(plugin = "kotlinx-serialization")
     apply(plugin = "com.google.devtools.ksp")
 

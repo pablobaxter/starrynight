@@ -18,25 +18,34 @@
 
 package com.frybits.gradle.configurations.core
 
+import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.LibraryPlugin
+import com.frybits.gradle.configurations.configurers.JavaConfigurer
+import com.frybits.gradle.configurations.configurers.getAndroidConfigurer
 import com.frybits.gradle.definitions.BuildFile
 import com.frybits.gradle.definitions.ProjectType
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.kotlin.dsl.apply
 
 /**
  * Configure based off the provided [BuildFile]
  */
 internal fun Project.buildFileConfiguration(buildFile: BuildFile) {
-    with(buildFile) {
-        when (type) {
-            ProjectType.ANDROID_APPLICATION -> {
-
-            }
-            ProjectType.ANDROID_LIBRARY -> {
-
-            }
-            ProjectType.JAVA_LIBRARY -> {
-
-            }
+    val configurer = when (buildFile.type) {
+        ProjectType.ANDROID_APPLICATION -> {
+            apply<AppPlugin>()
+            getAndroidConfigurer()
+        }
+        ProjectType.ANDROID_LIBRARY -> {
+            apply<LibraryPlugin>()
+            getAndroidConfigurer()
+        }
+        ProjectType.JAVA_LIBRARY -> {
+            apply<JavaPlugin>()
+            JavaConfigurer()
         }
     }
+
+    configurer.configureBuild(buildFile)
 }

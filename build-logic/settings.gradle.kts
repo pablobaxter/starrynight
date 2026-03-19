@@ -26,3 +26,6 @@ dependencyResolutionManagement {
 
 include(":plugins")
 include(":utils")
+include(":android")
+include(":android:agp8")
+include(":android:agp9")

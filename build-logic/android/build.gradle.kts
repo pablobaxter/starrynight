@@ -1,14 +1,12 @@
 plugins {
     `kotlin-dsl`
-    kotlin("plugin.serialization") version "2.3.10"
 }
 
 dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
 
-    compileOnly(logic.kotlin.gradle)
     compileOnly(logic.agp.zip(providers.gradleProperty("agp")) { lib, version -> "$lib:$version" })
 
-    implementation(logic.kotlinx.serialization)
+    implementation(project(":utils"))
 }
