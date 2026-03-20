@@ -18,10 +18,7 @@ testing {
 }
 
 // Special thanks to https://github.com/melix/jmh-gradle-plugin/blob/master/build-logic/src/main/kotlin/me.champeau.convention-funcTest.gradle.kts
-val pluginsUnderTest by configurations.registering {
-    isCanBeConsumed = false
-    isCanBeResolved = false
-}
+val pluginsUnderTest by configurations.registering
 
 gradlePlugin {
     plugins {
@@ -33,8 +30,7 @@ gradlePlugin {
     }
 
     // These functional tests are performing actual Gradle builds, and aren't automatically added by the testing suite. Adding here instead.
-    @Suppress("UnstableApiUsage")
-    testSourceSet(sourceSets.getByName("functionalTest"))
+    testSourceSets(sourceSets.getByName("functionalTest"))
 }
 
 dependencies {
@@ -64,12 +60,12 @@ tasks.withType<ValidatePlugins>().configureEach {
     enableStricterValidation.set(true)
 }
 
-// Checks should include all tests
-tasks.check {
-    dependsOn("functionalTest")
-}
-
 // Add in the classpaths the functional tests will expect
 tasks.withType<PluginUnderTestMetadata>().configureEach {
     pluginClasspath.from(pluginsUnderTest)
+}
+
+// Checks should include all tests
+tasks.check {
+    dependsOn("functionalTest")
 }
