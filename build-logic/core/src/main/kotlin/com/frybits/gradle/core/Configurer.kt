@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle
+package com.frybits.gradle.core
 
-import com.frybits.gradle.definitions.BuildFile
+import com.frybits.gradle.core.definitions.BuildFile
 
 /**
  * Configures the Android projects with the given build file
  */
 public interface Configurer {
 
-    fun configureBuild(buildFile: BuildFile)
+    public fun configureBuild(buildFile: BuildFile)
 }

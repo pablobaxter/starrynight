@@ -16,20 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.definitions
+package com.frybits.gradle.android.wrappers
 
-import kotlinx.serialization.SerialName
+import com.android.build.api.dsl.CommonExtension
+import javax.inject.Inject
 
-/**
- * Currently supported project types
- */
-public enum class ProjectType {
-    @SerialName("androidApplication")
-    ANDROID_APPLICATION,
-
-    @SerialName("androidLibrary")
-    ANDROID_LIBRARY,
-
-    @SerialName("javaLibrary")
-    JAVA_LIBRARY
-}
+internal abstract class AGP9CommonExtensionWrapper @Inject internal constructor(
+    commonExtension: CommonExtension
+): CommonExtensionWrapper, CommonExtension by commonExtension

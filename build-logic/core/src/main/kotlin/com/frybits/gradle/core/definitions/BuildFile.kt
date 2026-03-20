@@ -16,13 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android
+package com.frybits.gradle.core.definitions
 
-import com.android.build.api.dsl.ApplicationExtension
-import com.frybits.gradle.definitions.BuildFile
-import org.gradle.api.Project
+import kotlinx.serialization.Serializable
 
-fun Project.androidAppConfiguration(buildFile: BuildFile, android: ApplicationExtension) {
-    with(android) {
-    }
-}
+/**
+ * Defines the structure of the build.json file
+ */
+@Serializable
+public data class BuildFile(
+    public val type: ProjectType,
+    public val libraries: List<String> = emptyList(),
+    public val projects: List<String> = emptyList()
+)

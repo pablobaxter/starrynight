@@ -16,30 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations
+package com.frybits.gradle.core.configurations
 
-import com.frybits.gradle.utils.kotlinJvmTarget
+import com.frybits.gradle.utils.javaSourceCompatibility
+import com.frybits.gradle.utils.javaTargetCompatibility
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
-import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.kotlin.dsl.configure
 
 /**
- * Configures all Kotlin projects
+ * Configuration common to all JVM projects
  */
-fun Project.kotlinProjectConfiguration() {
-    apply(plugin = "kotlinx-serialization")
-    apply(plugin = "com.google.devtools.ksp")
-
-    extensions.configure<HasConfigurableKotlinCompilerOptions<KotlinJvmCompilerOptions>>("kotlin") {
-        compilerOptions {
-            jvmTarget.set(kotlinJvmTarget)
-            allWarningsAsErrors.set(true)
-        }
-    }
-
-    kotlinExtension.run {
-        explicitApi()
+public fun Project.jvmProjectConfiguration() {
+    configure<JavaPluginExtension> {
+        targetCompatibility = javaTargetCompatibility.get()
+        sourceCompatibility = javaSourceCompatibility.get()
     }
 }

@@ -16,20 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations
+package com.frybits.gradle.android.configurations
 
-import com.frybits.gradle.utils.javaSourceCompatibility
-import com.frybits.gradle.utils.javaTargetCompatibility
+import com.android.build.api.dsl.LibraryExtension
+import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.kotlin.dsl.configure
 
-/**
- * Configuration common to all JVM projects
- */
-fun Project.jvmProjectConfiguration() {
-    configure<JavaPluginExtension> {
-        targetCompatibility = javaTargetCompatibility.get()
-        sourceCompatibility = javaSourceCompatibility.get()
+public fun Project.androidLibraryConfiguration(buildFile: BuildFile, android: LibraryExtension) {
+    with(android) {
+
     }
 }

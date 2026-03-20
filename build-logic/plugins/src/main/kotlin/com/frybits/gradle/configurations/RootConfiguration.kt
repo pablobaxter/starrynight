@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations.core
+package com.frybits.gradle.configurations
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.tools.r8.Version

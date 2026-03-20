@@ -2,7 +2,6 @@ plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     `jvm-test-suite`
-    kotlin("plugin.serialization") version "2.3.10"
 }
 
 testing {
@@ -39,10 +38,11 @@ gradlePlugin {
 }
 
 dependencies {
-    implementation(project(":utils"))
     implementation(project(":android"))
     implementation(project(":android:agp8"))
     implementation(project(":android:agp9"))
+    implementation(project(":core"))
+    implementation(project(":utils"))
 
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
@@ -52,7 +52,12 @@ dependencies {
     compileOnly(logic.ksp)
     compileOnly(logic.r8)
 
+    implementation(logic.kotlinx.serialization.core)
     implementation(logic.bundles.kotlinx.toml)
+}
+
+kotlin {
+    explicitApi()
 }
 
 tasks.withType<ValidatePlugins>().configureEach {

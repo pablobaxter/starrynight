@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android
+package com.frybits.gradle.android.wrappers
 
 import com.android.build.api.variant.DslLifecycle
 import com.android.build.api.variant.Variant
@@ -24,7 +24,7 @@ import com.android.build.api.variant.VariantBuilder
 import com.android.build.api.variant.VariantSelector
 import org.gradle.api.Action
 
-interface ComponentsExtensionWrapper<DslExtensionT: CommonExtensionWrapper, VariantBuilderT: VariantBuilder, VariantT: Variant>: DslLifecycle<DslExtensionT> {
+public interface ComponentsExtensionWrapper<DslExtensionT: CommonExtensionWrapper, VariantBuilderT: VariantBuilder, VariantT: Variant>: DslLifecycle<DslExtensionT> {
 
     /**
      * Creates a [VariantSelector] instance that can be configured to reduce the set of [com.android.build.api.variant.ComponentBuilder] instances participating in the
@@ -32,7 +32,7 @@ interface ComponentsExtensionWrapper<DslExtensionT: CommonExtensionWrapper, Vari
      *
      * @return [VariantSelector] to select the variants of interest.
      */
-    fun selector(): VariantSelector
+    public fun selector(): VariantSelector
 
     /**
      * Method to register a [callback] to be called with [VariantBuilderT] instances that satisfies the [selector]. The [callback] will be
@@ -70,10 +70,10 @@ interface ComponentsExtensionWrapper<DslExtensionT: CommonExtensionWrapper, Vari
      *   interest.
      * @param callback lambda to be called with each instance of [VariantBuilderT] of interest.
      */
-    fun beforeVariants(selector: VariantSelector = selector().all(), callback: (VariantBuilderT) -> Unit)
+    public fun beforeVariants(selector: VariantSelector = selector().all(), callback: (VariantBuilderT) -> Unit)
 
     /** [Action] based version of [beforeVariants] above. */
-    fun beforeVariants(selector: VariantSelector = selector().all(), callback: Action<VariantBuilderT>)
+    public fun beforeVariants(selector: VariantSelector = selector().all(), callback: Action<VariantBuilderT>)
 
     /**
      * Allow for registration of a [callback] to be called with variant instances of type [VariantT] once the list of
@@ -114,8 +114,8 @@ interface ComponentsExtensionWrapper<DslExtensionT: CommonExtensionWrapper, Vari
      *   interest.
      * @param callback lambda to be called with each instance of [VariantT] of interest.
      */
-    fun onVariants(selector: VariantSelector = selector().all(), callback: (VariantT) -> Unit)
+    public fun onVariants(selector: VariantSelector = selector().all(), callback: (VariantT) -> Unit)
 
     /** [Action] based version of [onVariants] above. */
-    fun onVariants(selector: VariantSelector = selector().all(), callback: Action<VariantT>)
+    public fun onVariants(selector: VariantSelector = selector().all(), callback: Action<VariantT>)
 }

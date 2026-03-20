@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations.configurers
+package com.frybits.gradle.core.jvm
 
-import com.frybits.gradle.Configurer
-import com.frybits.gradle.configurations.baseProjectConfiguration
-import com.frybits.gradle.configurations.jvmProjectConfiguration
-import com.frybits.gradle.configurations.kotlinProjectConfiguration
-import com.frybits.gradle.definitions.BuildFile
+import com.frybits.gradle.core.Configurer
+import com.frybits.gradle.core.configurations.baseProjectConfiguration
+import com.frybits.gradle.core.configurations.jvmProjectConfiguration
+import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
+import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 import javax.inject.Inject
 
-internal abstract class JavaConfigurer @Inject internal constructor(
+public abstract class JavaConfigurer @Inject internal constructor(
     private val project: Project
 ): Configurer {
 

@@ -16,13 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android
+package com.frybits.gradle.android.configurations
 
-interface CommonExtensionWrapper {
+import com.frybits.gradle.android.wrappers.CommonExtensionWrapper
+import com.frybits.gradle.core.configurations.baseProjectConfiguration
+import com.frybits.gradle.core.configurations.jvmProjectConfiguration
+import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
+import com.frybits.gradle.core.definitions.BuildFile
+import org.gradle.api.Project
 
-    /**
-     * The namespace of the generated R and BuildConfig classes. Also, the namespace used to resolve any relative class names that are
-     * declared in the AndroidManifest.xml.
-     */
-    var namespace: String?
+public fun Project.androidCommonConfiguration(buildFile: BuildFile, android: CommonExtensionWrapper) {
+    baseProjectConfiguration() // All base project configuration
+    jvmProjectConfiguration() // All JVM configuration
+    kotlinProjectConfiguration() // All Kotlin configuration
+
+    with(android) {
+
+    }
 }

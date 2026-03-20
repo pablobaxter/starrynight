@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android
+package com.frybits.gradle.android.configurations
 
-import com.android.build.api.dsl.CommonExtension
-import javax.inject.Inject
+import com.android.build.api.dsl.ApplicationExtension
+import com.frybits.gradle.core.definitions.BuildFile
+import org.gradle.api.Project
 
-internal abstract class AGP9CommonExtensionWrapper @Inject internal constructor(
-    commonExtension: CommonExtension
-): CommonExtensionWrapper, CommonExtension by commonExtension
+public fun Project.androidAppConfiguration(buildFile: BuildFile, android: ApplicationExtension) {
+    with(android) {
+    }
+}

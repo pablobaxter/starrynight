@@ -21,5 +21,5 @@ package com.frybits.gradle.utils
 import org.gradle.api.Project
 
 @Suppress("UnstableApiUsage")
-val Project.isRoot: Boolean
+public val Project.isRoot: Boolean
     get() = isolated == isolated.rootProject

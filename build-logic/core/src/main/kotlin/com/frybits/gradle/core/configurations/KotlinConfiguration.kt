@@ -16,26 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.plugins
+package com.frybits.gradle.core.configurations
 
-import com.frybits.gradle.configurations.projectConfiguration
-import com.frybits.gradle.configurations.rootProjectConfiguration
-import com.frybits.gradle.utils.isRoot
-import org.gradle.api.Plugin
+import com.frybits.gradle.utils.kotlinJvmTarget
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 /**
- * Generic plugin that is applied to all projects
- *
- * id: com.frybits.plugin
+ * Configures all Kotlin projects
  */
-internal class FrybitsPlugin : Plugin<Project> {
+public fun Project.kotlinProjectConfiguration() {
+    apply(plugin = "kotlinx-serialization")
+    apply(plugin = "com.google.devtools.ksp")
 
-    override fun apply(target: Project) = target.run {
-        if (isRoot) {
-            rootProjectConfiguration()
-        } else {
-            projectConfiguration()
+    extensions.configure<HasConfigurableKotlinCompilerOptions<KotlinJvmCompilerOptions>>("kotlin") {
+        compilerOptions {
+            jvmTarget.set(kotlinJvmTarget)
+            allWarningsAsErrors.set(true)
         }
+    }
+
+    kotlinExtension.run {
+        explicitApi()
     }
 }

@@ -16,16 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.definitions
+package com.frybits.gradle.core.definitions
 
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 /**
- * Defines the structure of the build.json file
+ * Currently supported project types
  */
-@Serializable
-public class BuildFile internal constructor(
-    val type: ProjectType,
-    val libraries: List<String> = emptyList(),
-    val projects: List<String> = emptyList()
-)
+public enum class ProjectType {
+    @SerialName("androidApplication")
+    ANDROID_APPLICATION,
+
+    @SerialName("androidLibrary")
+    ANDROID_LIBRARY,
+
+    @SerialName("javaLibrary")
+    JAVA_LIBRARY
+}

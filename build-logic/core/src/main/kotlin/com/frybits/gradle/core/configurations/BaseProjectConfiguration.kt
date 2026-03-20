@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.configurations
+package com.frybits.gradle.core.configurations
 
 import org.gradle.api.Project
 
 /**
  * Configuration that should be common to all projects (excluding root)
  */
-fun Project.baseProjectConfiguration() {
+public fun Project.baseProjectConfiguration() {
 
 }

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android
+package com.frybits.gradle.android.configurations
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
@@ -24,8 +24,9 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
-import com.frybits.gradle.Configurer
-import com.frybits.gradle.definitions.BuildFile
+import com.frybits.gradle.android.wrappers.AGP9CommonExtensionWrapper
+import com.frybits.gradle.core.Configurer
+import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject

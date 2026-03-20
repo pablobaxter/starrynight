@@ -16,42 +16,60 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android
+package com.frybits.gradle.android.wrappers
 
 import com.android.build.api.dsl.AndroidResources
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildFeatures
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.DefaultConfig
 import com.android.build.api.dsl.Installation
-import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
-import com.frybits.gradle.Configurer
-import com.frybits.gradle.definitions.BuildFile
+import com.android.build.api.variant.VariantSelector
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
-public abstract class AGP8Configurer @Inject internal constructor(
+internal abstract class AGP8ComponentsExtensionWrapper @Inject internal constructor(
     private val project: Project,
-    private val commonExtension: CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>,
     private val componentsExtension: AndroidComponentsExtension<CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>, VariantBuilder, Variant>
-): Configurer {
+): ComponentsExtensionWrapper<AGP8CommonExtensionWrapper, VariantBuilder, Variant> {
 
-    override fun configureBuild(buildFile: BuildFile) {
-        project.androidCommonConfiguration(buildFile, project.objects.newInstance<AGP8CommonExtensionWrapper>(commonExtension))
+    override fun selector(): VariantSelector = componentsExtension.selector()
 
-        when(commonExtension) {
-            is ApplicationExtension -> {
-                project.androidAppConfiguration(buildFile, commonExtension)
-            }
-            is LibraryExtension -> {
-                project.androidLibraryConfiguration(buildFile, commonExtension)
-            }
+    override fun beforeVariants(
+        selector: VariantSelector,
+        callback: (VariantBuilder) -> Unit
+    ) = componentsExtension.beforeVariants(selector, callback)
+
+    override fun beforeVariants(
+        selector: VariantSelector,
+        callback: Action<VariantBuilder>
+    ) = componentsExtension.beforeVariants(selector, callback)
+
+    override fun onVariants(
+        selector: VariantSelector,
+        callback: (Variant) -> Unit
+    ) = componentsExtension.onVariants(selector, callback)
+
+    override fun onVariants(
+        selector: VariantSelector,
+        callback: Action<Variant>
+    ) = componentsExtension.onVariants(selector,callback)
+
+    override fun finalizeDsl(callback: (AGP8CommonExtensionWrapper) -> Unit) {
+        componentsExtension.finalizeDsl { commonExtension ->
+            callback(project.objects.newInstance<AGP8CommonExtensionWrapper>(commonExtension))
+        }
+    }
+
+    override fun finalizeDsl(callback: Action<AGP8CommonExtensionWrapper>) {
+        componentsExtension.finalizeDsl { commonExtension ->
+            callback.execute(project.objects.newInstance<AGP8CommonExtensionWrapper>(commonExtension))
         }
     }
 }

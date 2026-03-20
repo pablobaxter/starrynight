@@ -16,14 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android
+package com.frybits.gradle.android.wrappers
 
-import com.android.build.api.dsl.LibraryExtension
-import com.frybits.gradle.definitions.BuildFile
-import org.gradle.api.Project
+import com.android.build.api.dsl.AndroidResources
+import com.android.build.api.dsl.BuildFeatures
+import com.android.build.api.dsl.BuildType
+import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.DefaultConfig
+import com.android.build.api.dsl.Installation
+import com.android.build.api.dsl.ProductFlavor
+import javax.inject.Inject
 
-fun Project.androidLibraryConfiguration(buildFile: BuildFile, android: LibraryExtension) {
-    with(android) {
-
-    }
-}
+internal abstract class AGP8CommonExtensionWrapper @Inject internal constructor(
+    commonExtension: CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>
+): CommonExtensionWrapper, CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation> by commonExtension
