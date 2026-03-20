@@ -44,8 +44,6 @@ internal fun Project.projectConfiguration() {
     // Intermediate projects will not have build files, so skip those
     val buildFile = populateBuildFile() ?: return
 
-    println(buildFile)
-
     // Configures based on build file
     buildFileConfiguration(buildFile)
 }
@@ -57,12 +55,12 @@ private fun Project.buildFileConfiguration(buildFile: BuildFile) {
     val configurer = when (buildFile.type) {
         ProjectType.ANDROID_APPLICATION -> {
             apply<AppPlugin>()
-            apply(plugin = "org.jetbrains.kotlin.android")
+            enableKotlinPluginIfNeeded()
             getAndroidConfigurer()
         }
         ProjectType.ANDROID_LIBRARY -> {
             apply<LibraryPlugin>()
-            apply(plugin = "org.jetbrains.kotlin.android")
+            enableKotlinPluginIfNeeded()
             getAndroidConfigurer()
         }
         ProjectType.JAVA_LIBRARY -> {
@@ -73,6 +71,13 @@ private fun Project.buildFileConfiguration(buildFile: BuildFile) {
     }
 
     configurer.configureBuild(buildFile)
+}
+
+private fun Project.enableKotlinPluginIfNeeded() {
+    val androidCurrentVersion = AndroidPluginVersion.getCurrent()
+    if (androidCurrentVersion.major < 9) {
+        apply(plugin = "org.jetbrains.kotlin.android")
+    }
 }
 
 private fun Project.getAndroidConfigurer(): Configurer {

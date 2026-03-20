@@ -35,7 +35,6 @@ public abstract class JavaConfigurer @Inject internal constructor(
             baseProjectConfiguration() // All base project configuration
             jvmProjectConfiguration() // All JVM configuration
             kotlinProjectConfiguration() // All Kotlin configuration
-            TODO("Not yet implemented")
         }
     }
 }
