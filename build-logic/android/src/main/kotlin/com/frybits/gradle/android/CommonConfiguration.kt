@@ -18,11 +18,18 @@
 
 package com.frybits.gradle.android
 
+import com.frybits.gradle.configurations.baseProjectConfiguration
+import com.frybits.gradle.configurations.jvmProjectConfiguration
+import com.frybits.gradle.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.definitions.BuildFile
 import org.gradle.api.Project
 
 fun Project.androidCommonConfiguration(buildFile: BuildFile, android: CommonExtensionWrapper) {
+    baseProjectConfiguration() // All base project configuration
+    jvmProjectConfiguration() // All JVM configuration
+    kotlinProjectConfiguration() // All Kotlin configuration
+
     with(android) {
-        logger.lifecycle("I'm a CommonExtension")
+
     }
 }

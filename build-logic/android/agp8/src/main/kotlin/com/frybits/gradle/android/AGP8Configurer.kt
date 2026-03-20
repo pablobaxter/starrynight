@@ -33,6 +33,7 @@ import com.android.build.api.variant.VariantBuilder
 import com.frybits.gradle.Configurer
 import com.frybits.gradle.definitions.BuildFile
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
 public abstract class AGP8Configurer @Inject internal constructor(
@@ -42,7 +43,7 @@ public abstract class AGP8Configurer @Inject internal constructor(
 ): Configurer {
 
     override fun configureBuild(buildFile: BuildFile) {
-        project.androidCommonConfiguration(buildFile, AGP8CommonExtensionWrapper(commonExtension))
+        project.androidCommonConfiguration(buildFile, project.objects.newInstance<AGP8CommonExtensionWrapper>(commonExtension))
 
         when(commonExtension) {
             is ApplicationExtension -> {

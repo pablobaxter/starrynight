@@ -1,0 +1,8 @@
+# Project type
+type = "androidApplication"
+
+# Libraries to be used (maven address or version catalog name)
+libraries = []
+
+# Projects to depend on
+projects = []

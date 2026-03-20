@@ -3,14 +3,18 @@ kotlin = "2.3.0"
 kotlinx-serialization = "1.10.0"
 ksp = "2.3.0"
 r8-version = "8.0.34"
+ktoml = "0.7.1"
 
 [libraries]
 kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlinx-toml-core = { group = "com.akuleshov7", name = "ktoml-core", version.ref = "ktoml" }
+kotlinx-toml-file = { group = "com.akuleshov7", name = "ktoml-file", version.ref = "ktoml" }
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 agp = { group = "com.android.tools.build", name = "gradle-api" }
 r8 = { group = "com.android.tools", name = "r8", version.ref = "r8-version" }
 
 [bundles]
+kotlinx-toml = ["kotlinx-toml-core", "kotlinx-toml-file"]
 
 [plugins]

@@ -25,8 +25,9 @@ import com.frybits.gradle.configurations.configurers.getAndroidConfigurer
 import com.frybits.gradle.definitions.BuildFile
 import com.frybits.gradle.definitions.ProjectType
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.newInstance
 
 /**
  * Configure based off the provided [BuildFile]
@@ -35,15 +36,18 @@ internal fun Project.buildFileConfiguration(buildFile: BuildFile) {
     val configurer = when (buildFile.type) {
         ProjectType.ANDROID_APPLICATION -> {
             apply<AppPlugin>()
+            apply(plugin = "org.jetbrains.kotlin.android")
             getAndroidConfigurer()
         }
         ProjectType.ANDROID_LIBRARY -> {
             apply<LibraryPlugin>()
+            apply(plugin = "org.jetbrains.kotlin.android")
             getAndroidConfigurer()
         }
         ProjectType.JAVA_LIBRARY -> {
-            apply<JavaPlugin>()
-            JavaConfigurer()
+            apply<JavaLibraryPlugin>()
+            apply(plugin = "org.jetbrains.kotlin.jvm")
+            objects.newInstance<JavaConfigurer>()
         }
     }
 

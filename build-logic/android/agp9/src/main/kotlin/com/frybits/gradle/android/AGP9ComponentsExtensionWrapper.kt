@@ -24,8 +24,12 @@ import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
 import com.android.build.api.variant.VariantSelector
 import org.gradle.api.Action
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.newInstance
+import javax.inject.Inject
 
-internal class AGP9ComponentsExtensionWrapper(
+internal abstract class AGP9ComponentsExtensionWrapper @Inject internal constructor(
+    private val project: Project,
     private val componentsExtension: AndroidComponentsExtension<CommonExtension, VariantBuilder, Variant>
 ): ComponentsExtensionWrapper<AGP9CommonExtensionWrapper, VariantBuilder, Variant> {
 
@@ -53,13 +57,13 @@ internal class AGP9ComponentsExtensionWrapper(
 
     override fun finalizeDsl(callback: (AGP9CommonExtensionWrapper) -> Unit) {
         componentsExtension.finalizeDsl { commonExtension ->
-            callback(AGP9CommonExtensionWrapper(commonExtension))
+            callback(project.objects.newInstance<AGP9CommonExtensionWrapper>(commonExtension))
         }
     }
 
     override fun finalizeDsl(callback: Action<AGP9CommonExtensionWrapper>) {
-        componentsExtension.finalizeDsl {
-            callback.execute(AGP9CommonExtensionWrapper(it))
+        componentsExtension.finalizeDsl { commonExtension ->
+            callback.execute(project.objects.newInstance<AGP9CommonExtensionWrapper>(commonExtension))
         }
     }
 }

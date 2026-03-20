@@ -18,8 +18,9 @@
 
 package com.frybits.gradle.configurations.core
 
+import com.akuleshov7.ktoml.Toml
 import com.frybits.gradle.definitions.BuildFile
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
 import org.gradle.api.Project
 
 /**
@@ -29,16 +30,16 @@ internal fun Project.projectConfiguration() {
     requireNoBuildScripts()
 
     // Intermediate projects will not have build files, so skip those
-    val buildFile = buildJson() ?: return
+    val buildFile = populateBuildFile() ?: return
 
     buildFileConfiguration(buildFile)
 }
 
 // Returns the [BuildFile] object generated from the build.json file
-private fun Project.buildJson(): BuildFile? {
-    val buildFile = providers.fileContents(layout.projectDirectory.file("build.json"))
+private fun Project.populateBuildFile(): BuildFile? {
+    val buildFile = providers.fileContents(layout.projectDirectory.file("build.toml"))
         .asText
-        .map { Json.decodeFromString<BuildFile>(it) }
+        .map { Toml.decodeFromString<BuildFile>(it) }
 
     return buildFile.orNull
 }

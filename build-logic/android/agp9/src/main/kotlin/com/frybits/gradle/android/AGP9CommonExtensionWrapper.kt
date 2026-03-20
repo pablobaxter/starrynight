@@ -19,7 +19,8 @@
 package com.frybits.gradle.android
 
 import com.android.build.api.dsl.CommonExtension
+import javax.inject.Inject
 
-internal class AGP9CommonExtensionWrapper(
+internal abstract class AGP9CommonExtensionWrapper @Inject internal constructor(
     commonExtension: CommonExtension
 ): CommonExtensionWrapper, CommonExtension by commonExtension

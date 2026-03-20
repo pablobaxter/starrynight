@@ -24,6 +24,6 @@ import org.gradle.api.Project
 
 fun Project.androidLibraryConfiguration(buildFile: BuildFile, android: LibraryExtension) {
     with(android) {
-        logger.lifecycle("I'm a LibraryExtension")
+
     }
 }

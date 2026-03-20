@@ -19,11 +19,23 @@
 package com.frybits.gradle.configurations.configurers
 
 import com.frybits.gradle.Configurer
+import com.frybits.gradle.configurations.baseProjectConfiguration
+import com.frybits.gradle.configurations.jvmProjectConfiguration
+import com.frybits.gradle.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.definitions.BuildFile
+import org.gradle.api.Project
+import javax.inject.Inject
 
-internal class JavaConfigurer: Configurer {
+internal abstract class JavaConfigurer @Inject internal constructor(
+    private val project: Project
+): Configurer {
 
     override fun configureBuild(buildFile: BuildFile) {
-        TODO("Not yet implemented")
+        with(project) {
+            baseProjectConfiguration() // All base project configuration
+            jvmProjectConfiguration() // All JVM configuration
+            kotlinProjectConfiguration() // All Kotlin configuration
+            TODO("Not yet implemented")
+        }
     }
 }

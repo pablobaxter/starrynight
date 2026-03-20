@@ -24,6 +24,5 @@ import org.gradle.api.Project
 
 fun Project.androidAppConfiguration(buildFile: BuildFile, android: ApplicationExtension) {
     with(android) {
-        logger.lifecycle("I'm an ApplicationExtension")
     }
 }

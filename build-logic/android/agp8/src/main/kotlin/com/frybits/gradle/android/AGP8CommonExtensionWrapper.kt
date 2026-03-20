@@ -25,7 +25,8 @@ import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.DefaultConfig
 import com.android.build.api.dsl.Installation
 import com.android.build.api.dsl.ProductFlavor
+import javax.inject.Inject
 
-internal class AGP8CommonExtensionWrapper(
+internal abstract class AGP8CommonExtensionWrapper @Inject internal constructor(
     commonExtension: CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>
 ): CommonExtensionWrapper, CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation> by commonExtension

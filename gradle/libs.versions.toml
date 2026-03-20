@@ -7,6 +7,8 @@
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-version" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.3.20" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-version" }
 android-cache-fix = { id = "org.gradle.android.cache-fix", version = "3.0.3" }

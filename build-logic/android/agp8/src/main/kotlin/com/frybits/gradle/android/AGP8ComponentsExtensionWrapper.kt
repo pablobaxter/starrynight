@@ -30,8 +30,12 @@ import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
 import com.android.build.api.variant.VariantSelector
 import org.gradle.api.Action
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.newInstance
+import javax.inject.Inject
 
-internal class AGP8ComponentsExtensionWrapper(
+internal abstract class AGP8ComponentsExtensionWrapper @Inject internal constructor(
+    private val project: Project,
     private val componentsExtension: AndroidComponentsExtension<CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>, VariantBuilder, Variant>
 ): ComponentsExtensionWrapper<AGP8CommonExtensionWrapper, VariantBuilder, Variant> {
 
@@ -59,13 +63,13 @@ internal class AGP8ComponentsExtensionWrapper(
 
     override fun finalizeDsl(callback: (AGP8CommonExtensionWrapper) -> Unit) {
         componentsExtension.finalizeDsl { commonExtension ->
-            callback(AGP8CommonExtensionWrapper(commonExtension))
+            callback(project.objects.newInstance<AGP8CommonExtensionWrapper>(commonExtension))
         }
     }
 
     override fun finalizeDsl(callback: Action<AGP8CommonExtensionWrapper>) {
-        componentsExtension.finalizeDsl {
-            callback.execute(AGP8CommonExtensionWrapper(it))
+        componentsExtension.finalizeDsl { commonExtension ->
+            callback.execute(project.objects.newInstance<AGP8CommonExtensionWrapper>(commonExtension))
         }
     }
 }

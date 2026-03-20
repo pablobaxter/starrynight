@@ -52,7 +52,7 @@ dependencies {
     compileOnly(logic.ksp)
     compileOnly(logic.r8)
 
-    implementation(logic.kotlinx.serialization)
+    implementation(logic.bundles.kotlinx.toml)
 }
 
 tasks.withType<ValidatePlugins>().configureEach {
