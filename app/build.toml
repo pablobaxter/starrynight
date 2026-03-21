@@ -1,6 +1,11 @@
 # Project type
 type = "androidApplication"
 
+applicationId = "com.frybits.starrynight"
+
+targetSdk = 36
+#previewTargetSdk
+
 # Libraries to be used (maven address or version catalog name)
 libraries = []
 

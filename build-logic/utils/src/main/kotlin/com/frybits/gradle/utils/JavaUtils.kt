@@ -36,3 +36,17 @@ public val Project.javaSourceCompatibility: Provider<JavaVersion>
     get() = providers.gradleProperty("com.frybits.java.compatibility.source")
         .map { target -> JavaVersion.toVersion(target) }
 
+/**
+ * Helper for Android target compatibility version
+ */
+public val Project.androidTargetCompatibility: Provider<JavaVersion>
+    get() = providers.gradleProperty("com.frybits.android.compatibility.target")
+        .map { target -> JavaVersion.toVersion(target) }
+
+/**
+ * Helper for Android source compatibility version
+ */
+public val Project.androidSourceCompatibility: Provider<JavaVersion>
+    get() = providers.gradleProperty("com.frybits.android.compatibility.source")
+        .map { target -> JavaVersion.toVersion(target) }
+

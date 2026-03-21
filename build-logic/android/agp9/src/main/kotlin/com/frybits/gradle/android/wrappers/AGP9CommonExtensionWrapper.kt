@@ -23,5 +23,5 @@ import javax.inject.Inject
 
 // Constructs the wrapper object for AGP CommonExtension
 internal abstract class AGP9CommonExtensionWrapper @Inject internal constructor(
-    commonExtension: CommonExtension
+    internal val commonExtension: CommonExtension
 ): CommonExtensionWrapper, CommonExtension by commonExtension

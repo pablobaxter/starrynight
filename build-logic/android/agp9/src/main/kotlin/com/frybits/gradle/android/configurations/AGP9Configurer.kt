@@ -24,9 +24,15 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
-import com.frybits.gradle.android.wrappers.AGP9CommonExtensionWrapper
+import com.frybits.gradle.android.configurations.app.androidAppConfiguration
+import com.frybits.gradle.android.configurations.common.androidBaseConfiguration
+import com.frybits.gradle.android.configurations.common.androidCommonConfiguration
+import com.frybits.gradle.android.configurations.library.androidLibraryConfiguration
+import com.frybits.gradle.android.wrappers.AGP9ComponentsExtensionWrapper
 import com.frybits.gradle.core.Configurer
+import com.frybits.gradle.core.definitions.AndroidBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
@@ -36,19 +42,24 @@ import javax.inject.Inject
  */
 public abstract class AGP9Configurer @Inject internal constructor(
     private val project: Project,
-    private val commonExtension: CommonExtension,
     private val componentsExtension: AndroidComponentsExtension<CommonExtension, VariantBuilder, Variant>
 ): Configurer {
 
     override fun configureBuild(buildFile: BuildFile) {
-        project.androidCommonConfiguration(buildFile, project.objects.newInstance<AGP9CommonExtensionWrapper>(commonExtension))
+        require(buildFile is AndroidBuildFile) { "Attempting to configure ${buildFile::class} with Android configurations" }
+        with(project) {
+            androidBaseConfiguration()
 
-        when(commonExtension) {
-            is ApplicationExtension -> {
-                project.androidAppConfiguration(buildFile, commonExtension)
-            }
-            is LibraryExtension -> {
-                project.androidLibraryConfiguration(buildFile, commonExtension)
+            objects.newInstance<AGP9ComponentsExtensionWrapper>(componentsExtension).run {
+                finalizeDsl { commonExtensionWrapper ->
+                    androidCommonConfiguration(buildFile, commonExtensionWrapper)
+
+                    when(val androidExtension = commonExtensionWrapper.commonExtension) {
+                        is ApplicationExtension -> androidAppConfiguration(buildFile, androidExtension)
+                        is LibraryExtension -> androidLibraryConfiguration(buildFile, androidExtension)
+                        else -> throw GradleException("Unsupported type ${androidExtension::class}")
+                    }
+                }
             }
         }
     }

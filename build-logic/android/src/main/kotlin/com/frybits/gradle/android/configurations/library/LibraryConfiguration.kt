@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.android.configurations
+package com.frybits.gradle.android.configurations.library
 
-import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
+import com.frybits.gradle.core.definitions.AndroidLibraryBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 
 /**
- * Configures Android Application projects
+ * Configures Android Library projects
  */
-public fun Project.androidAppConfiguration(buildFile: BuildFile, android: ApplicationExtension) {
+public fun Project.androidLibraryConfiguration(buildFile: BuildFile, android: LibraryExtension) {
+    require(buildFile is AndroidLibraryBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
     with(android) {
+
     }
 }

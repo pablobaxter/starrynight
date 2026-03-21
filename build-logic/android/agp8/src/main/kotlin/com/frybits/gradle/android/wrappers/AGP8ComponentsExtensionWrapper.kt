@@ -37,7 +37,7 @@ import javax.inject.Inject
 // Constructs the ComponentsExtensionWrapper for AGP AndroidComponentsExtension
 internal abstract class AGP8ComponentsExtensionWrapper @Inject internal constructor(
     private val project: Project,
-    private val componentsExtension: AndroidComponentsExtension<CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>, VariantBuilder, Variant>
+    internal val componentsExtension: AndroidComponentsExtension<CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>, VariantBuilder, Variant>
 ): ComponentsExtensionWrapper<AGP8CommonExtensionWrapper, VariantBuilder, Variant> {
 
     override fun selector(): VariantSelector = componentsExtension.selector()

@@ -18,14 +18,45 @@
 
 package com.frybits.gradle.core.definitions
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
  * Defines the structure of the build.toml file
  */
 @Serializable
-public data class BuildFile(
-    public val type: ProjectType,
-    public val libraries: List<String> = emptyList(),
-    public val projects: List<String> = emptyList()
-)
+public sealed interface BuildFile {
+    public val libraries: List<String>
+    public val projects: List<String>
+}
+
+@Serializable
+public sealed interface AndroidBuildFile: BuildFile {
+    public val namespace: String?
+}
+
+@Serializable
+@SerialName("androidApplication")
+public data class AndroidAppBuildFile(
+    val applicationId: String,
+    val targetSdk: Int?,
+    val previewTargetSdk: String? = null,
+    override val libraries: List<String> = emptyList(),
+    override val projects: List<String> = emptyList(),
+    override val namespace: String? = null
+): AndroidBuildFile
+
+@Serializable
+@SerialName("androidLibrary")
+public data class AndroidLibraryBuildFile(
+    override val libraries: List<String> = emptyList(),
+    override val projects: List<String> = emptyList(),
+    override val namespace: String? = null
+): AndroidBuildFile
+
+@Serializable
+@SerialName("javaLibrary")
+public data class JavaLibraryBuildFile(
+    override val libraries: List<String> = emptyList(),
+    override val projects: List<String> = emptyList()
+): BuildFile

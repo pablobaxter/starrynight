@@ -23,6 +23,7 @@ import com.frybits.gradle.core.configurations.baseProjectConfiguration
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.definitions.BuildFile
+import com.frybits.gradle.core.definitions.JavaLibraryBuildFile
 import org.gradle.api.Project
 import javax.inject.Inject
 
@@ -34,6 +35,7 @@ public abstract class JavaLibraryConfigurer @Inject internal constructor(
 ): Configurer {
 
     override fun configureBuild(buildFile: BuildFile) {
+        require(buildFile is JavaLibraryBuildFile) { "Attempting to configure ${buildFile::class} with JavaLibrary configurations" }
         with(project) {
             baseProjectConfiguration() // All base project configuration
             jvmProjectConfiguration() // All JVM configuration

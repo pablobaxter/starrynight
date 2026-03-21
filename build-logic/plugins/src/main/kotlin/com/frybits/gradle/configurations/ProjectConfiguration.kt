@@ -18,16 +18,18 @@
 
 package com.frybits.gradle.configurations
 
-import com.akuleshov7.ktoml.Toml
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.frybits.gradle.android.configurations.AGP8Configurer
 import com.frybits.gradle.android.configurations.AGP9Configurer
 import com.frybits.gradle.core.Configurer
-import com.frybits.gradle.core.jvm.JavaLibraryConfigurer
+import com.frybits.gradle.core.definitions.AndroidAppBuildFile
+import com.frybits.gradle.core.definitions.AndroidLibraryBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
-import com.frybits.gradle.core.definitions.ProjectType
+import com.frybits.gradle.core.definitions.JavaLibraryBuildFile
+import com.frybits.gradle.core.jvm.JavaLibraryConfigurer
+import dev.eav.tomlkt.Toml
 import kotlinx.serialization.decodeFromString
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -50,18 +52,18 @@ internal fun Project.projectConfiguration() {
 
 // Configure based off the provided [BuildFile]
 private fun Project.buildFileConfiguration(buildFile: BuildFile) {
-    val configurer = when (buildFile.type) {
-        ProjectType.ANDROID_APPLICATION -> {
+    val configurer = when (buildFile) {
+        is AndroidAppBuildFile -> {
             apply<AppPlugin>()
             enableKotlinPluginIfNeeded()
             getAndroidConfigurer()
         }
-        ProjectType.ANDROID_LIBRARY -> {
+        is AndroidLibraryBuildFile -> {
             apply<LibraryPlugin>()
             enableKotlinPluginIfNeeded()
             getAndroidConfigurer()
         }
-        ProjectType.JAVA_LIBRARY -> {
+        is JavaLibraryBuildFile -> {
             apply<JavaLibraryPlugin>()
             apply(plugin = "org.jetbrains.kotlin.jvm")
             objects.newInstance<JavaLibraryConfigurer>()
@@ -85,13 +87,11 @@ private fun Project.getAndroidConfigurer(): Configurer {
     return when(androidCurrentVersion.major) {
         8 -> {
             objects.newInstance<AGP8Configurer>(
-                extensions.getByName("android"),
                 extensions.getByName("androidComponents")
             )
         }
         9 -> {
             objects.newInstance<AGP9Configurer>(
-                extensions.getByName("android"),
                 extensions.getByName("androidComponents")
             )
         }

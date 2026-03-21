@@ -29,5 +29,5 @@ import javax.inject.Inject
 
 // Constructs the wrapper object for AGP CommonExtension
 internal abstract class AGP8CommonExtensionWrapper @Inject internal constructor(
-    commonExtension: CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>
+    internal val commonExtension: CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>
 ): CommonExtensionWrapper, CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation> by commonExtension
