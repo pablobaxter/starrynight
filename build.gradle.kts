@@ -1,3 +1,4 @@
+// This build file should not be modified
 buildscript {
     dependencies {
         val r8Version = providers.gradleProperty("com.frybits.r8.version")
@@ -6,3 +7,4 @@ buildscript {
         }
     }
 }
+// End build file

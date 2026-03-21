@@ -25,6 +25,7 @@ import com.google.devtools.ksp.gradle.KSP_VERSION
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
+import java.security.MessageDigest
 
 /**
  * Configuration that will only apply to the root
@@ -32,6 +33,7 @@ import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
 internal fun Project.rootProjectConfiguration() {
     require(isRoot) { "This method should only be used with the root project" }
     logVersions()
+    checkBuildFileModification()
 }
 
 // Helper function to log the versions of major tools used for the build
@@ -47,4 +49,15 @@ private fun Project.logVersions() {
     }
 
     logger.lifecycle("Versions: ${list.joinToString(separator = ", ", prefix = "[ ", postfix = " ]")}")
+}
+
+// Ensure that nothing new is added to the root build file
+private fun Project.checkBuildFileModification() {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val buildFileUnmodified = providers.fileContents(layout.projectDirectory.file(buildFile.name)).asBytes
+        .zip(providers.gradleProperty("com.frybits.root.build.hash")) { bytes, hash ->
+            return@zip digest.digest(bytes).toHexString() == hash
+        }
+
+    require(buildFileUnmodified.get()) { "$buildFile should not be modified" }
 }
