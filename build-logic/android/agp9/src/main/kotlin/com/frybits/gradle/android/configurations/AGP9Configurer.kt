@@ -31,6 +31,9 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
+/**
+ * Performs the configuration of the android and androidComponents objects
+ */
 public abstract class AGP9Configurer @Inject internal constructor(
     private val project: Project,
     private val commonExtension: CommonExtension,

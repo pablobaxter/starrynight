@@ -37,6 +37,9 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
+/**
+ * Performs the configuration of the android and androidComponents objects
+ */
 public abstract class AGP8Configurer @Inject internal constructor(
     private val project: Project,
     private val commonExtension: CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>,

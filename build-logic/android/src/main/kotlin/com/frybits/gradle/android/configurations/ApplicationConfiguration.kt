@@ -22,6 +22,9 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 
+/**
+ * Configures Android Application projects
+ */
 public fun Project.androidAppConfiguration(buildFile: BuildFile, android: ApplicationExtension) {
     with(android) {
     }

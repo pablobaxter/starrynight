@@ -25,7 +25,7 @@ import com.android.build.gradle.LibraryPlugin
 import com.frybits.gradle.android.configurations.AGP8Configurer
 import com.frybits.gradle.android.configurations.AGP9Configurer
 import com.frybits.gradle.core.Configurer
-import com.frybits.gradle.core.jvm.JavaConfigurer
+import com.frybits.gradle.core.jvm.JavaLibraryConfigurer
 import com.frybits.gradle.core.definitions.BuildFile
 import com.frybits.gradle.core.definitions.ProjectType
 import kotlinx.serialization.decodeFromString
@@ -48,9 +48,7 @@ internal fun Project.projectConfiguration() {
     buildFileConfiguration(buildFile)
 }
 
-/**
- * Configure based off the provided [BuildFile]
- */
+// Configure based off the provided [BuildFile]
 private fun Project.buildFileConfiguration(buildFile: BuildFile) {
     val configurer = when (buildFile.type) {
         ProjectType.ANDROID_APPLICATION -> {
@@ -66,13 +64,14 @@ private fun Project.buildFileConfiguration(buildFile: BuildFile) {
         ProjectType.JAVA_LIBRARY -> {
             apply<JavaLibraryPlugin>()
             apply(plugin = "org.jetbrains.kotlin.jvm")
-            objects.newInstance<JavaConfigurer>()
+            objects.newInstance<JavaLibraryConfigurer>()
         }
     }
 
     configurer.configureBuild(buildFile)
 }
 
+// Handles applying the kotlin plugin if AGP 9 is used
 private fun Project.enableKotlinPluginIfNeeded() {
     val androidCurrentVersion = AndroidPluginVersion.getCurrent()
     if (androidCurrentVersion.major < 9) {
@@ -80,6 +79,7 @@ private fun Project.enableKotlinPluginIfNeeded() {
     }
 }
 
+// Gets the current AGP configurer for project configuration
 private fun Project.getAndroidConfigurer(): Configurer {
     val androidCurrentVersion = AndroidPluginVersion.getCurrent()
     return when(androidCurrentVersion.major) {

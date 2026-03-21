@@ -34,6 +34,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
+// Constructs the ComponentsExtensionWrapper for AGP AndroidComponentsExtension
 internal abstract class AGP8ComponentsExtensionWrapper @Inject internal constructor(
     private val project: Project,
     private val componentsExtension: AndroidComponentsExtension<CommonExtension<BuildFeatures, BuildType, DefaultConfig, ProductFlavor, AndroidResources, Installation>, VariantBuilder, Variant>

@@ -25,5 +25,8 @@ import com.frybits.gradle.core.definitions.BuildFile
  */
 public interface Configurer {
 
+    /**
+     * Configures the current project based on the provided build file
+     */
     public fun configureBuild(buildFile: BuildFile)
 }

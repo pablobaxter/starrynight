@@ -20,6 +20,9 @@ package com.frybits.gradle.utils
 
 import org.gradle.api.Project
 
+/**
+ * Helper for determining if the current project is the root project
+ */
 @Suppress("UnstableApiUsage")
 public val Project.isRoot: Boolean
     get() = isolated == isolated.rootProject

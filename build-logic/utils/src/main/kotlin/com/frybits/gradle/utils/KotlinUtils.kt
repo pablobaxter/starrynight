@@ -22,6 +22,9 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+/**
+ * Helper for Kotlin JVM target version
+ */
 public val Project.kotlinJvmTarget: Provider<JvmTarget>
     get() = providers.gradleProperty("com.frybits.kotlin.jvm.target")
         .map { jvmTarget -> JvmTarget.fromTarget(jvmTarget) }

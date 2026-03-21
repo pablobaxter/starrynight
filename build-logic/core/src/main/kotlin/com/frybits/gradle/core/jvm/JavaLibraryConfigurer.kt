@@ -26,7 +26,10 @@ import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 import javax.inject.Inject
 
-public abstract class JavaConfigurer @Inject internal constructor(
+/**
+ * Handles configuration of Java library projects
+ */
+public abstract class JavaLibraryConfigurer @Inject internal constructor(
     private val project: Project
 ): Configurer {
 

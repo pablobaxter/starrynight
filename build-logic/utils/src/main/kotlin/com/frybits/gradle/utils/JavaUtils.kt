@@ -22,10 +22,16 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 
+/**
+ * Helper for Java target compatibility version
+ */
 public val Project.javaTargetCompatibility: Provider<JavaVersion>
     get() = providers.gradleProperty("com.frybits.java.compatibility.target")
         .map { target -> JavaVersion.toVersion(target) }
 
+/**
+ * Helper for Java source compatibility version
+ */
 public val Project.javaSourceCompatibility: Provider<JavaVersion>
     get() = providers.gradleProperty("com.frybits.java.compatibility.source")
         .map { target -> JavaVersion.toVersion(target) }

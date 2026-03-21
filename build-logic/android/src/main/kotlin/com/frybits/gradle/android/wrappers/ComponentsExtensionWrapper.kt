@@ -24,6 +24,12 @@ import com.android.build.api.variant.VariantBuilder
 import com.android.build.api.variant.VariantSelector
 import org.gradle.api.Action
 
+/**
+ * This class wraps the [com.android.build.api.variant.AndroidComponentsExtension] class. The purpose for this is due to
+ * AGP changing the generics of the [com.android.build.api.dsl.CommonExtension] class in AGP 8, and a binary breaking change in AGP 9.
+ *
+ * The only functions, variables, properties available for [com.android.build.api.variant.AndroidComponentsExtension] are the ones provided here.
+ */
 public interface ComponentsExtensionWrapper<DslExtensionT: CommonExtensionWrapper, VariantBuilderT: VariantBuilder, VariantT: Variant>: DslLifecycle<DslExtensionT> {
 
     /**

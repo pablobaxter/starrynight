@@ -22,6 +22,9 @@ import com.android.build.api.dsl.LibraryExtension
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 
+/**
+ * Configures Android Library projects
+ */
 public fun Project.androidLibraryConfiguration(buildFile: BuildFile, android: LibraryExtension) {
     with(android) {
 

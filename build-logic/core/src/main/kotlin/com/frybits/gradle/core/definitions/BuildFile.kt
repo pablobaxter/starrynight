@@ -21,7 +21,7 @@ package com.frybits.gradle.core.definitions
 import kotlinx.serialization.Serializable
 
 /**
- * Defines the structure of the build.json file
+ * Defines the structure of the build.toml file
  */
 @Serializable
 public data class BuildFile(

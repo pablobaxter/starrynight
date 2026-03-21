@@ -18,6 +18,12 @@
 
 package com.frybits.gradle.android.wrappers
 
+/**
+ * This class wraps the [com.android.build.api.dsl.CommonExtension] class. The purpose for this is due to
+ * AGP changing the generics of this class in AGP 8, and a binary breaking change in AGP 9.
+ *
+ * The only functions, variables, properties available for [com.android.build.api.dsl.CommonExtension] are the ones provided here.
+ */
 public interface CommonExtensionWrapper {
 
     /**

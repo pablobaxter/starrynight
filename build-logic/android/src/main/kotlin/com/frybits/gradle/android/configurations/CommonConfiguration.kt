@@ -25,6 +25,11 @@ import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 
+/**
+ * Configures the CommonExtension used by all Android projects.
+ *
+ * Note, this uses the [CommonExtensionWrapper], not the AGP [com.android.build.api.dsl.CommonExtension]
+ */
 public fun Project.androidCommonConfiguration(buildFile: BuildFile, android: CommonExtensionWrapper) {
     baseProjectConfiguration() // All base project configuration
     jvmProjectConfiguration() // All JVM configuration
