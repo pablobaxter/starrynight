@@ -54,7 +54,7 @@ public abstract class AGP8Configurer @Inject internal constructor(
     override fun configureBuild(buildFile: BuildFile) {
         require(buildFile is AndroidBuildFile) { "Attempting to configure ${buildFile::class} with Android configurations" }
         with(project) {
-            androidBaseConfiguration()
+            androidBaseConfiguration(buildFile)
 
             objects.newInstance<AGP8ComponentsExtensionWrapper>(componentsExtension).run {
                 finalizeDsl { commonExtensionWrapper ->

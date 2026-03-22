@@ -21,38 +21,37 @@ package com.frybits.gradle.core.definitions
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Serializable
+public sealed interface Dependency
+
+@Serializable
+public sealed interface Module: Dependency {
+    public val name: String
+}
+
 /**
- * Defines the structure of the build.toml file
+ * The [name] should be the project path
  */
 @Serializable
-public sealed interface BuildFile {
-    public val dependencies: Map<String, List<Dependency>>
-}
+@SerialName("project")
+public data class Project(
+    override val name: String
+): Module
 
+/**
+ * The [name] should be the library name in the version catalog
+ */
 @Serializable
-public sealed interface AndroidBuildFile: BuildFile {
-    public val namespace: String?
-}
+@SerialName("library")
+public data class Library(
+    override val name: String
+): Module
 
+/**
+ * Performs the [org.gradle.kotlin.dsl.support.delegates.DependencyHandlerDelegate.platform] on the provided [Module]
+ */
 @Serializable
-@SerialName("androidApplication")
-public data class AndroidAppBuildFile(
-    val applicationId: String,
-    val targetSdk: Int?,
-    val previewTargetSdk: String? = null,
-    override val dependencies: Map<String, List<Dependency>> = emptyMap(),
-    override val namespace: String? = null
-): AndroidBuildFile
-
-@Serializable
-@SerialName("androidLibrary")
-public data class AndroidLibraryBuildFile(
-    override val dependencies: Map<String, List<Dependency>> = emptyMap(),
-    override val namespace: String? = null
-): AndroidBuildFile
-
-@Serializable
-@SerialName("javaLibrary")
-public data class JavaLibraryBuildFile(
-    override val dependencies: Map<String, List<Dependency>> = emptyMap(),
-): BuildFile
+@SerialName("platform")
+public data class Platform(
+    val module: Module
+): Dependency

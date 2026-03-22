@@ -35,6 +35,14 @@ public fun Project.androidAppConfiguration(buildFile: BuildFile, android: Applic
             applicationId = buildFile.applicationId
             configureTargetSdk(buildFile)
         }
+
+        buildTypes.configureEach {
+            val minifyProperty = providers.gradleProperty("com.frybits.android.minify").map { it.toBoolean() }
+            if (minifyProperty.isPresent) {
+                isMinifyEnabled = minifyProperty.get()
+            }
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
     }
 }
 

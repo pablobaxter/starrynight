@@ -29,6 +29,8 @@ import org.gradle.api.Project
 public fun Project.androidLibraryConfiguration(buildFile: BuildFile, android: LibraryExtension) {
     require(buildFile is AndroidLibraryBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
     with(android) {
-
+        defaultConfig {
+            consumerProguardFile("consumer-proguard-rules.pro")
+        }
     }
 }

@@ -25,6 +25,7 @@ import com.frybits.gradle.core.configurations.baseProjectConfiguration
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.definitions.AndroidBuildFile
+import com.frybits.gradle.core.definitions.BuildFile
 import com.frybits.gradle.utils.androidSourceCompatibility
 import com.frybits.gradle.utils.androidTargetCompatibility
 import org.gradle.api.Project
@@ -32,8 +33,8 @@ import org.gradle.api.Project
 /**
  * Base configuration for all android builds
  */
-public fun Project.androidBaseConfiguration() {
-    baseProjectConfiguration() // All base project configuration
+public fun Project.androidBaseConfiguration(buildFile: BuildFile) {
+    baseProjectConfiguration(buildFile) // All base project configuration
     jvmProjectConfiguration() // All JVM configuration
     kotlinProjectConfiguration() // All Kotlin configuration
 }

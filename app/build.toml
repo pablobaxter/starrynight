@@ -7,7 +7,15 @@ targetSdk = 36
 #previewTargetSdk
 
 # Libraries to be used (maven address or version catalog name)
-libraries = []
+[dependencies]
 
-# Projects to depend on
-projects = []
+# Used to add libraries into the "implementation" configuration
+implementation = [
+    # Examplt types to add: "project", "library", "platform"
+    # { type = "project", name = ":foobar" },
+    # { type = "library", name = "androidx.core" }, # Name here should match version catalog dot naming convention
+    # { type = "platform", module = { type = "library", name = "kotlinx.coroutines.bom" } },
+]
+
+# Used to add libraries into the "api" configuration
+#api = []

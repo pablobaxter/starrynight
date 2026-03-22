@@ -37,7 +37,7 @@ public abstract class JavaLibraryConfigurer @Inject internal constructor(
     override fun configureBuild(buildFile: BuildFile) {
         require(buildFile is JavaLibraryBuildFile) { "Attempting to configure ${buildFile::class} with JavaLibrary configurations" }
         with(project) {
-            baseProjectConfiguration() // All base project configuration
+            baseProjectConfiguration(buildFile) // All base project configuration
             jvmProjectConfiguration() // All JVM configuration
             kotlinProjectConfiguration() // All Kotlin configuration
         }

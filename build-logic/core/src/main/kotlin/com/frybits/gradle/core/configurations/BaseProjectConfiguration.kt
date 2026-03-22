@@ -18,11 +18,57 @@
 
 package com.frybits.gradle.core.configurations
 
+import com.frybits.gradle.core.definitions.BuildFile
+import com.frybits.gradle.core.definitions.Library
+import com.frybits.gradle.core.definitions.Platform
+import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.the
 
 /**
  * Configuration that should be common to all projects (excluding root)
  */
-public fun Project.baseProjectConfiguration() {
+public fun Project.baseProjectConfiguration(buildFile: BuildFile) {
+    handleDependencies(buildFile)
+}
 
+// AfterEvaluate needed to allow Gradle to register the version catalog extension, since we are running before the current project is evaluated
+private fun Project.handleDependencies(buildFile: BuildFile) = afterEvaluate {
+    val libs = the<VersionCatalogsExtension>().named("libs")
+    dependencies {
+        buildFile.dependencies.forEach { (configuration, deps) ->
+            deps.forEach { dep ->
+                val notation = when (dep) {
+                    is com.frybits.gradle.core.definitions.Project -> {
+                        project(dep.name)
+                    }
+
+                    is Library -> {
+                        libs.findLibrary(dep.name).orElseThrow {
+                            GradleException("Dependency ${dep.name} not found in version catalog ${libs.name}")
+                        }
+                    }
+
+                    is Platform -> {
+                        val module = when (dep.module) {
+                            is com.frybits.gradle.core.definitions.Project -> {
+                                project(dep.module.name)
+                            }
+
+                            is Library -> {
+                                libs.findLibrary(dep.module.name).orElseThrow {
+                                    GradleException("Dependency ${dep.module.name} not found in version catalog ${libs.name}")
+                                }
+                            }
+                        }
+                        platform(module)
+                    }
+                }
+
+                add(configuration, notation)
+            }
+        }
+    }
 }
