@@ -16,28 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app
+package com.frybits.gradle.core.configurations
 
-import android.app.Activity
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesIntoMap
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
-import dev.zacsweers.metrox.android.ActivityKey
+import com.frybits.gradle.core.definitions.BuildFile
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 
-@ContributesIntoMap(AppScope::class, binding<Activity>())
-@ActivityKey(MainActivity::class)
-@Inject
-internal class MainActivity: ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-
-        }
+/**
+ * Configures compose for the project
+ */
+public fun Project.handleComposeConfiguration(buildFile: BuildFile) {
+    if (buildFile.enableCompose) {
+        apply(plugin = "org.jetbrains.kotlin.plugin.compose")
     }
 }

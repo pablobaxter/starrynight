@@ -32,6 +32,7 @@ import org.gradle.kotlin.dsl.the
  */
 public fun Project.baseProjectConfiguration(buildFile: BuildFile) {
     handleDependencies(buildFile)
+    handleComposeConfiguration(buildFile)
 }
 
 // AfterEvaluate needed to allow Gradle to register the version catalog extension, since we are running before the current project is evaluated

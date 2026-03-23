@@ -54,6 +54,7 @@ public fun Project.androidCommonConfiguration(buildFile: AndroidBuildFile, andro
             targetCompatibility(androidTargetCompatibility.get())
             sourceCompatibility(androidSourceCompatibility.get())
         }
+        buildFeatures.compose = buildFile.enableCompose
     }
 }
 

@@ -27,6 +27,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 public sealed interface BuildFile {
     public val dependencies: Map<String, List<Dependency>>
+    public val enableCompose: Boolean
 }
 
 @Serializable
@@ -41,18 +42,21 @@ public data class AndroidAppBuildFile(
     val targetSdk: Int?,
     val previewTargetSdk: String? = null,
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
-    override val namespace: String? = null
+    override val namespace: String? = null,
+    override val enableCompose: Boolean = false,
 ): AndroidBuildFile
 
 @Serializable
 @SerialName("androidLibrary")
 public data class AndroidLibraryBuildFile(
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
-    override val namespace: String? = null
+    override val namespace: String? = null,
+    override val enableCompose: Boolean = false,
 ): AndroidBuildFile
 
 @Serializable
 @SerialName("javaLibrary")
 public data class JavaLibraryBuildFile(
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
+    override val enableCompose: Boolean = false,
 ): BuildFile

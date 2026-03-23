@@ -6,6 +6,8 @@ applicationId = "com.frybits.starrynight.android"
 targetSdk = 36
 #previewTargetSdk
 
+enableCompose = true
+
 # Libraries to be used (maven address or version catalog name)
 [dependencies]
 

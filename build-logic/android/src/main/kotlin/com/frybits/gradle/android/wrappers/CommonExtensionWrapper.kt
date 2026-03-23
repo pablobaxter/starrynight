@@ -18,6 +18,7 @@
 
 package com.frybits.gradle.android.wrappers
 
+import com.android.build.api.dsl.BuildFeatures
 import com.android.build.api.dsl.CompileOptions
 import com.android.build.api.dsl.CompileSdkSpec
 import com.android.build.api.dsl.DefaultConfig
@@ -97,4 +98,7 @@ public interface CommonExtensionWrapper {
      * For more information about the properties you can configure in this block, see [CompileOptions].
      */
     public val compileOptions: CompileOptions
+
+    /** A list of build features that can be enabled or disabled on the Android Project. */
+    public val buildFeatures: BuildFeatures
 }
