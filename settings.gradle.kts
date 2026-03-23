@@ -16,6 +16,8 @@ pluginManagement {
         id("org.jetbrains.kotlin.plugin.serialization") version "2.3.20"
         id("com.google.devtools.ksp") version providers.gradleProperty("com.frybits.ksp.version")
         id("org.gradle.android.cache-fix") version "3.0.3"
+        id("dev.zacsweers.metro") version providers.gradleProperty("com.frybits.metro.version")
+        id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
     }
 
     includeBuild("build-logic")
@@ -32,6 +34,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") apply false
     id("com.google.devtools.ksp") apply false
     id("org.gradle.android.cache-fix") apply false
+    id("dev.zacsweers.metro") apply false
+    id("org.jetbrains.kotlin.plugin.compose") apply false
 }
 
 @Suppress("UnstableApiUsage")
@@ -47,6 +51,7 @@ dependencyResolutionManagement {
             version("agp-version", providers.gradleProperty("com.frybits.agp.version").get())
             version("kotlin-version", providers.gradleProperty("com.frybits.kotlin.version").get())
             version("ksp-version", providers.gradleProperty("com.frybits.ksp.version").get())
+            version("metro-version", providers.gradleProperty("com.frybits.metro.version").get())
         }
     }
 }

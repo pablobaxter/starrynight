@@ -60,7 +60,7 @@ private fun Project.handleDependencies(buildFile: BuildFile) = afterEvaluate {
                             is Library -> {
                                 libs.findLibrary(dep.module.name).orElseThrow {
                                     GradleException("Dependency ${dep.module.name} not found in version catalog ${libs.name}")
-                                }
+                                }.get()
                             }
                         }
                         platform(module)

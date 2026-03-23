@@ -29,6 +29,7 @@ import com.frybits.gradle.core.definitions.AndroidBuildFile
 import com.frybits.gradle.utils.androidSourceCompatibility
 import com.frybits.gradle.utils.androidTargetCompatibility
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 
 /**
  * Base configuration for all android builds
@@ -37,6 +38,7 @@ public fun Project.androidBaseConfiguration(buildFile: AndroidBuildFile) {
     baseProjectConfiguration(buildFile) // All base project configuration
     jvmProjectConfiguration() // All JVM configuration
     kotlinProjectConfiguration() // All Kotlin configuration
+    apply(plugin = "dev.zacsweers.metro")
 }
 
 /**

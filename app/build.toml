@@ -1,7 +1,7 @@
 # Project type
 type = "androidApplication"
 
-applicationId = "com.frybits.starrynight"
+applicationId = "com.frybits.starrynight.android"
 
 targetSdk = 36
 #previewTargetSdk
@@ -11,11 +11,17 @@ targetSdk = 36
 
 # Used to add libraries into the "implementation" configuration
 implementation = [
-    # Examplt types to add: "project", "library", "platform"
-    # { type = "project", name = ":foobar" },
-    # { type = "library", name = "androidx.core" }, # Name here should match version catalog dot naming convention
-    # { type = "platform", module = { type = "library", name = "kotlinx.coroutines.bom" } },
+    { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
+    { type = "library", name = "androidx.activity.compose" },
+    { type = "library", name = "androidx.core" },
+    { type = "library", name = "google.material" },
+    { type = "library", name = "metrox.android" },
 ]
 
 # Used to add libraries into the "api" configuration
-#api = []
+#api = [
+    # Example types to add: "project", "library", "platform"
+    # { type = "project", name = ":foobar" },
+    # { type = "library", name = "androidx.core" }, # Name here should match version catalog dot naming convention
+    # { type = "platform", module = { type = "library", name = "kotlinx.coroutines.bom" } },
+#]
