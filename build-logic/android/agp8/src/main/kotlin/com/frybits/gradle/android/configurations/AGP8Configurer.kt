@@ -28,12 +28,22 @@ import com.android.build.api.dsl.Installation
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.ApplicationVariantBuilder
+import com.android.build.api.variant.LibraryVariant
+import com.android.build.api.variant.LibraryVariantBuilder
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
 import com.frybits.gradle.android.configurations.app.androidAppConfiguration
+import com.frybits.gradle.android.configurations.app.androidAppVariantBuilderConfiguration
+import com.frybits.gradle.android.configurations.app.androidAppVariantConfiguration
 import com.frybits.gradle.android.configurations.common.androidBaseConfiguration
 import com.frybits.gradle.android.configurations.common.androidCommonConfiguration
+import com.frybits.gradle.android.configurations.common.androidVariantBuilderConfiguration
+import com.frybits.gradle.android.configurations.common.androidVariantConfiguration
 import com.frybits.gradle.android.configurations.library.androidLibraryConfiguration
+import com.frybits.gradle.android.configurations.library.androidLibraryVariantBuilderConfiguration
+import com.frybits.gradle.android.configurations.library.androidLibraryVariantConfiguration
 import com.frybits.gradle.android.wrappers.AGP8ComponentsExtensionWrapper
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.definitions.AndroidBuildFile
@@ -57,6 +67,24 @@ public abstract class AGP8Configurer @Inject internal constructor(
             androidBaseConfiguration(buildFile)
 
             objects.newInstance<AGP8ComponentsExtensionWrapper>(componentsExtension).run {
+                beforeVariants { variantBuilder ->
+                    androidVariantBuilderConfiguration(buildFile, variantBuilder)
+                    when(variantBuilder) {
+                        is ApplicationVariantBuilder -> androidAppVariantBuilderConfiguration(buildFile, variantBuilder)
+                        is LibraryVariantBuilder -> androidLibraryVariantBuilderConfiguration(buildFile, variantBuilder)
+                        else -> throw GradleException("Unsupported type ${variantBuilder::class}")
+                    }
+                }
+
+                onVariants { variant ->
+                    androidVariantConfiguration(buildFile, variant)
+                    when (variant) {
+                        is ApplicationVariant -> androidAppVariantConfiguration(buildFile, variant)
+                        is LibraryVariant -> androidLibraryVariantConfiguration(buildFile, variant)
+                        else -> throw GradleException("Unsupported type ${variant::class}")
+                    }
+                }
+
                 finalizeDsl { commonExtensionWrapper ->
                     androidCommonConfiguration(buildFile, commonExtensionWrapper)
 

@@ -19,13 +19,13 @@
 package com.frybits.gradle.android.configurations.common
 
 import com.android.build.api.AndroidPluginVersion
-import com.android.build.api.dsl.DefaultConfig
+import com.android.build.api.variant.Variant
+import com.android.build.api.variant.VariantBuilder
 import com.frybits.gradle.android.wrappers.CommonExtensionWrapper
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.definitions.AndroidBuildFile
-import com.frybits.gradle.core.definitions.BuildFile
 import com.frybits.gradle.utils.androidSourceCompatibility
 import com.frybits.gradle.utils.androidTargetCompatibility
 import org.gradle.api.Project
@@ -33,7 +33,7 @@ import org.gradle.api.Project
 /**
  * Base configuration for all android builds
  */
-public fun Project.androidBaseConfiguration(buildFile: BuildFile) {
+public fun Project.androidBaseConfiguration(buildFile: AndroidBuildFile) {
     baseProjectConfiguration(buildFile) // All base project configuration
     jvmProjectConfiguration() // All JVM configuration
     kotlinProjectConfiguration() // All Kotlin configuration
@@ -48,12 +48,24 @@ public fun Project.androidCommonConfiguration(buildFile: AndroidBuildFile, andro
     with(android) {
         namespace = buildFile.namespace ?: generateNamespace()
         configureCompileSdk(android)
-        configureMinSdk(defaultConfig)
         with(compileOptions) {
             targetCompatibility(androidTargetCompatibility.get())
             sourceCompatibility(androidSourceCompatibility.get())
         }
     }
+}
+
+/**
+ * Configures the base [VariantBuilder]
+ */
+public fun Project.androidVariantBuilderConfiguration(buildFile: AndroidBuildFile, variantBuilder: VariantBuilder) {
+    configureMinSdk(variantBuilder)
+}
+
+/**
+ * Configures the base [Variant]
+ */
+public fun Project.androidVariantConfiguration(buildFile: AndroidBuildFile, variant: Variant) {
 }
 
 private val AGP_8_13_0 = AndroidPluginVersion(8, 13)
@@ -93,21 +105,15 @@ private fun Project.configureCompileSdk(android: CommonExtensionWrapper) {
     }
 }
 
-private fun Project.configureMinSdk(defaultConfig: DefaultConfig) {
-    with(defaultConfig) {
-        val pluginVersion = AndroidPluginVersion.getCurrent()
-
+private fun Project.configureMinSdk(variantBuilder: VariantBuilder) {
+    with(variantBuilder) {
         val minSdkProvider = providers.gradleProperty("com.frybits.android.min.sdk").map { it.toInt() }
         val previewMinSdkProvider = providers.gradleProperty("com.frybits.android.min.sdk.preview")
 
-        if (pluginVersion >= AGP_8_13_0) {
-            minSdk {
-                version = if (previewMinSdkProvider.isPresent) {
-                    preview(previewMinSdkProvider.get())
-                } else {
-                    release(minSdkProvider.get())
-                }
-            }
+        if (previewMinSdkProvider.isPresent) {
+            minSdkPreview = previewMinSdkProvider.get()
+        } else {
+            minSdk = minSdkProvider.get()
         }
     }
 }

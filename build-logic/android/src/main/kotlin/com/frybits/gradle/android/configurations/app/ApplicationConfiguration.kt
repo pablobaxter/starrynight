@@ -19,50 +19,62 @@
 package com.frybits.gradle.android.configurations.app
 
 import com.android.build.api.AndroidPluginVersion
-import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.ApplicationVariantBuilder
+import com.android.build.api.variant.CanMinifyCodeBuilder
+import com.android.build.api.variant.GeneratesApkBuilder
 import com.frybits.gradle.core.definitions.AndroidAppBuildFile
-import com.frybits.gradle.core.definitions.BuildFile
+import com.frybits.gradle.core.definitions.AndroidBuildFile
 import org.gradle.api.Project
 
+private val AGP_9 = AndroidPluginVersion(9, 0)
 /**
  * Configures Android Application projects
  */
-public fun Project.androidAppConfiguration(buildFile: BuildFile, android: ApplicationExtension) {
+public fun Project.androidAppConfiguration(buildFile: AndroidBuildFile, android: ApplicationExtension) {
     require(buildFile is AndroidAppBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
-    with(android) {
-        defaultConfig {
-            applicationId = buildFile.applicationId
-            configureTargetSdk(buildFile)
-        }
 
-        buildTypes.configureEach {
-            val minifyProperty = providers.gradleProperty("com.frybits.android.minify").map { it.toBoolean() }
-            if (minifyProperty.isPresent) {
-                isMinifyEnabled = minifyProperty.get()
-            }
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    // Only needed because AGP 8 defaults to proguard-android.txt
+    if (AndroidPluginVersion.getCurrent() < AGP_9) {
+        android.buildTypes.configureEach {
+            proguardFiles(android.getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
 }
 
-private val AGP_8_13_0 = AndroidPluginVersion(8, 13)
+/**
+ * Configures Android [ApplicationVariantBuilder]
+ */
+public fun Project.androidAppVariantBuilderConfiguration(buildFile: AndroidBuildFile, applicationVariantBuilder: ApplicationVariantBuilder) {
+    require(buildFile is AndroidAppBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
+    configureTargetSdk(buildFile, applicationVariantBuilder)
+    minifyCodeConfiguration(applicationVariantBuilder)
+}
 
-private fun ApplicationDefaultConfig.configureTargetSdk(buildFile: AndroidAppBuildFile) {
-    val pluginVersion = AndroidPluginVersion.getCurrent()
-    if (pluginVersion >= AGP_8_13_0) {
-        targetSdk {
-            version = if (buildFile.previewTargetSdk.isNullOrBlank()) {
-                release(requireNotNull(buildFile.targetSdk))
-            } else {
-                preview(requireNotNull(buildFile.previewTargetSdk))
-            }
-        }
-    } else {
+/**
+ * Configures Android [ApplicationVariant]
+ */
+public fun Project.androidAppVariantConfiguration(buildFile: AndroidBuildFile, applicationVariant: ApplicationVariant) {
+    require(buildFile is AndroidAppBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
+    applicationVariant.applicationId.set(buildFile.applicationId)
+    applicationVariant.proguardFiles.add(layout.projectDirectory.file("proguard-rules.pro"))
+}
+
+private fun configureTargetSdk(buildFile: AndroidAppBuildFile, generatesApkBuilder: GeneratesApkBuilder) {
+    with (generatesApkBuilder) {
         if (buildFile.previewTargetSdk.isNullOrBlank()) {
             targetSdk = requireNotNull(buildFile.targetSdk)
         } else {
             targetSdkPreview = requireNotNull(buildFile.previewTargetSdk)
         }
+    }
+}
+
+@Suppress("UnstableApiUsage")
+private fun Project.minifyCodeConfiguration(minifyCodeBuilder: CanMinifyCodeBuilder) {
+    val minifyProvider = providers.gradleProperty("com.frybits.android.minify").map { it.toBoolean() }
+    if (minifyProvider.isPresent) {
+        minifyCodeBuilder.isMinifyEnabled = minifyProvider.get()
     }
 }
