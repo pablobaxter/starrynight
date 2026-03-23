@@ -57,8 +57,14 @@ public fun Project.androidAppVariantBuilderConfiguration(buildFile: AndroidBuild
  */
 public fun Project.androidAppVariantConfiguration(buildFile: AndroidBuildFile, applicationVariant: ApplicationVariant) {
     require(buildFile is AndroidAppBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
-    applicationVariant.applicationId.set(buildFile.applicationId)
-    applicationVariant.proguardFiles.add(layout.projectDirectory.file("proguard-rules.pro"))
+    with(applicationVariant) {
+        applicationId.set(buildFile.applicationId)
+        proguardFiles.add(layout.projectDirectory.file("proguard-rules.pro"))
+        outputs.forEach { variantOutput ->
+            variantOutput.versionCode.set(providers.gradleProperty("com.frybits.android.version.code").map { it.toInt() })
+            variantOutput.versionName.set(providers.gradleProperty("com.frybits.android.version.name"))
+        }
+    }
 }
 
 private fun configureTargetSdk(buildFile: AndroidAppBuildFile, generatesApkBuilder: GeneratesApkBuilder) {
