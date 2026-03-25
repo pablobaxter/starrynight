@@ -9,6 +9,7 @@ tomlkt = "0.6.0"
 kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-toml-core = { group = "dev.eav.tomlkt", name = "tomlkt", version.ref = "tomlkt" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 agp = { group = "com.android.tools.build", name = "gradle-api" }
 r8 = { group = "com.android.tools", name = "r8", version.ref = "r8-version" }

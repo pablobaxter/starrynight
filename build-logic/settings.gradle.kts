@@ -24,6 +24,7 @@ dependencyResolutionManagement {
     }
 }
 
+include(":atproto")
 include(":android")
 include(":android:agp8")
 include(":android:agp9")
