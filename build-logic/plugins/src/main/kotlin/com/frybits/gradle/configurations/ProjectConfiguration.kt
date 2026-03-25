@@ -99,8 +99,6 @@ private fun Project.getAndroidConfigurer(): Configurer {
     }
 }
 
-
-
 // Returns the [BuildFile] object generated from the build.json file
 private fun Project.populateBuildFile(): BuildFile? {
     val buildFile = providers.fileContents(layout.projectDirectory.file("build.toml"))
