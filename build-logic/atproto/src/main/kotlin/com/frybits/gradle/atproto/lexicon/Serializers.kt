@@ -74,6 +74,5 @@ internal val lexiconSerializerModule = SerializersModule {
                 error("Unknown type: $type")
             }
         }
-
     }
 }

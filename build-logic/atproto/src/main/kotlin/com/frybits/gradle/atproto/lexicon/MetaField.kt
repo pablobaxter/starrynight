@@ -21,6 +21,7 @@ package com.frybits.gradle.atproto.lexicon
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Serializable
 internal sealed interface MetaField: LexiconType
 
 @Serializable

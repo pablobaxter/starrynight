@@ -23,6 +23,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
+@Serializable
 internal sealed interface SubTypeField: LexiconType
 
 @Serializable
