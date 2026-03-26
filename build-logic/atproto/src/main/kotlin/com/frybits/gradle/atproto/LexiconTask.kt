@@ -18,9 +18,5 @@
 
 package com.frybits.gradle.atproto
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-internal sealed interface Field {
-    val description: String?
+internal class LexiconTask {
 }

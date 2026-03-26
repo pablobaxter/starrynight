@@ -16,24 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto
+package com.frybits.gradle.atproto.lexicon
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
+internal sealed interface SubTypeField: LexiconType
+
 @Serializable
 @SerialName("params")
 internal data class ParamsField(
     override val description: String? = null,
     val required: List<String>? = null,
-    @Serializable(LimitedScopeDeserializer::class) val properties: Map<String, Field>
-): Field
+    @Serializable(LimitedScopeDeserializer::class) val properties: Map<String, LexiconType>
+): SubTypeField
 
 @OptIn(ExperimentalSerializationApi::class)
 @SerialName("permission")
-internal sealed interface PermissionField: Field {
+internal sealed interface PermissionField: SubTypeField {
     val resource: String
 }
 

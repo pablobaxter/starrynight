@@ -16,10 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto
+package com.frybits.gradle.atproto.lexicon
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+@Serializable
+internal sealed interface ConcreteField: LexiconType
 
 @Serializable
 @SerialName("boolean")
@@ -27,7 +30,7 @@ internal data class BooleanField(
     override val description: String? = null,
     val default: Boolean? = null,
     val const: Boolean? = null
-): Field
+): ConcreteField
 
 @Serializable
 @SerialName("integer")
@@ -38,13 +41,13 @@ internal data class IntegerField(
     val enum: List<Int>? = null,
     val default: Int? = null,
     val const: Int? = null
-): Field
+): ConcreteField
 
 @Serializable
 @SerialName("string")
 internal data class StringField(
     override val description: String? = null,
-    val format: String? = null,
+    val format: StringFormat? = null,
     val maxLength: Int? = null,
     val minLength: Int? = null,
     val maxGraphemes: Int? = null,
@@ -53,7 +56,7 @@ internal data class StringField(
     val enum: List<String>? = null,
     val default: String? = null,
     val const: String? = null
-): Field
+): ConcreteField
 
 @Serializable
 @SerialName("bytes")
@@ -61,31 +64,31 @@ internal data class BytesField(
     override val description: String? = null,
     val minLength: Int? = null,
     val maxLength: Int? = null
-): Field
+): ConcreteField
 
 @Serializable
 @SerialName("cid-link")
 internal data class CidLinkField(
     override val description: String? = ""
-): Field
+): ConcreteField
 
 @Serializable
 @SerialName("array")
 internal data class ArrayField(
     override val description: String? = null,
-    val items: Field,
+    val items: LexiconType,
     val minLength: Int? = null,
     val maxLength: Int? = null
-): Field
+): ConcreteField
 
 @Serializable
 @SerialName("object")
 internal data class ObjectField(
     override val description: String? = null,
-    val properties: Map<String, Field>,
+    val properties: Map<String, LexiconType>,
     val required: List<String>? = null,
     val nullable: List<String>? = null
-): Field
+): ConcreteField
 
 @Serializable
 @SerialName("blob")
@@ -93,4 +96,39 @@ internal data class BlobField(
     override val description: String? = null,
     val accept: List<String>? = null,
     val maxSize: Int? = null
-): Field
+): ConcreteField
+
+internal enum class StringFormat {
+    @SerialName("at-identifier")
+    AT_IDENTIFIER,
+
+    @SerialName("at-uri")
+    AT_URI,
+
+    @SerialName("cid")
+    CID,
+
+    @SerialName("datetime")
+    DATETIME,
+
+    @SerialName("did")
+    DID,
+
+    @SerialName("handle")
+    HANDLE,
+
+    @SerialName("nsid")
+    NSID,
+
+    @SerialName("tid")
+    TID,
+
+    @SerialName("record-key")
+    RECORD_KEY,
+
+    @SerialName("uri")
+    URI,
+
+    @SerialName("language")
+    LANGUAGE
+}

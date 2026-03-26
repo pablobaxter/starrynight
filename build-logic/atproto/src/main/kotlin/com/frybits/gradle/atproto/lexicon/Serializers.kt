@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto
+package com.frybits.gradle.atproto.lexicon
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
@@ -30,7 +30,7 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.serializer
 import kotlin.collections.contains
 
-internal object LimitedScopeDeserializer : JsonTransformingSerializer<Map<String, Field>>(serializer()) {
+internal object LimitedScopeDeserializer : JsonTransformingSerializer<Map<String, LexiconType>>(serializer()) {
     val validTypes = setOf("boolean", "integer", "string")
     override fun transformDeserialize(element: JsonElement): JsonElement {
         require(element is JsonObject) { "JsonObject expected, got ${element::class}" }
@@ -54,7 +54,7 @@ internal object LimitedScopeDeserializer : JsonTransformingSerializer<Map<String
 }
 
 internal val lexiconSerializerModule = SerializersModule {
-    polymorphic(Field::class) {
+    polymorphic(LexiconType::class) {
         defaultDeserializer { type ->
             if (type == "permission") {
                 object : JsonContentPolymorphicSerializer<PermissionField>(PermissionField::class) {

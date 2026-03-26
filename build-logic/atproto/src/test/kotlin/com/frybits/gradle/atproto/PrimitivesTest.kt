@@ -18,6 +18,8 @@
 
 package com.frybits.gradle.atproto
 
+import com.frybits.gradle.atproto.lexicon.LexiconType
+import com.frybits.gradle.atproto.lexicon.lexiconSerializerModule
 import kotlinx.serialization.json.Json
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -50,7 +52,7 @@ class PrimitivesTest {
             }
         """.trimIndent()
 
-        val result = json.decodeFromString<Field>(blah)
+        val result = json.decodeFromString<LexiconType>(blah)
 
         println(result)
     }
@@ -65,7 +67,7 @@ class PrimitivesTest {
             }
         """.trimIndent()
 
-        val result = json.decodeFromString<Field>(blah)
+        val result = json.decodeFromString<LexiconType>(blah)
         println(result)
     }
 }
