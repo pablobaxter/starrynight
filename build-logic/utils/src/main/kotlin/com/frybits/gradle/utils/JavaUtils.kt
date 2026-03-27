@@ -49,4 +49,3 @@ public val Project.androidTargetCompatibility: Provider<JavaVersion>
 public val Project.androidSourceCompatibility: Provider<JavaVersion>
     get() = providers.gradleProperty("com.frybits.android.compatibility.source")
         .map { target -> JavaVersion.toVersion(target) }
-
