@@ -22,6 +22,8 @@ dependencies {
     compileOnly(logic.kotlin.gradle)
 
     implementation(logic.kotlinx.serialization.core)
+
+    testImplementation(logic.kotlin.gradle)
 }
 
 kotlin {
