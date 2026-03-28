@@ -30,15 +30,29 @@ class MetaTest {
     }
 
     @Test
+    fun `token field deserialization minimal`() {
+        @Language("JSON")
+        val tokenFieldJson = """
+            {"type": "token"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(tokenFieldJson)
+
+        val expected = TokenField()
+
+        assertIs<TokenField>(result)
+        assertIs<MetaField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun `ref field deserialization`() {
         @Language("JSON")
         val refFieldJson = """
             {
               "type": "ref",
               "description": "Some description",
-              "ref": {
-                "type": "string"
-              }
+              "ref": "some.ref"
             }
         """.trimIndent()
 
@@ -46,7 +60,28 @@ class MetaTest {
 
         val expected = RefField(
             description = "Some description",
-            ref = StringField()
+            ref = "some.ref"
+        )
+
+        assertIs<RefField>(result)
+        assertIs<MetaField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `ref field deserialization minimal`() {
+        @Language("JSON")
+        val refFieldJson = """
+            {
+              "type": "ref",
+              "ref": "some.ref"
+            }
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(refFieldJson)
+
+        val expected = RefField(
+            ref = "some.ref",
         )
 
         assertIs<RefField>(result)
@@ -61,7 +96,7 @@ class MetaTest {
             {
               "type": "union",
               "description": "Some description",
-              "refs": [{ "type": "string" }],
+              "refs": ["some.ref"],
               "closed": true
             }
         """.trimIndent()
@@ -70,8 +105,29 @@ class MetaTest {
 
         val expected = UnionField(
             description = "Some description",
-            refs = listOf(StringField()),
+            refs = listOf("some.ref"),
             closed = true
+        )
+
+        assertIs<UnionField>(result)
+        assertIs<MetaField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `union field deserialization minimal`() {
+        @Language("JSON")
+        val unionFieldJson = """
+            {
+              "type": "union",
+              "refs": ["some.ref"]
+            }
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(unionFieldJson)
+
+        val expected = UnionField(
+            refs = listOf("some.ref")
         )
 
         assertIs<UnionField>(result)
@@ -94,6 +150,22 @@ class MetaTest {
         val expected = UnknownField(
             description = "Some description",
         )
+
+        assertIs<UnknownField>(result)
+        assertIs<MetaField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `unknown field deserialization minimal`() {
+        @Language("JSON")
+        val unknownFieldJson = """
+            {"type": "unknown"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(unknownFieldJson)
+
+        val expected = UnknownField()
 
         assertIs<UnknownField>(result)
         assertIs<MetaField>(result)

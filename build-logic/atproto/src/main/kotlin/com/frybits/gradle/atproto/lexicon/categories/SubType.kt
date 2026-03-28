@@ -47,7 +47,7 @@ internal sealed interface PermissionField: SubTypeField {
 internal data class RepoPermissionField(
     override val description: String? = null,
     override val resource: String,
-    val collection: List<String>,
+    val collection: Set<String>,
     val action: Set<Action>? = null
 ): PermissionField
 

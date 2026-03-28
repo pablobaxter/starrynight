@@ -34,6 +34,22 @@ class ConcreteTest {
     }
 
     @Test
+    fun `boolean field deserialization minimal`() {
+        @Language("JSON")
+        val booleanFieldJson = """
+            {"type": "boolean"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(booleanFieldJson)
+
+        val expected = BooleanField()
+
+        assertIs<BooleanField>(result)
+        assertIs<ConcreteField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun `integer field deserialization`() {
         @Language("JSON")
         val integerFieldJson = """
@@ -58,6 +74,22 @@ class ConcreteTest {
             default = 7,
             const = 2
         )
+
+        assertIs<IntegerField>(result)
+        assertIs<ConcreteField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `integer field deserialization minimal`() {
+        @Language("JSON")
+        val integerFieldJson = """
+            {"type": "integer"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(integerFieldJson)
+
+        val expected = IntegerField()
 
         assertIs<IntegerField>(result)
         assertIs<ConcreteField>(result)
@@ -104,6 +136,22 @@ class ConcreteTest {
     }
 
     @Test
+    fun `string field deserialization minimal`() {
+        @Language("JSON")
+        val stringFieldJson = """
+            {"type": "string"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(stringFieldJson)
+
+        val expected = StringField()
+
+        assertIs<StringField>(result)
+        assertIs<ConcreteField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun `bytes field deserialization`() {
         @Language("JSON")
         val byteFieldJson = """
@@ -122,6 +170,22 @@ class ConcreteTest {
             maxLength = 10,
             minLength = 3,
         )
+
+        assertIs<BytesField>(result)
+        assertIs<ConcreteField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `bytes field deserialization minimal`() {
+        @Language("JSON")
+        val byteFieldJson = """
+            {"type": "bytes"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(byteFieldJson)
+
+        val expected = BytesField()
 
         assertIs<BytesField>(result)
         assertIs<ConcreteField>(result)
@@ -150,6 +214,22 @@ class ConcreteTest {
     }
 
     @Test
+    fun `cid-link field deserialization minimal`() {
+        @Language("JSON")
+        val cidLinkFieldJson = """
+            {"type": "cid-link"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(cidLinkFieldJson)
+
+        val expected = CidLinkField()
+
+        assertIs<CidLinkField>(result)
+        assertIs<ConcreteField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun `blob field deserialization`() {
         @Language("JSON")
         val blobFieldJson = """
@@ -168,6 +248,22 @@ class ConcreteTest {
             maxSize = 2,
             accept = listOf("blah")
         )
+
+        assertIs<BlobField>(result)
+        assertIs<ConcreteField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `blob field deserialization minimal`() {
+        @Language("JSON")
+        val blobFieldJson = """
+            {"type": "blob"}
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(blobFieldJson)
+
+        val expected = BlobField()
 
         assertIs<BlobField>(result)
         assertIs<ConcreteField>(result)

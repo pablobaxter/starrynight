@@ -36,6 +36,27 @@ class ContainerTest {
     }
 
     @Test
+    fun `array field deserialization minimal`() {
+        @Language("JSON")
+        val arrayFieldJson = """
+            {
+              "type": "array",
+              "items": { "type": "cid-link" }
+            }
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(arrayFieldJson)
+
+        val expected = ArrayField(
+            items = CidLinkField()
+        )
+
+        assertIs<ArrayField>(result)
+        assertIs<ContainerField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun `object field deserialization`() {
         @Language("JSON")
         val objectFieldJson = """
@@ -59,6 +80,27 @@ class ContainerTest {
             properties = mapOf("foobar" to CidLinkField()),
             required = listOf("foobar"),
             nullable = emptyList()
+        )
+
+        assertIs<ObjectField>(result)
+        assertIs<ContainerField>(result)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `object field deserialization minimal`() {
+        @Language("JSON")
+        val objectFieldJson = """
+            {
+              "type": "object",
+              "properties": {}
+            }
+        """.trimIndent()
+
+        val result = lexiconJson.decodeFromString<LexiconType>(objectFieldJson)
+
+        val expected = ObjectField(
+            properties = emptyMap()
         )
 
         assertIs<ObjectField>(result)

@@ -18,7 +18,9 @@
 
 package com.frybits.gradle.atproto.lexicon.categories
 
+import com.frybits.gradle.atproto.lexicon.HttpBodyLimitedProperties
 import com.frybits.gradle.atproto.lexicon.RecordLimitedProperties
+import com.frybits.gradle.atproto.lexicon.SubscriptionLimitedProperties
 import com.frybits.gradle.atproto.lexicon.XRPCParamsLimitedProperties
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -37,7 +39,7 @@ internal data class RecordField(
 @Serializable
 internal sealed interface XRPCField: PrimaryField {
     val parameters: LexiconType?
-    val errors: List<LexiconType>?
+    val errors: List<ErrorBodyField>?
 }
 
 @Serializable
@@ -45,8 +47,8 @@ internal sealed interface XRPCField: PrimaryField {
 internal data class QueryField(
     override val description: String? = null,
     @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
-    val output: LexiconType? = null,
-    override val errors: List<LexiconType>? = null
+    val output: BodyField? = null,
+    override val errors: List<ErrorBodyField>? = null
 ): XRPCField
 
 @Serializable
@@ -54,9 +56,9 @@ internal data class QueryField(
 internal data class ProcedureField(
     override val description: String? = null,
     @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
-    val output: LexiconType? = null,
-    override val errors: List<LexiconType>? = null,
-    val input: LexiconType? = null
+    val output: BodyField? = null,
+    override val errors: List<ErrorBodyField>? = null,
+    val input: BodyField? = null
 ): XRPCField
 
 @Serializable
@@ -64,8 +66,8 @@ internal data class ProcedureField(
 internal data class SubscriptionField(
     override val description: String? = null,
     @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
-    val message: LexiconType,
-    override val errors: List<LexiconType>? = null
+    val message: MessageField,
+    override val errors: List<ErrorBodyField>? = null
 ): XRPCField
 
 @Serializable
@@ -78,3 +80,22 @@ internal data class PermissionSetField(
     @SerialName("detail:lang") val detailLang: Map<String, String>? = null,
     val permissions: List<LexiconType>
 ): PrimaryField
+
+@Serializable
+internal data class BodyField(
+    override val description: String? = null,
+    val encoding: String,
+    @Serializable(HttpBodyLimitedProperties::class) val schema: LexiconType? = null,
+): LexiconType
+
+@Serializable
+internal data class ErrorBodyField(
+    override val description: String? = null,
+    val name: String
+): LexiconType
+
+@Serializable
+internal data class MessageField(
+    override val description: String? = null,
+    @Serializable(SubscriptionLimitedProperties::class) val schema: LexiconType? = null,
+): LexiconType

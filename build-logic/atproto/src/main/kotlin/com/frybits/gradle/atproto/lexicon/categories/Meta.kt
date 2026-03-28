@@ -34,14 +34,14 @@ internal data class TokenField(
 @SerialName("ref")
 internal data class RefField(
     override val description: String? = null,
-    val ref: LexiconType
+    val ref: String
 ): MetaField
 
 @Serializable
 @SerialName("union")
 internal data class UnionField(
     override val description: String? = null,
-    val refs: List<LexiconType>,
+    val refs: List<String>,
     val closed: Boolean = false
 ): MetaField
 

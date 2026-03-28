@@ -30,6 +30,7 @@ import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonTransformingSerializer
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.modules.SerializersModule
@@ -77,7 +78,25 @@ internal object XRPCParamsLimitedProperties : JsonTransformingSerializer<Lexicon
     override fun transformDeserialize(element: JsonElement): JsonElement {
         val data = element.jsonObject
         val result = data["type"]?.jsonPrimitive?.content
-        require(result == "params") { "Record expected 'params' type, got $result" }
+        require(result == "params") { "XRPC expected 'params' type, got $result" }
+        return element
+    }
+}
+
+internal object HttpBodyLimitedProperties : JsonTransformingSerializer<LexiconType>(serializer()) {
+    val validTypes = setOf("object", "ref", "union", null)
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        val data = element.jsonObject
+        val result = data["schema"]?.jsonObject?.get("type")?.jsonPrimitive?.content
+        require(result in validTypes) { "Response expected schema type $validTypes, got $result" }
+        return element
+    }
+}
+
+internal object SubscriptionLimitedProperties : JsonTransformingSerializer<LexiconType>(serializer()) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        val result = element.jsonObject["type"]?.jsonPrimitive?.content
+        require(result == "union") { "Response expected schema type 'union', got $result" }
         return element
     }
 }
@@ -91,8 +110,32 @@ private fun lexiconSerializerModule(): SerializersModule = SerializersModule {
                     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<PermissionField> {
                         val resource = element.jsonObject["resource"]?.jsonPrimitive?.content
                         return when (resource) {
-                            "repo" -> RepoPermissionField.serializer()
-                            "rpc" -> RpcPermissionField.serializer()
+                            "repo" -> {
+                                val collection = element.jsonObject["collection"]?.jsonArray
+                                requireNotNull(collection) { "Property 'collection' must not be null" }
+                                val result = collection.map { it.jsonPrimitive.content }
+                                require(!result.contains("*")) { "Property 'collection' must not contain '*' wildcard" }
+                                require(result.size == result.distinct().size) { "Property 'collection' must have unique items" }
+                                require(result.isNotEmpty()) { "Property 'collection' must not be empty" }
+                                RepoPermissionField.serializer()
+                            }
+                            "rpc" -> {
+                                val lxm = element.jsonObject["lxm"]?.jsonArray
+                                requireNotNull(lxm) { "Property 'lxm' must not be null" }
+                                val result = lxm.map { it.jsonPrimitive.content }
+                                require(result.isNotEmpty()) { "Property 'lxm' must not be empty" }
+                                require(!result.contains("*")) { "Property 'lxm' must not contain '*' wildcard" }
+
+                                val inheritAud = element.jsonObject["inheritAud"]?.jsonPrimitive?.content.toBoolean()
+
+                                val aud = element.jsonObject["aud"]?.jsonPrimitive?.content
+                                if (inheritAud) {
+                                    require(aud == "*" || aud == null) { "Property 'aud' must be '*' wildcard or null with inheritAud" }
+                                } else {
+                                    requireNotNull(aud) { "Property 'aud' must not be null" }
+                                }
+                                RpcPermissionField.serializer()
+                            }
                             else -> NothingSerializer()
                         }
                     }
