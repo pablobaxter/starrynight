@@ -18,7 +18,15 @@
 
 package com.frybits.gradle.atproto.lexicon
 
+import com.frybits.gradle.atproto.lexicon.categories.AccountPermissionField
+import com.frybits.gradle.atproto.lexicon.categories.BlobPermissionField
+import com.frybits.gradle.atproto.lexicon.categories.IdentityPermissionField
+import com.frybits.gradle.atproto.lexicon.categories.LexiconType
+import com.frybits.gradle.atproto.lexicon.categories.PermissionField
+import com.frybits.gradle.atproto.lexicon.categories.RepoPermissionField
+import com.frybits.gradle.atproto.lexicon.categories.RpcPermissionField
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -29,6 +37,8 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.serializer
 import kotlin.collections.contains
+
+internal val lexiconJson = Json { serializersModule = lexiconSerializerModule() }
 
 internal object LimitedScopeDeserializer : JsonTransformingSerializer<Map<String, LexiconType>>(serializer()) {
     val validTypes = setOf("boolean", "integer", "string")
@@ -53,7 +63,7 @@ internal object LimitedScopeDeserializer : JsonTransformingSerializer<Map<String
     }
 }
 
-internal val lexiconSerializerModule = SerializersModule {
+private fun lexiconSerializerModule(): SerializersModule = SerializersModule {
     polymorphic(LexiconType::class) {
         defaultDeserializer { type ->
             if (type == "permission") {

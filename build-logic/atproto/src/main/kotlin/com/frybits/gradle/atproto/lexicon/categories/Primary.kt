@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto.lexicon
+package com.frybits.gradle.atproto.lexicon.categories
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -25,38 +25,42 @@ import kotlinx.serialization.Serializable
 internal sealed interface PrimaryField: LexiconType
 
 @Serializable
-internal data class Record(
+@SerialName("record")
+internal data class RecordField(
     override val description: String? = null,
     val key: String,
     val record: LexiconType
 ): PrimaryField
 
 @Serializable
-internal sealed interface XRPC: PrimaryField {
+internal sealed interface XRPCField: PrimaryField {
     val parameters: LexiconType?
     val output: LexiconType?
     val errors: List<LexiconType>?
 }
 
 @Serializable
-internal data class Query(
+@SerialName("query")
+internal data class QueryField(
     override val description: String? = null,
     override val parameters: LexiconType? = null,
     override val output: LexiconType? = null,
     override val errors: List<LexiconType>? = null
-): XRPC
+): XRPCField
 
 @Serializable
-internal data class Procedure(
+@SerialName("procedure")
+internal data class ProcedureField(
     override val description: String? = null,
     override val parameters: LexiconType? = null,
     override val output: LexiconType? = null,
     override val errors: List<LexiconType>? = null,
     val input: LexiconType? = null
-): XRPC
+): XRPCField
 
 @Serializable
-internal data class Subscription(
+@SerialName("subscription")
+internal data class SubscriptionField(
     override val description: String? = null,
     val parameters: LexiconType? = null,
     val message: LexiconType,
@@ -65,7 +69,7 @@ internal data class Subscription(
 
 @Serializable
 @SerialName("permission-set")
-internal data class PermissionSet(
+internal data class PermissionSetField(
     override val description: String? = null,
     val title: String? = null,
     @SerialName("title:lang") val titleLang: Map<String, String>? = null,

@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto.lexicon
+package com.frybits.gradle.atproto.lexicon.categories
 
+import com.frybits.gradle.atproto.lexicon.LimitedScopeDeserializer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

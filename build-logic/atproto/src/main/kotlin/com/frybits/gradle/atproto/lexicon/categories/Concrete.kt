@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto.lexicon
+package com.frybits.gradle.atproto.lexicon.categories
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -70,24 +70,6 @@ internal data class BytesField(
 @SerialName("cid-link")
 internal data class CidLinkField(
     override val description: String? = ""
-): ConcreteField
-
-@Serializable
-@SerialName("array")
-internal data class ArrayField(
-    override val description: String? = null,
-    val items: LexiconType,
-    val minLength: Int? = null,
-    val maxLength: Int? = null
-): ConcreteField
-
-@Serializable
-@SerialName("object")
-internal data class ObjectField(
-    override val description: String? = null,
-    val properties: Map<String, LexiconType>,
-    val required: List<String>? = null,
-    val nullable: List<String>? = null
 ): ConcreteField
 
 @Serializable

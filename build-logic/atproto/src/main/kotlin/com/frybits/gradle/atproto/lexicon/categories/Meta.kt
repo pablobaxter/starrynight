@@ -16,11 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto.lexicon
+package com.frybits.gradle.atproto.lexicon.categories
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal sealed interface LexiconType {
-    val description: String?
-}
+internal sealed interface MetaField: LexiconType
+
+@Serializable
+@SerialName("token")
+internal data class TokenField(
+    override val description: String? = null
+): MetaField
+
+@Serializable
+@SerialName("ref")
+internal data class RefField(
+    override val description: String? = null,
+    val ref: String
+): MetaField
+
+@Serializable
+@SerialName("union")
+internal data class UnionField(
+    override val description: String? = null,
+    val refs: List<String>,
+    val closed: Boolean = false
+): MetaField
+
+@Serializable
+@SerialName("unknown")
+internal data class UnknownField(
+    override val description: String? = null,
+): MetaField
