@@ -36,7 +36,9 @@ class MetaTest {
             {
               "type": "ref",
               "description": "Some description",
-              "ref": "something"
+              "ref": {
+                "type": "string"
+              }
             }
         """.trimIndent()
 
@@ -44,7 +46,7 @@ class MetaTest {
 
         val expected = RefField(
             description = "Some description",
-            ref = "something"
+            ref = StringField()
         )
 
         assertIs<RefField>(result)
@@ -59,7 +61,7 @@ class MetaTest {
             {
               "type": "union",
               "description": "Some description",
-              "refs": ["something"],
+              "refs": [{ "type": "string" }],
               "closed": true
             }
         """.trimIndent()
@@ -68,7 +70,7 @@ class MetaTest {
 
         val expected = UnionField(
             description = "Some description",
-            refs = listOf("something"),
+            refs = listOf(StringField()),
             closed = true
         )
 

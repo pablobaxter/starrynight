@@ -18,6 +18,8 @@
 
 package com.frybits.gradle.atproto.lexicon.categories
 
+import com.frybits.gradle.atproto.lexicon.RecordLimitedProperties
+import com.frybits.gradle.atproto.lexicon.XRPCParamsLimitedProperties
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -29,13 +31,12 @@ internal sealed interface PrimaryField: LexiconType
 internal data class RecordField(
     override val description: String? = null,
     val key: String,
-    val record: LexiconType
+    @Serializable(RecordLimitedProperties::class) val record: LexiconType
 ): PrimaryField
 
 @Serializable
 internal sealed interface XRPCField: PrimaryField {
     val parameters: LexiconType?
-    val output: LexiconType?
     val errors: List<LexiconType>?
 }
 
@@ -43,8 +44,8 @@ internal sealed interface XRPCField: PrimaryField {
 @SerialName("query")
 internal data class QueryField(
     override val description: String? = null,
-    override val parameters: LexiconType? = null,
-    override val output: LexiconType? = null,
+    @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
+    val output: LexiconType? = null,
     override val errors: List<LexiconType>? = null
 ): XRPCField
 
@@ -52,8 +53,8 @@ internal data class QueryField(
 @SerialName("procedure")
 internal data class ProcedureField(
     override val description: String? = null,
-    override val parameters: LexiconType? = null,
-    override val output: LexiconType? = null,
+    @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
+    val output: LexiconType? = null,
     override val errors: List<LexiconType>? = null,
     val input: LexiconType? = null
 ): XRPCField
@@ -62,10 +63,10 @@ internal data class ProcedureField(
 @SerialName("subscription")
 internal data class SubscriptionField(
     override val description: String? = null,
-    val parameters: LexiconType? = null,
+    @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
     val message: LexiconType,
-    val errors: List<LexiconType>? = null
-): PrimaryField
+    override val errors: List<LexiconType>? = null
+): XRPCField
 
 @Serializable
 @SerialName("permission-set")
@@ -75,5 +76,5 @@ internal data class PermissionSetField(
     @SerialName("title:lang") val titleLang: Map<String, String>? = null,
     val detail: String? = null,
     @SerialName("detail:lang") val detailLang: Map<String, String>? = null,
-    val permissions: List<PermissionField>
+    val permissions: List<LexiconType>
 ): PrimaryField

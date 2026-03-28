@@ -18,14 +18,13 @@
 
 package com.frybits.gradle.atproto.lexicon
 
-import com.frybits.gradle.atproto.lexicon.categories.AccountPermissionField
-import com.frybits.gradle.atproto.lexicon.categories.BlobPermissionField
-import com.frybits.gradle.atproto.lexicon.categories.IdentityPermissionField
 import com.frybits.gradle.atproto.lexicon.categories.LexiconType
 import com.frybits.gradle.atproto.lexicon.categories.PermissionField
 import com.frybits.gradle.atproto.lexicon.categories.RepoPermissionField
 import com.frybits.gradle.atproto.lexicon.categories.RpcPermissionField
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.builtins.NothingSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
@@ -38,9 +37,11 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.serializer
 import kotlin.collections.contains
 
-internal val lexiconJson = Json { serializersModule = lexiconSerializerModule() }
+internal val lexiconJson = Json {
+    serializersModule = lexiconSerializerModule()
+}
 
-internal object LimitedScopeDeserializer : JsonTransformingSerializer<Map<String, LexiconType>>(serializer()) {
+internal object ParamsLimitedProperties : JsonTransformingSerializer<Map<String, LexiconType>>(serializer()) {
     val validTypes = setOf("boolean", "integer", "string")
     override fun transformDeserialize(element: JsonElement): JsonElement {
         require(element is JsonObject) { "JsonObject expected, got ${element::class}" }
@@ -63,6 +64,25 @@ internal object LimitedScopeDeserializer : JsonTransformingSerializer<Map<String
     }
 }
 
+internal object RecordLimitedProperties : JsonTransformingSerializer<LexiconType>(serializer()) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        val data = element.jsonObject
+        val result = data["type"]?.jsonPrimitive?.content
+        require(result == "object") { "Record expected 'object' type, got $result" }
+        return element
+    }
+}
+
+internal object XRPCParamsLimitedProperties : JsonTransformingSerializer<LexiconType>(serializer()) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        val data = element.jsonObject
+        val result = data["type"]?.jsonPrimitive?.content
+        require(result == "params") { "Record expected 'params' type, got $result" }
+        return element
+    }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
 private fun lexiconSerializerModule(): SerializersModule = SerializersModule {
     polymorphic(LexiconType::class) {
         defaultDeserializer { type ->
@@ -73,10 +93,7 @@ private fun lexiconSerializerModule(): SerializersModule = SerializersModule {
                         return when (resource) {
                             "repo" -> RepoPermissionField.serializer()
                             "rpc" -> RpcPermissionField.serializer()
-                            "blob" -> BlobPermissionField.serializer()
-                            "identity" -> IdentityPermissionField.serializer()
-                            "account" -> AccountPermissionField.serializer()
-                            else -> error("Wrong stuff")
+                            else -> NothingSerializer()
                         }
                     }
                 }

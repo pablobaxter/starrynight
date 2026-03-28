@@ -173,42 +173,4 @@ class ConcreteTest {
         assertIs<ConcreteField>(result)
         assertEquals(expected, result)
     }
-
-    @Test
-    fun testPrimitive() {
-        val blah = """
-            {
-                "type": "params",
-                "required": ["subjects"],
-                "properties": {
-                    "subjects": {
-                        "type": "array",
-                        "maxLength": 100,
-                        "minLength": 1,
-                        "items": {
-                          "type": "string"
-                        }
-                    }
-                }
-            }
-        """.trimIndent()
-
-        val result = lexiconJson.decodeFromString<LexiconType>(blah)
-
-        println(result)
-    }
-
-    @Test
-    fun testRepoPermission() {
-        val blah = """
-            {
-              "type": "permission",
-              "resource": "repo",
-              "collection": ["app.example.profile"]
-            }
-        """.trimIndent()
-
-        val result = lexiconJson.decodeFromString<LexiconType>(blah)
-        println(result)
-    }
 }

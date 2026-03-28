@@ -18,7 +18,7 @@
 
 package com.frybits.gradle.atproto.lexicon.categories
 
-import com.frybits.gradle.atproto.lexicon.LimitedScopeDeserializer
+import com.frybits.gradle.atproto.lexicon.ParamsLimitedProperties
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -32,7 +32,7 @@ internal sealed interface SubTypeField: LexiconType
 internal data class ParamsField(
     override val description: String? = null,
     val required: List<String>? = null,
-    @Serializable(LimitedScopeDeserializer::class) val properties: Map<String, LexiconType>
+    @Serializable(ParamsLimitedProperties::class) val properties: Map<String, LexiconType>
 ): SubTypeField
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -48,7 +48,7 @@ internal data class RepoPermissionField(
     override val description: String? = null,
     override val resource: String,
     val collection: List<String>,
-    val action: Set<String>? = null
+    val action: Set<Action>? = null
 ): PermissionField
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -62,30 +62,13 @@ internal data class RpcPermissionField(
     val inheritAud: Boolean? = null
 ): PermissionField
 
-@OptIn(ExperimentalSerializationApi::class)
-@Serializable
-@JsonIgnoreUnknownKeys
-internal data class BlobPermissionField(
-    override val description: String? = null,
-    override val resource: String,
-    val accept: List<String>
-): PermissionField
+internal enum class Action {
+    @SerialName("create")
+    CREATE,
 
-@OptIn(ExperimentalSerializationApi::class)
-@Serializable
-@JsonIgnoreUnknownKeys
-internal data class IdentityPermissionField(
-    override val description: String? = null,
-    override val resource: String,
-    val attr: String
-): PermissionField
+    @SerialName("update")
+    UPDATE,
 
-@OptIn(ExperimentalSerializationApi::class)
-@Serializable
-@JsonIgnoreUnknownKeys
-internal data class AccountPermissionField(
-    override val description: String? = null,
-    override val resource: String,
-    val attr: String,
-    val action: String? = null
-): PermissionField
+    @SerialName("delete")
+    DELETE
+}
