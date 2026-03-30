@@ -1,5 +1,7 @@
 package com.frybits.gradle.atproto.lexicon
 
+import com.frybits.gradle.atproto.generator.generateLexiconDefinitions
+import com.frybits.gradle.atproto.lexicon.categories.BooleanField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import org.intellij.lang.annotations.Language
 import kotlin.test.Test
@@ -17,7 +19,7 @@ class LexiconTest {
               "description": "Some description",
               "defs": {
                 "main": {
-                  "type": "string"
+                  "type": "boolean"
                 }
               }
             }
@@ -30,9 +32,15 @@ class LexiconTest {
             id = "app.bsky.feed.foobar",
             description = "Some description",
             defs = mapOf(
-                "main" to StringField()
+                "main" to BooleanField(
+                    description = "foobar blah blah",
+                    default = false,
+                    const = true
+                )
             )
         )
+
+        generateLexiconDefinitions(expected)
 
         assertEquals(expected, result)
     }

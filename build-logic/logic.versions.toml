@@ -1,5 +1,6 @@
 [versions]
 kotlin = "2.3.0"
+kotlinpoet = "2.3.0"
 kotlinx-serialization = "1.10.0"
 ksp = "2.3.0"
 r8-version = "8.0.34"
@@ -8,6 +9,7 @@ tomlkt = "0.6.0"
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle-api" }
 kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-poet = { group = "com.squareup", name = "kotlinpoet", version.ref = "kotlinpoet" }
 kotlinx-toml-core = { group = "dev.eav.tomlkt", name = "tomlkt", version.ref = "tomlkt" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
