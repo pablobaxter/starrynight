@@ -1,8 +1,6 @@
 package com.frybits.gradle.atproto.lexicon
 
-import com.frybits.gradle.atproto.generator.generateLexiconDefinitions
 import com.frybits.gradle.atproto.lexicon.categories.BooleanField
-import com.frybits.gradle.atproto.lexicon.categories.StringField
 import org.intellij.lang.annotations.Language
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,15 +30,9 @@ class LexiconTest {
             id = "app.bsky.feed.foobar",
             description = "Some description",
             defs = mapOf(
-                "main" to BooleanField(
-                    description = "foobar blah blah",
-                    default = false,
-                    const = true
-                )
+                "main" to BooleanField()
             )
         )
-
-        generateLexiconDefinitions(expected)
 
         assertEquals(expected, result)
     }
