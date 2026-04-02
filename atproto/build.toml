@@ -1,0 +1,13 @@
+# Project type
+type = "atprotoLibrary"
+
+# Lexicons to download and compile
+lexicons = []
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+# Used to add libraries into the "implementation" configuration
+implementation = [
+    { type = "library", name = "kotlinx.serialization" },
+]

@@ -14,6 +14,8 @@ testing {
 }
 
 dependencies {
+    implementation(project(":core"))
+
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
 

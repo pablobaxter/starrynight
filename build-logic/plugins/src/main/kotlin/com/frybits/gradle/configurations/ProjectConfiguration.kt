@@ -23,7 +23,9 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.frybits.gradle.android.configurations.AGP8Configurer
 import com.frybits.gradle.android.configurations.AGP9Configurer
+import com.frybits.gradle.atproto.ATProtoConfigurer
 import com.frybits.gradle.core.Configurer
+import com.frybits.gradle.core.definitions.ATProtoLibrary
 import com.frybits.gradle.core.definitions.AndroidAppBuildFile
 import com.frybits.gradle.core.definitions.AndroidLibraryBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
@@ -67,6 +69,11 @@ private fun Project.buildFileConfiguration(buildFile: BuildFile) {
             apply<JavaLibraryPlugin>()
             apply(plugin = "org.jetbrains.kotlin.jvm")
             objects.newInstance<JavaLibraryConfigurer>()
+        }
+        is ATProtoLibrary -> {
+            apply<JavaLibraryPlugin>()
+            apply(plugin = "org.jetbrains.kotlin.jvm")
+            objects.newInstance<ATProtoConfigurer>()
         }
     }
 

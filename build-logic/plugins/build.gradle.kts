@@ -34,6 +34,7 @@ gradlePlugin {
 }
 
 dependencies {
+    implementation(project(":atproto"))
     implementation(project(":android"))
     implementation(project(":android:agp8"))
     implementation(project(":android:agp9"))

@@ -2,7 +2,8 @@
 androidx-core-version="1.18.0"
 activity-compose-version = "1.13.0"
 kotlin-version = "2.3.20"
-compose-bom-version = "2026.03.00"
+kotlinx-serialization = "1.10.0"
+compose-bom-version = "2026.03.01"
 google-material="1.13.0"
 
 [libraries]
@@ -11,6 +12,7 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-version" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 metrox-android = { group = "dev.zacsweers.metro", name = "metrox-android", version.ref = "metro-version" }
 
 [bundles]

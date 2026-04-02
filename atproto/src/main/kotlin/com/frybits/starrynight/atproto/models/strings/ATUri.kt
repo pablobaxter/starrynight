@@ -16,7 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto
+package com.frybits.starrynight.atproto.models.strings
 
-internal class LexiconTask {
+import kotlinx.serialization.Serializable
+import java.net.URI
+
+@Serializable
+@JvmInline
+public value class ATUri(override val prop: String): ATString {
+    override fun toString(): String = prop
+
+    public val uri: URI
+        get() = URI.create(prop)
 }

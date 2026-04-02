@@ -20,6 +20,7 @@ package com.frybits.gradle.core.definitions
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * Defines the structure of the build.toml file
@@ -60,3 +61,14 @@ public data class JavaLibraryBuildFile(
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
     override val enableCompose: Boolean = false,
 ): BuildFile
+
+@Serializable
+@SerialName("atprotoLibrary")
+public data class ATProtoLibrary(
+    override val dependencies: Map<String, List<Dependency>>,
+    val lexicons: List<String>
+): BuildFile {
+
+    @Transient
+    override val enableCompose: Boolean = false
+}
