@@ -8,14 +8,8 @@ import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.squareup.kotlinpoet.FileSpec
 import org.gradle.api.Project
 
-internal fun Project.generateLexicon(schema: Lexicon) {
-    val packageName = schema.id
+internal fun Project.generateLexicon() {
 
-    val main = schema.defs["main"]
-
-    if (main != null) {
-
-    }
 }
 
 internal fun generateLexiconDefinitions(schema: Lexicon) {

@@ -13,6 +13,7 @@ androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "and
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 metrox-android = { group = "dev.zacsweers.metro", name = "metrox-android", version.ref = "metro-version" }
 
 [bundles]

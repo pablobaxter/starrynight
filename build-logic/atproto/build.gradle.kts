@@ -19,6 +19,8 @@ dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
 
+    compileOnly(logic.kotlin.gradle)
+
     implementation(logic.kotlin.poet)
     implementation(logic.kotlinx.serialization.core)
     implementation(logic.kotlinx.serialization.json)

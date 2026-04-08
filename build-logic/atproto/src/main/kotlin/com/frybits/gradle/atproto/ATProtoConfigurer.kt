@@ -18,6 +18,7 @@
 
 package com.frybits.gradle.atproto
 
+import com.frybits.gradle.atproto.generator.LexiconGeneratorTask
 import com.frybits.gradle.atproto.pull.LexiconPullTask
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
@@ -27,6 +28,8 @@ import com.frybits.gradle.core.definitions.ATProtoLibrary
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import javax.inject.Inject
 
 /**
@@ -44,10 +47,20 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
             kotlinProjectConfiguration() // All Kotlin configuration
 
             val lexiconPullTask = tasks.register<LexiconPullTask>("lexiconPull") {
-                endpoint.set("https://bsky.social")
+                endpoint.set("bsky.social")
                 outputDir.set(layout.buildDirectory.dir("lexicons"))
                 nsids.set(buildFile.lexicons)
             }
+
+            val lexiconGeneratedTask = tasks.register<LexiconGeneratorTask>("lexiconGenerate") {
+                // TODO cleanup
+//                inputDirectory.set(lexiconPullTask.map { it.outputDir.get() })
+                inputDirectory.set(layout.projectDirectory.dir("blah"))
+                generatedSources.set(layout.buildDirectory.dir("generated/lexicons"))
+            }
+
+            @OptIn(ExperimentalKotlinGradlePluginApi::class)
+            kotlinExtension.sourceSets.getByName("main").generatedKotlin.srcDirs(lexiconGeneratedTask)
         }
     }
 }

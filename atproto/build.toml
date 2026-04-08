@@ -2,7 +2,10 @@
 type = "atprotoLibrary"
 
 # Lexicons to download and compile
-lexicons = []
+lexicons = [
+    "app.bsky.actor.getProfiles",
+    "app.bsky.actor.getProfile"
+]
 
 # Libraries to be used (maven address or version catalog name)
 [dependencies]
@@ -10,4 +13,5 @@ lexicons = []
 # Used to add libraries into the "implementation" configuration
 implementation = [
     { type = "library", name = "kotlinx.serialization" },
+    { type = "library", name = "kotlinx.serialization.json" },
 ]
