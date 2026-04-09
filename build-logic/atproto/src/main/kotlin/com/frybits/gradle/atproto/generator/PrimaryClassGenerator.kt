@@ -20,7 +20,6 @@ package com.frybits.gradle.atproto.generator
 
 import com.frybits.gradle.atproto.lexicon.categories.ArrayField
 import com.frybits.gradle.atproto.lexicon.categories.BlobField
-import com.frybits.gradle.atproto.lexicon.categories.BodyField
 import com.frybits.gradle.atproto.lexicon.categories.BooleanField
 import com.frybits.gradle.atproto.lexicon.categories.BytesField
 import com.frybits.gradle.atproto.lexicon.categories.CidLinkField
@@ -46,11 +45,8 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import kotlinx.serialization.Serializable
-import org.intellij.lang.annotations.Language
 
 internal fun RecordField.generateClass(
     className: ClassName,
@@ -63,55 +59,60 @@ internal fun RecordField.generateClass(
     val typeSpecBuilder = TypeSpec.classBuilder(className)
         .addAnnotation(Serializable::class)
         .addModifiers(KModifier.PUBLIC)
-        .addModifiers(KModifier.DATA)
 
     if (description != null) {
         typeSpecBuilder.addKdoc(description)
     }
 
     val constructor = FunSpec.constructorBuilder()
+    val initCodeBlock = CodeBlock.builder()
+    val companion = TypeSpec.companionObjectBuilder()
 
     require(record is ObjectField)
     val required = record.required.orEmpty().toSet()
 
-    val initCodeBlock = CodeBlock.builder()
-
     record.properties.forEach { (name, type) ->
+        val isRequired = name in required
         when (type) {
             is BlobField -> {
-                val blobClassName = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "Blob")
-                val standardBlobClassName = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "StandardBlob")
-
-                val property = PropertySpec.builder(name, blobClassName)
-                    .initializer(name)
-
-                val parameter = ParameterSpec.builder(name,blobClassName)
-                if (type.description != null) {
-                    parameter.addKdoc(type.description)
-                    property.addKdoc(type.description)
-                }
-
-                initCodeBlock.addStatement("// Begin $name requirements")
-                if (!type.accept.isNullOrEmpty()) {
-                    initCodeBlock.addStatement("val accept = setOf(%L)", type.accept.joinToString(", ") { "\"$it\"" })
-                    initCodeBlock.addStatement("require(%L in accept) { %P }", "$name.mimeType", $$"$$name does not allow mimeType ${$$name.mimeType}")
-                }
-                if (type.maxSize != null) {
-                    initCodeBlock.beginControlFlow("if (%L is %T)", name, standardBlobClassName)
-                        .addStatement("require(%L <= %L) { %P }", "$name.size", type.maxSize, $$"$$name cannot be bigger than $${type.maxSize} bytes. Current size: ${$$name.size} bytes")
-                        .endControlFlow()
-                }
-
-                initCodeBlock.addStatement("// End $name requirements")
-
-                constructor.addParameter(parameter.build())
-                typeSpecBuilder.addProperty(property.build())
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    initCodeBlockBuilder = initCodeBlock,
+                    isRequired = isRequired
+                )
             }
-            is BooleanField -> TODO()
-            is BytesField -> TODO()
-            is CidLinkField -> TODO()
-            is IntegerField -> TODO()
+            is BooleanField -> {
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    companionBuilder = companion,
+                    isRequired = isRequired
+                )
+            }
+            is BytesField -> {
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    initCodeBlockBuilder = initCodeBlock,
+                    isRequired = isRequired
+                )
+            }
+            is IntegerField -> {
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    initCodeBlockBuilder = initCodeBlock,
+                    companionBuilder = companion,
+                    isRequired = isRequired
+                )
+            }
             is StringField -> TODO()
+            is CidLinkField -> TODO()
             is ArrayField -> TODO()
             is ObjectField -> TODO()
             is ErrorBodyField -> TODO()
@@ -132,8 +133,21 @@ internal fun RecordField.generateClass(
         }
     }
 
-    typeSpecBuilder.primaryConstructor(constructor.build())
-    typeSpecBuilder.addInitializerBlock(initCodeBlock.build())
+    if (constructor.parameters.isNotEmpty()) {
+        typeSpecBuilder.primaryConstructor(constructor.build())
+    }
+
+    if (initCodeBlock.isNotEmpty()) {
+        typeSpecBuilder.addInitializerBlock(initCodeBlock.build())
+    }
+
+    if (companion.typeSpecs.isNotEmpty() || companion.propertySpecs.isNotEmpty()) {
+        typeSpecBuilder.addType(companion.build())
+    }
+
+    if (typeSpecBuilder.propertySpecs.isNotEmpty()) {
+        typeSpecBuilder.addModifiers(KModifier.DATA)
+    }
 
     return fileBuilder.addType(typeSpecBuilder.build()).build()
 }

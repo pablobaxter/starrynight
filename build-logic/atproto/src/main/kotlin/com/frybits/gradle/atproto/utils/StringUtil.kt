@@ -16,13 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.atproto.models.strings
+package com.frybits.gradle.atproto.utils
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-@JvmInline
-public value class CId(override val prop: String): ATString {
-
-    override fun toString(): String = prop
+internal fun String.camelToSnakeCase(): String {
+    val regex = "(?<=[a-zA-Z])[A-Z]".toRegex()
+    return regex.replace(this) { "_${it.value}" }.lowercase()
 }

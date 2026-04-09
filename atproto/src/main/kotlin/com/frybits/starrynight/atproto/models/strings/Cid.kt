@@ -18,8 +18,11 @@
 
 package com.frybits.starrynight.atproto.models.strings
 
-import com.frybits.starrynight.atproto.serializers.ATIdentifierSerializer
 import kotlinx.serialization.Serializable
 
-@Serializable(ATIdentifierSerializer::class)
-public sealed interface ATIdentifier
+@Serializable
+@JvmInline
+public value class Cid(override val prop: String): ATString {
+
+    override fun toString(): String = prop
+}

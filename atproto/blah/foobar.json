@@ -1,0 +1,41 @@
+{
+  "uri":"at://did:plc:4v4y5r3lwsbtmsxhile2ljac/com.atproto.lexicon.schema/app.bsky.actor.defs",
+  "cid":"bafyreigwqwhe2jxohagozazfbrf6dxgzphvkg3d3lg7uxdvepsimqyclka",
+  "value": {
+    "lexicon": 1,
+    "id": "app.bsky.actor.profile",
+    "defs": {
+      "main": {
+        "type": "record",
+        "description": "A declaration of a Bluesky account profile.",
+        "key": "literal:self",
+        "record": {
+          "type": "object",
+          "required": ["isSomeType"],
+          "properties": {
+            "banner": {
+              "type": "blob",
+              "description": "Larger horizontal image to display behind profile view.",
+              "accept": ["image/png", "image/jpeg"],
+              "maxSize": 1000000
+            },
+            "isSomeType": {
+              "type": "boolean",
+              "description": "Some made up boolean value",
+              "const": true
+            },
+            "someBytes": {
+              "type": "bytes",
+              "description": "Some bytes of data",
+              "maxLength": 1000000
+            },
+            "aMaxNumber": {
+              "type": "integer",
+              "default": 100
+            }
+          }
+        }
+      }
+    }
+  }
+}
