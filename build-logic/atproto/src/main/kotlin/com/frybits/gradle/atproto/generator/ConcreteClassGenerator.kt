@@ -8,6 +8,7 @@ import com.frybits.gradle.atproto.lexicon.categories.IntegerField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.StringFormat
 import com.frybits.gradle.atproto.utils.camelToSnakeCase
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
@@ -16,6 +17,7 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
+import kotlinx.serialization.Serializable
 import org.gradle.internal.extensions.stdlib.capitalized
 import java.net.URI
 import java.time.ZonedDateTime
@@ -48,7 +50,9 @@ internal fun BlobField.generateField(
     }
 
     outerCodeBlock.addStatement("// Begin $name requirements")
-    outerCodeBlock.beginControlFlow("if (%L != null)", name)
+    if (!isRequired) {
+        outerCodeBlock.beginControlFlow("if (%L != null)", name)
+    }
     if (!accept.isNullOrEmpty()) {
         innerCodeBlock.addStatement("val accept = setOf(%L)", accept.joinToString(", ") { "\"$it\"" })
         innerCodeBlock.addStatement("require(%L.mimeType in accept) { %P }", name, $$"$$name does not allow mimeType $$$name")
@@ -61,7 +65,9 @@ internal fun BlobField.generateField(
     if (innerCodeBlock.isNotEmpty()) {
         outerCodeBlock.add(innerCodeBlock.build())
     }
-    outerCodeBlock.endControlFlow()
+    if (!isRequired) {
+        outerCodeBlock.endControlFlow()
+    }
     outerCodeBlock.addStatement("// End $name requirements")
 
     if (innerCodeBlock.isNotEmpty()) {
@@ -121,10 +127,11 @@ internal fun BytesField.generateField(
     initCodeBlockBuilder: CodeBlock.Builder,
     isRequired: Boolean
 ) {
-    val typeName = ClassName(packageName = "com.frybits.starrynight.atproto.models.bytes", "ATBytes").copy(nullable = !isRequired)
+    val typeName = ByteArray::class.asTypeName().copy(nullable = !isRequired)
 
     val property = PropertySpec.builder(name, typeName)
         .initializer(name)
+        .addAnnotation(AnnotationSpec.builder(Serializable::class).addMember("%T::class", ClassName("com.frybits.starrynight.atproto.serializers", "ATBytesSerializer")).build())
 
     val parameter = ParameterSpec.builder(name, typeName)
 
@@ -141,17 +148,21 @@ internal fun BytesField.generateField(
     }
 
     outerCodeBlock.addStatement("// Begin $name requirements")
-    outerCodeBlock.beginControlFlow("if (%L != null)", name)
+    if (!isRequired) {
+        outerCodeBlock.beginControlFlow("if (%L != null)", name)
+    }
     if (minLength != null) {
-        innerCodeBlock.addStatement("require(%L.bytes.size >= %L) { %P }", name, minLength, $$"Expected $$name to be greater than or equal to $$minLength. Current size $$$name")
+        innerCodeBlock.addStatement("require(%L.size >= %L) { %P }", name, minLength, $$"Expected $$name to be greater than or equal to $$minLength. Current size ${$$name.size}")
     }
     if (maxLength != null) {
-        innerCodeBlock.addStatement("require(%L.bytes.size <= %L) { %P }", name, maxLength, $$"Expected $$name to be less than or equal to $$maxLength. Current size $$$name")
+        innerCodeBlock.addStatement("require(%L.size <= %L) { %P }", name, maxLength, $$"Expected $$name to be less than or equal to $$maxLength. Current size ${$$name.size}")
     }
     if (innerCodeBlock.isNotEmpty()) {
         outerCodeBlock.add(innerCodeBlock.build())
     }
-    outerCodeBlock.endControlFlow()
+    if (!isRequired) {
+        outerCodeBlock.endControlFlow()
+    }
     outerCodeBlock.addStatement("// End $name requirements")
 
     if (innerCodeBlock.isNotEmpty()) {
@@ -209,6 +220,9 @@ internal fun IntegerField.generateField(
     }
 
     outerCodeBlock.addStatement("// Begin $name requirements")
+    if (!isRequired) {
+        outerCodeBlock.beginControlFlow("if (%L != null)", name)
+    }
     if (minimum != null) {
         innerCodeBlock.addStatement("require(%L >= %L) { %P }", name, minimum, $$"Expected $$name to be greater than or equal to $$minimum. Currently $$$name")
     }
@@ -222,7 +236,9 @@ internal fun IntegerField.generateField(
     if (innerCodeBlock.isNotEmpty()) {
         outerCodeBlock.add(innerCodeBlock.build())
     }
-    outerCodeBlock.endControlFlow()
+    if (!isRequired) {
+        outerCodeBlock.endControlFlow()
+    }
     outerCodeBlock.addStatement("// End $name requirements")
 
     if (innerCodeBlock.isNotEmpty()) {
