@@ -1,12 +1,29 @@
 package com.frybits.gradle.atproto.generator
 
+import com.frybits.gradle.atproto.lexicon.categories.ArrayField
 import com.frybits.gradle.atproto.lexicon.categories.BlobField
+import com.frybits.gradle.atproto.lexicon.categories.BodyField
 import com.frybits.gradle.atproto.lexicon.categories.BooleanField
 import com.frybits.gradle.atproto.lexicon.categories.BytesField
 import com.frybits.gradle.atproto.lexicon.categories.CidLinkField
+import com.frybits.gradle.atproto.lexicon.categories.ErrorBodyField
 import com.frybits.gradle.atproto.lexicon.categories.IntegerField
+import com.frybits.gradle.atproto.lexicon.categories.MessageField
+import com.frybits.gradle.atproto.lexicon.categories.ObjectField
+import com.frybits.gradle.atproto.lexicon.categories.ParamsField
+import com.frybits.gradle.atproto.lexicon.categories.PermissionSetField
+import com.frybits.gradle.atproto.lexicon.categories.ProcedureField
+import com.frybits.gradle.atproto.lexicon.categories.QueryField
+import com.frybits.gradle.atproto.lexicon.categories.RecordField
+import com.frybits.gradle.atproto.lexicon.categories.RefField
+import com.frybits.gradle.atproto.lexicon.categories.RepoPermissionField
+import com.frybits.gradle.atproto.lexicon.categories.RpcPermissionField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.StringFormat
+import com.frybits.gradle.atproto.lexicon.categories.SubscriptionField
+import com.frybits.gradle.atproto.lexicon.categories.TokenField
+import com.frybits.gradle.atproto.lexicon.categories.UnionField
+import com.frybits.gradle.atproto.lexicon.categories.UnknownField
 import com.frybits.gradle.atproto.utils.camelToSnakeCase
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
@@ -14,11 +31,15 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.withIndent
 import kotlinx.serialization.Serializable
+import org.gradle.api.GradleException
+import org.gradle.internal.extensions.stdlib.capitalized
 import java.net.URI
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -314,6 +335,11 @@ internal fun StringField.generateField(
         property.addKdoc(description)
     }
 
+  // TODO Figure out what to do with token references
+//    knownValues?.forEach { knownValue ->
+//
+//    }
+
     if (default != null) {
         when (format) {
             StringFormat.DATETIME -> parameter.defaultValue("%T.parse(%S)", Instant::class, default)
@@ -418,4 +444,57 @@ internal fun CidLinkField.generateField(
 
     constructorBuilder.addParameter(parameter.build())
     typeSpecBuilder.addProperty(property.build())
+}
+
+internal fun ArrayField.generateField(
+    name: String,
+    typeSpecBuilder: TypeSpec.Builder,
+    constructorBuilder: FunSpec.Builder,
+    initCodeBlockBuilder: CodeBlock.Builder,
+    companionBuilder: TypeSpec.Builder,
+    isRequired: Boolean
+) {
+    val typeName = List::class.asTypeName()
+
+    val parameterizedType = when (items) {
+        is BlobField -> ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "Blob")
+        is BooleanField -> Boolean::class.asTypeName()
+        is BytesField -> ByteArray::class.asTypeName()
+        is CidLinkField -> URI::class.asTypeName()
+        is IntegerField -> Int::class.asTypeName()
+        is StringField -> TODO()
+        is ArrayField -> TODO()
+        is ObjectField -> Map::class.asTypeName().parameterizedBy(String::class.asTypeName(), Any::class.asTypeName())
+        is RefField -> {
+            val ref = items.ref
+            if (ref.contains('#')) {
+                val (packageName, className) = ref.split('#')
+                ClassName(packageName, className.capitalized())
+            } else {
+                ClassName(ref, ref.split('.').last().capitalized())
+            }
+        }
+        is TokenField -> TODO("Find out what to do with token references")
+        is UnionField -> TODO()
+        is UnknownField -> Any::class.asTypeName()
+        is PermissionSetField -> TODO()
+        is RecordField -> TODO()
+        is ProcedureField -> TODO()
+        is QueryField -> TODO()
+        is SubscriptionField -> TODO()
+        is ParamsField -> TODO()
+        is RepoPermissionField -> TODO()
+        is RpcPermissionField -> TODO()
+        else -> throw GradleException("Unable to parameterize array with $items")
+    }
+
+    val property = PropertySpec.builder(name, typeName)
+        .initializer(name)
+
+    val parameter = ParameterSpec.builder(name, typeName)
+
+    if (description != null) {
+        parameter.addKdoc(description)
+        property.addKdoc(description)
+    }
 }

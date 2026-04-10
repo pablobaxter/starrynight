@@ -64,10 +64,10 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
         val toGenerate = hashSetOf<ClassName>()
         val records = inputDirectory.asFileTree.files.associate { file ->
             val record = file.inputStream().use { lexiconJson.decodeFromStream<RecordResponse>(it) }
-            return@associate record.value.id to record
+            return@associate record.value.id to record.value
         }
 
-        records.values.map { it.value }.forEach { lexicon ->
+        records.values.forEach { lexicon ->
             val lexiconType = lexicon.defs["main"] ?: return@forEach
             if (lexiconType !is PrimaryField) return@forEach
             val className = ClassName(lexicon.id, lexicon.id.split('.').last().capitalized())
