@@ -16,16 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.atproto.models.strings
+package com.frybits.starrynight.atproto.serializers
 
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import java.net.URI
 
-@Serializable
-@JvmInline
-public value class ATUri(override val prop: String): ATString {
-    override fun toString(): String = prop
+internal object URISerializer: KSerializer<URI> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("java.net.URI", PrimitiveKind.STRING)
 
-    public val uri: URI
-        get() = URI.create(prop)
+    override fun deserialize(decoder: Decoder): URI {
+        return URI.create(decoder.toString())
+    }
+
+    override fun serialize(encoder: Encoder, value: URI) {
+        encoder.encodeString(value.toString())
+    }
 }

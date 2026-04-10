@@ -32,6 +32,12 @@
             "aMaxNumber": {
               "type": "integer",
               "default": 100
+            },
+            "contentMode": {
+              "type": "string",
+              "format": "cid",
+              "enum": ["foo", "did:bar", "baz"],
+              "default": "foo"
             }
           }
         }

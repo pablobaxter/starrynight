@@ -111,8 +111,24 @@ internal fun RecordField.generateClass(
                     isRequired = isRequired
                 )
             }
-            is StringField -> TODO()
-            is CidLinkField -> TODO()
+            is StringField -> {
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    initCodeBlockBuilder = initCodeBlock,
+                    companionBuilder = companion,
+                    isRequired = isRequired
+                )
+            }
+            is CidLinkField -> {
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    isRequired = isRequired
+                )
+            }
             is ArrayField -> TODO()
             is ObjectField -> TODO()
             is ErrorBodyField -> TODO()

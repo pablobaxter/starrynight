@@ -39,7 +39,6 @@ internal object ATBytesSerializer : KSerializer<ByteArray> {
         val jsonDecoder = decoder as JsonDecoder
         val element = jsonDecoder.decodeJsonElement()
         val result = element.jsonObject[$$"$bytes"]?.jsonPrimitive?.content.orEmpty()
-        println(result)
         return Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).decode(result)
     }
 
