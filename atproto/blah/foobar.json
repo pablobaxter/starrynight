@@ -36,8 +36,11 @@
             "contentMode": {
               "type": "string",
               "format": "cid",
-              "enum": ["foo", "did:bar", "baz"],
-              "default": "foo"
+              "enum": ["foo", "did:bar", "baz"]
+            },
+            "cids": {
+              "type": "array",
+              "items": { "type": "string", "format": "cid" }
             }
           }
         }

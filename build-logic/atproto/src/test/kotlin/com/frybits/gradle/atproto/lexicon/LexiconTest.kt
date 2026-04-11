@@ -1,6 +1,8 @@
 package com.frybits.gradle.atproto.lexicon
 
 import com.frybits.gradle.atproto.lexicon.categories.BooleanField
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.intellij.lang.annotations.Language
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,6 +25,8 @@ class LexiconTest {
             }
         """.trimIndent()
 
+        val blah = Json.decodeFromString<JsonObject>(json)
+        println(blah)
         val result = lexiconJson.decodeFromString<Lexicon>(json)
 
         val expected = Lexicon(

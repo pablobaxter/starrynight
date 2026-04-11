@@ -46,6 +46,10 @@ public data class LegacyBlob(
     val cid: String
 ): Blob
 
+public data object EmptyBlob: Blob {
+    override val mimeType: String = ""
+}
+
 @Serializable
 public data class Ref(
     @SerialName($$"$link")

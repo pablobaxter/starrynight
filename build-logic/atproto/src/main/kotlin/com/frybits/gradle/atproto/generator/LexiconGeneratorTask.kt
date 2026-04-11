@@ -61,26 +61,41 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
     @OptIn(ExperimentalSerializationApi::class)
     @TaskAction
     internal fun generateSources() {
-        val toGenerate = hashSetOf<ClassName>()
+        val toGenerate = hashSetOf<String>()
         val records = inputDirectory.asFileTree.files.associate { file ->
             val record = file.inputStream().use { lexiconJson.decodeFromStream<RecordResponse>(it) }
             return@associate record.value.id to record.value
         }
 
+        val rkeyMap = records.flatMap { (id, type) ->
+            type.defs.mapNotNull { (name, lexiconType) ->
+                if (lexiconType is RecordField) {
+                    if (name == "main") {
+                        lexiconType.key to ClassName(id, id.split('.').last().capitalized())
+                    } else {
+                        lexiconType.key to ClassName(id, name.capitalized())
+
+                    }
+                } else {
+                    null
+                }
+            }
+        }.toMap()
+
         records.values.forEach { lexicon ->
             val lexiconType = lexicon.defs["main"] ?: return@forEach
             if (lexiconType !is PrimaryField) return@forEach
             val className = ClassName(lexicon.id, lexicon.id.split('.').last().capitalized())
-            when (lexiconType) {
+            val fileSpec = when (lexiconType) {
                 is RecordField -> {
-                    val fileSpec = lexiconType.generateClass(className, toGenerate)
-                    generatedSources.file(fileSpec.relativePath).get().asFile.toPath().createParentDirectories().writeText(fileSpec.toString())
+                    lexiconType.generateClass(className, toGenerate, rkeyMap)
                 }
                 is PermissionSetField -> TODO()
                 is ProcedureField -> TODO()
                 is QueryField -> TODO()
                 is SubscriptionField -> TODO()
             }
+            generatedSources.file(fileSpec.relativePath).get().asFile.toPath().createParentDirectories().writeText(fileSpec.toString())
         }
     }
 }

@@ -23,21 +23,11 @@ import com.frybits.gradle.atproto.lexicon.categories.BlobField
 import com.frybits.gradle.atproto.lexicon.categories.BooleanField
 import com.frybits.gradle.atproto.lexicon.categories.BytesField
 import com.frybits.gradle.atproto.lexicon.categories.CidLinkField
-import com.frybits.gradle.atproto.lexicon.categories.ErrorBodyField
 import com.frybits.gradle.atproto.lexicon.categories.IntegerField
-import com.frybits.gradle.atproto.lexicon.categories.MessageField
 import com.frybits.gradle.atproto.lexicon.categories.ObjectField
-import com.frybits.gradle.atproto.lexicon.categories.ParamsField
-import com.frybits.gradle.atproto.lexicon.categories.PermissionSetField
-import com.frybits.gradle.atproto.lexicon.categories.ProcedureField
-import com.frybits.gradle.atproto.lexicon.categories.QueryField
 import com.frybits.gradle.atproto.lexicon.categories.RecordField
 import com.frybits.gradle.atproto.lexicon.categories.RefField
-import com.frybits.gradle.atproto.lexicon.categories.RepoPermissionField
-import com.frybits.gradle.atproto.lexicon.categories.RpcPermissionField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
-import com.frybits.gradle.atproto.lexicon.categories.SubscriptionField
-import com.frybits.gradle.atproto.lexicon.categories.TokenField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.lexicon.categories.UnknownField
 import com.squareup.kotlinpoet.ClassName
@@ -50,7 +40,8 @@ import kotlinx.serialization.Serializable
 
 internal fun RecordField.generateClass(
     className: ClassName,
-    toGenerateCollector: MutableSet<ClassName>
+    toGenerateCollector: MutableSet<String>,
+    rkeyMap: Map<String, ClassName>
 ): FileSpec {
     val fileBuilder = FileSpec.builder(className)
 
@@ -70,9 +61,11 @@ internal fun RecordField.generateClass(
 
     require(record is ObjectField)
     val required = record.required.orEmpty().toSet()
+    val nullable = record.nullable.orEmpty().toSet()
 
     record.properties.forEach { (name, type) ->
         val isRequired = name in required
+        val isNullable = name in nullable
         when (type) {
             is BlobField -> {
                 type.generateField(
@@ -80,7 +73,8 @@ internal fun RecordField.generateClass(
                     typeSpecBuilder = typeSpecBuilder,
                     constructorBuilder = constructor,
                     initCodeBlockBuilder = initCodeBlock,
-                    isRequired = isRequired
+                    isRequired = isRequired,
+                    isNullable = isNullable
                 )
             }
             is BooleanField -> {
@@ -89,7 +83,8 @@ internal fun RecordField.generateClass(
                     typeSpecBuilder = typeSpecBuilder,
                     constructorBuilder = constructor,
                     companionBuilder = companion,
-                    isRequired = isRequired
+                    isRequired = isRequired,
+                    isNullable = isNullable
                 )
             }
             is BytesField -> {
@@ -98,7 +93,8 @@ internal fun RecordField.generateClass(
                     typeSpecBuilder = typeSpecBuilder,
                     constructorBuilder = constructor,
                     initCodeBlockBuilder = initCodeBlock,
-                    isRequired = isRequired
+                    isRequired = isRequired,
+                    isNullable = isNullable
                 )
             }
             is IntegerField -> {
@@ -108,7 +104,8 @@ internal fun RecordField.generateClass(
                     constructorBuilder = constructor,
                     initCodeBlockBuilder = initCodeBlock,
                     companionBuilder = companion,
-                    isRequired = isRequired
+                    isRequired = isRequired,
+                    isNullable = isNullable
                 )
             }
             is StringField -> {
@@ -118,7 +115,9 @@ internal fun RecordField.generateClass(
                     constructorBuilder = constructor,
                     initCodeBlockBuilder = initCodeBlock,
                     companionBuilder = companion,
-                    isRequired = isRequired
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    toGenerateCollector = toGenerateCollector
                 )
             }
             is CidLinkField -> {
@@ -126,25 +125,26 @@ internal fun RecordField.generateClass(
                     name = name,
                     typeSpecBuilder = typeSpecBuilder,
                     constructorBuilder = constructor,
-                    isRequired = isRequired
+                    isRequired = isRequired,
+                    isNullable = isNullable
                 )
             }
-            is ArrayField -> TODO()
+            is ArrayField -> {
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    initCodeBlockBuilder = initCodeBlock,
+                    companionBuilder = companion,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    rkeyMap = rkeyMap
+                )
+            }
             is ObjectField -> TODO()
-            is ErrorBodyField -> TODO()
-            is MessageField -> TODO()
             is RefField -> TODO()
-            is TokenField -> TODO()
             is UnionField -> TODO()
             is UnknownField -> TODO()
-            is PermissionSetField -> TODO()
-            is RecordField -> TODO()
-            is ProcedureField -> TODO()
-            is QueryField -> TODO()
-            is SubscriptionField -> TODO()
-            is ParamsField -> TODO()
-            is RepoPermissionField -> TODO()
-            is RpcPermissionField -> TODO()
             else -> TODO()
         }
     }
