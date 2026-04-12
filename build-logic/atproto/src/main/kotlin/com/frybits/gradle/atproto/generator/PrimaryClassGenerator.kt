@@ -37,6 +37,7 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.TypeSpec
 import kotlinx.serialization.Serializable
+import org.gradle.api.GradleException
 
 internal fun RecordField.generateClass(
     className: ClassName,
@@ -132,20 +133,58 @@ internal fun RecordField.generateClass(
             is ArrayField -> {
                 type.generateField(
                     name = name,
+                    className = className,
                     typeSpecBuilder = typeSpecBuilder,
                     constructorBuilder = constructor,
                     initCodeBlockBuilder = initCodeBlock,
                     companionBuilder = companion,
                     isRequired = isRequired,
                     isNullable = isNullable,
-                    rkeyMap = rkeyMap
+                    rkeyMap = rkeyMap,
+                    toGenerateCollector = toGenerateCollector
                 )
             }
-            is ObjectField -> TODO()
-            is RefField -> TODO()
-            is UnionField -> TODO()
-            is UnknownField -> TODO()
-            else -> TODO()
+            is ObjectField -> {
+                type.generateNestedField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    isRequired = isRequired,
+                    isNullable = isNullable
+                )
+            }
+            is RefField -> {
+                type.generateField(
+                    name = name,
+                    className = className,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    toGenerateCollector = toGenerateCollector
+                )
+            }
+            is UnionField -> {
+                type.generateField(
+                    name = name,
+                    className = className,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    toGenerateCollector = toGenerateCollector
+                )
+            }
+            is UnknownField -> {
+                type.generateField(
+                    name = name,
+                    typeSpecBuilder = typeSpecBuilder,
+                    constructorBuilder = constructor,
+                    isRequired = isRequired,
+                    isNullable = isNullable
+                )
+            }
+            else -> throw GradleException("Type not supported yet. Name=$name, type=$type")
         }
     }
 

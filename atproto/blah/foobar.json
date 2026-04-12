@@ -12,6 +12,7 @@
         "record": {
           "type": "object",
           "required": ["isSomeType"],
+          "nullable": [],
           "properties": {
             "banner": {
               "type": "blob",
@@ -41,6 +42,32 @@
             "cids": {
               "type": "array",
               "items": { "type": "string", "format": "cid" }
+            },
+            "preference": {
+              "type": "array",
+              "description": "Union array!",
+              "items": {
+                "type": "union",
+                "description": "An unholy union of stuff!",
+                "refs": [
+                  "#adultContentPref",
+                  "#contentLabelPref",
+                  "#savedFeedsPref",
+                  "#savedFeedsPrefV2",
+                  "#personalDetailsPref",
+                  "#declaredAgePref",
+                  "#feedViewPref",
+                  "#threadViewPref",
+                  "#interestsPref",
+                  "#mutedWordsPref",
+                  "#hiddenPostsPref",
+                  "#bskyAppStatePref",
+                  "#labelersPref",
+                  "#postInteractionSettingsPref",
+                  "#verificationPrefs",
+                  "#liveEventPreferences"
+                ]
+              }
             }
           }
         }

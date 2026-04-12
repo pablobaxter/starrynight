@@ -97,5 +97,9 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
             }
             generatedSources.file(fileSpec.relativePath).get().asFile.toPath().createParentDirectories().writeText(fileSpec.toString())
         }
+
+        toGenerate.forEach {
+
+        }
     }
 }

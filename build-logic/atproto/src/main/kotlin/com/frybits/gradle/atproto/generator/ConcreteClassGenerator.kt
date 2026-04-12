@@ -41,7 +41,11 @@ internal fun BlobField.generateField(
     val parameter = ParameterSpec.builder(name, typeName)
 
     if (!isRequired) {
-        parameter.defaultValue("%T", ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "EmptyBlob"))
+        if (isNullable) {
+            parameter.defaultValue("%L", null)
+        } else {
+            parameter.defaultValue("%T", ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "EmptyBlob"))
+        }
     }
 
     if (description != null) {
@@ -121,7 +125,11 @@ internal fun BooleanField.generateField(
     if (default != null) {
         parameter.defaultValue("%L", default)
     } else if (!isRequired) {
-        parameter.defaultValue("%L", false)
+        if (isNullable) {
+            parameter.defaultValue("%L", null)
+        } else {
+            parameter.defaultValue("%L", false)
+        }
     }
 
     constructorBuilder.addParameter(parameter.build())
@@ -150,7 +158,11 @@ internal fun BytesField.generateField(
     }
 
     if (!isRequired) {
-        parameter.defaultValue("byteArrayOf()")
+        if (isNullable) {
+            parameter.defaultValue("%L", null)
+        } else {
+            parameter.defaultValue("byteArrayOf()")
+        }
     }
 
     val outerCodeBlock = CodeBlock.builder()
@@ -223,7 +235,11 @@ internal fun IntegerField.generateField(
     if (default != null) {
         parameter.defaultValue("%L", default)
     } else if (!isRequired) {
-        parameter.defaultValue("%L", 0)
+        if (isNullable) {
+            parameter.defaultValue("%L", null)
+        } else {
+            parameter.defaultValue("%L", 0)
+        }
     }
 
     val outerCodeBlock = CodeBlock.builder()
@@ -358,12 +374,16 @@ internal fun StringField.generateField(
             else -> parameter.defaultValue("%T(%S)", stringTypeName, default)
         }
     } else if (!isRequired) {
-        when (format) {
-            StringFormat.DATETIME -> parameter.defaultValue("%T.now()", Instant::class)
-            StringFormat.URI, StringFormat.AT_URI, StringFormat.CID -> parameter.defaultValue("%T.create(%S)", URI::class, "")
-            StringFormat.AT_IDENTIFIER -> parameter.defaultValue("%T(%S)", ClassName(stringPackage, "Handle"), "")
-            null -> parameter.defaultValue("%S", "")
-            else -> parameter.defaultValue("%T(%S)", stringTypeName, "")
+        if (isNullable) {
+            parameter.defaultValue("%L", null)
+        } else {
+            when (format) {
+                StringFormat.DATETIME -> parameter.defaultValue("%T.now()", Instant::class)
+                StringFormat.URI, StringFormat.AT_URI, StringFormat.CID -> parameter.defaultValue("%T.create(%S)", URI::class, "")
+                StringFormat.AT_IDENTIFIER -> parameter.defaultValue("%T(%S)", ClassName(stringPackage, "Handle"), "")
+                null -> parameter.defaultValue("%S", "")
+                else -> parameter.defaultValue("%T(%S)", stringTypeName, "")
+            }
         }
     }
 
@@ -455,7 +475,11 @@ internal fun CidLinkField.generateField(
     }
 
     if (!isRequired) {
-        parameter.defaultValue("%T.create(%S)", URI::class, "")
+        if (isNullable) {
+            parameter.defaultValue("%L", null)
+        } else {
+            parameter.defaultValue("%T.create(%S)", URI::class, "")
+        }
     }
 
     constructorBuilder.addParameter(parameter.build())
