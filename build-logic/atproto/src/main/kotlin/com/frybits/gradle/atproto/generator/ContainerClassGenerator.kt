@@ -100,11 +100,10 @@ internal fun ArrayField.generateField(
         }
         is UnionField -> {
             val nestedClassName = className.nestedClass("${name.capitalized()}Union")
-            items.generateUnionFieldInterface(
+            typeSpecBuilder.addType(items.generateUnionFieldInterface(
                 typeName = nestedClassName,
-                typeSpecBuilder = typeSpecBuilder,
                 toGenerateCollector = toGenerateCollector
-            )
+            ))
             nestedClassName
         }
         is UnknownField -> JsonObject::class.asTypeName()

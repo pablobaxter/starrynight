@@ -5,6 +5,7 @@ kotlin-version = "2.3.20"
 kotlinx-serialization = "1.10.0"
 compose-bom-version = "2026.03.01"
 google-material="1.13.0"
+retrofit = "3.0.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose-version" }
@@ -15,6 +16,7 @@ google-material = { group = "com.google.android.material", name = "material", ve
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 metrox-android = { group = "dev.zacsweers.metro", name = "metrox-android", version.ref = "metro-version" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 
 [bundles]
 

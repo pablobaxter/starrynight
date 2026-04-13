@@ -3,8 +3,7 @@ type = "atprotoLibrary"
 
 # Lexicons to download and compile
 lexicons = [
-    "app.bsky.actor.getProfiles",
-    "app.bsky.actor.getProfile"
+    "com.atproto.moderation.createReport"
 ]
 
 # Libraries to be used (maven address or version catalog name)
@@ -14,4 +13,5 @@ lexicons = [
 implementation = [
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
+    { type = "library", name = "retrofit" },
 ]

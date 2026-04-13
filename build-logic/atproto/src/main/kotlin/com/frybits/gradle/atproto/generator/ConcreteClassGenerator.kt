@@ -352,9 +352,9 @@ internal fun StringField.generateField(
         } else {
             companionBuilder.addProperty(
                 PropertySpec.builder(
-                    knownValue.camelToSnakeCase(),
+                    knownValue.uppercase(),
                     String::class, KModifier.PUBLIC, KModifier.CONST
-                ).build()
+                ).initializer("%S", knownValue).build()
             )
         }
     }
@@ -399,10 +399,10 @@ internal fun StringField.generateField(
         outerCodeBlock.beginControlFlow("if (%L != null)", name)
     }
     if (minLength != null) {
-        innerCodeBlock.addStatement("require(%L.length >= %L) { %P }", name, minLength, $$"Expected $$name to be greater than or equal to $$minLength. Current size ${$$name.size}")
+        innerCodeBlock.addStatement("require(%L.length >= %L) { %P }", name, minLength, $$"Expected $$name to be greater than or equal to $$minLength. Current size ${$$name.length}")
     }
     if (maxLength != null) {
-        innerCodeBlock.addStatement("require(%L.length <= %L) { %P }", name, maxLength, $$"Expected $$name to be less than or equal to $$maxLength. Current size ${$$name.size}")
+        innerCodeBlock.addStatement("require(%L.length <= %L) { %P }", name, maxLength, $$"Expected $$name to be less than or equal to $$maxLength. Current size ${$$name.length}")
     }
     if (maxGraphemes != null || minGraphemes != null) {
         innerCodeBlock.addStatement("val graphemes = \"\\\\X\".toRegex().findAll(%L).count()", name)

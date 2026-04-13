@@ -18,7 +18,6 @@
 
 package com.frybits.gradle.atproto.generator
 
-import com.frybits.gradle.atproto.lexicon.categories.ObjectField
 import com.frybits.gradle.atproto.lexicon.categories.RefField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.lexicon.categories.UnknownField
@@ -100,7 +99,7 @@ internal fun UnionField.generateField(
         }
     }
 
-    generateUnionFieldInterface(className.nestedClass("${name.capitalized()}Union"), typeSpecBuilder, toGenerateCollector)
+    typeSpecBuilder.addType(generateUnionFieldInterface(className.nestedClass("${name.capitalized()}Union"), toGenerateCollector))
 
     constructorBuilder.addParameter(parameter.build())
     typeSpecBuilder.addProperty(property.build())
@@ -108,9 +107,8 @@ internal fun UnionField.generateField(
 
 internal fun UnionField.generateUnionFieldInterface(
     typeName: ClassName,
-    typeSpecBuilder: TypeSpec.Builder,
     toGenerateCollector: MutableSet<String>
-) {
+): TypeSpec {
     val unionTypeSpec = TypeSpec.interfaceBuilder(typeName)
         .addAnnotation(Serializable::class)
         .addModifiers(KModifier.PUBLIC, KModifier.SEALED)
@@ -158,7 +156,7 @@ internal fun UnionField.generateUnionFieldInterface(
         unionTypeSpec.addKdoc(description)
     }
 
-    typeSpecBuilder.addType(unionTypeSpec.build())
+    return unionTypeSpec.build()
 }
 
 internal fun UnknownField.generateField(

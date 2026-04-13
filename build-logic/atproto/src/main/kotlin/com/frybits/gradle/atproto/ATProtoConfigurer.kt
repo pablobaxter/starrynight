@@ -53,9 +53,7 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
             }
 
             val lexiconGeneratedTask = tasks.register<LexiconGeneratorTask>("lexiconGenerate") {
-                // TODO cleanup
                 inputDirectory.set(lexiconPullTask.map { it.outputDir.get() })
-//                inputDirectory.set(layout.projectDirectory.dir("blah"))
                 generatedSources.set(layout.buildDirectory.dir("generated/lexicons"))
             }
 

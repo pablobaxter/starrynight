@@ -25,19 +25,26 @@ import com.frybits.gradle.atproto.lexicon.categories.BytesField
 import com.frybits.gradle.atproto.lexicon.categories.CidLinkField
 import com.frybits.gradle.atproto.lexicon.categories.IntegerField
 import com.frybits.gradle.atproto.lexicon.categories.ObjectField
+import com.frybits.gradle.atproto.lexicon.categories.ParamsField
+import com.frybits.gradle.atproto.lexicon.categories.ProcedureField
 import com.frybits.gradle.atproto.lexicon.categories.RecordField
 import com.frybits.gradle.atproto.lexicon.categories.RefField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.lexicon.categories.UnknownField
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 import kotlinx.serialization.Serializable
 import org.gradle.api.GradleException
+import org.gradle.internal.extensions.stdlib.capitalized
 
 internal fun RecordField.generateClass(
     className: ClassName,
@@ -61,10 +68,292 @@ internal fun RecordField.generateClass(
     val companion = TypeSpec.companionObjectBuilder()
 
     require(record is ObjectField)
-    val required = record.required.orEmpty().toSet()
-    val nullable = record.nullable.orEmpty().toSet()
+    record.generateClass(
+        className = className,
+        typeSpecBuilder = typeSpecBuilder,
+        constructor = constructor,
+        initCodeBlock = initCodeBlock,
+        companion = companion,
+        toGenerateCollector = toGenerateCollector,
+        rkeyMap = rkeyMap
+    )
 
-    record.properties.forEach { (name, type) ->
+    if (constructor.parameters.isNotEmpty()) {
+        typeSpecBuilder.primaryConstructor(constructor.build())
+    }
+
+    if (initCodeBlock.isNotEmpty()) {
+        typeSpecBuilder.addInitializerBlock(initCodeBlock.build())
+    }
+
+    if (companion.typeSpecs.isNotEmpty() || companion.propertySpecs.isNotEmpty()) {
+        typeSpecBuilder.addType(companion.build())
+    }
+
+    if (typeSpecBuilder.propertySpecs.isNotEmpty()) {
+        typeSpecBuilder.addModifiers(KModifier.DATA)
+    }
+
+    return fileBuilder.addType(typeSpecBuilder.build()).build()
+}
+
+internal fun ProcedureField.generateClass(
+    className: ClassName,
+    id: String,
+    toGenerateCollector: MutableSet<String>,
+    rkeyMap: Map<String, ClassName>
+): FileSpec {
+    val name = id.split('.').last()
+    val fileBuilder = FileSpec.builder(className)
+
+    fileBuilder.addFileComment("GENERATED FILE. DO NOT MODIFY!")
+
+    val typeSpecBuilder = TypeSpec.interfaceBuilder(className)
+        .addModifiers(KModifier.PUBLIC)
+
+    if (description != null) {
+        typeSpecBuilder.addKdoc(description)
+    }
+
+    val procedureFunSpecBuilder = FunSpec.builder(name)
+        .addModifiers(KModifier.PUBLIC, KModifier.SUSPEND, KModifier.ABSTRACT)
+
+    val resultTypeName = ClassName("retrofit2", "Response")
+
+    if (output != null) {
+        val outputClassName = when (val schema = output.schema) {
+            is ObjectField -> {
+                val cn = ClassName(id, "${name.capitalized()}Response")
+                val outputTypeSpec = TypeSpec.classBuilder(cn)
+                    .addAnnotation(Serializable::class)
+                    .addModifiers(KModifier.PUBLIC)
+
+                if (schema.description != null) {
+                    outputTypeSpec.addKdoc(schema.description)
+                }
+
+                val constructor = FunSpec.constructorBuilder()
+                val initCodeBlock = CodeBlock.builder()
+                val companion = TypeSpec.companionObjectBuilder()
+                schema.generateClass(
+                    className = cn,
+                    typeSpecBuilder = outputTypeSpec,
+                    constructor = constructor,
+                    initCodeBlock = initCodeBlock,
+                    companion = companion,
+                    toGenerateCollector = toGenerateCollector,
+                    rkeyMap = rkeyMap
+                )
+
+                if (constructor.parameters.isNotEmpty()) {
+                    outputTypeSpec.primaryConstructor(constructor.build())
+                }
+
+                if (initCodeBlock.isNotEmpty()) {
+                    outputTypeSpec.addInitializerBlock(initCodeBlock.build())
+                }
+
+                if (companion.typeSpecs.isNotEmpty() || companion.propertySpecs.isNotEmpty()) {
+                    outputTypeSpec.addType(companion.build())
+                }
+
+                if (outputTypeSpec.propertySpecs.isNotEmpty()) {
+                    outputTypeSpec.addModifiers(KModifier.DATA)
+                }
+                fileBuilder.addType(outputTypeSpec.build())
+                cn
+            }
+            is RefField -> {
+                val (packageName, refName) = schema.ref.split('#')
+                if (packageName.isBlank()) {
+                    toGenerateCollector.add("$id#$refName")
+                    ClassName(id, refName)
+                } else {
+                    toGenerateCollector.add(schema.ref)
+                    ClassName(packageName, refName)
+                }
+            }
+            is UnionField -> {
+                val cn = ClassName(id, "${name.capitalized()}ResponseUnion")
+                val unionTypeSpec = schema.generateUnionFieldInterface(
+                    typeName = cn,
+                    toGenerateCollector = toGenerateCollector
+                )
+                fileBuilder.addType(unionTypeSpec)
+                cn
+            }
+            else -> null
+        }
+
+        procedureFunSpecBuilder.returns(resultTypeName.parameterizedBy(outputClassName ?: ClassName("okhttp3", "ResponseBody")), output.description?.let { CodeBlock.of(it) } ?: CodeBlock.builder().build())
+    } else {
+        procedureFunSpecBuilder.returns(resultTypeName.parameterizedBy(Unit::class.asTypeName()))
+    }
+
+    if (parameters != null) {
+        require(parameters is ParamsField)
+        val hardCodedQueryParams = hashMapOf<String, String>()
+        parameters.description?.let { procedureFunSpecBuilder.addKdoc(it) }
+        val required = parameters.required.orEmpty().toSet()
+        parameters.properties.forEach { (paramName, type) ->
+            val isRequired = paramName in required
+            val paramTypeName = when (type) {
+                is BooleanField -> Boolean::class.asTypeName()
+                is IntegerField -> Int::class.asTypeName()
+                is StringField -> String::class.asTypeName()
+                else -> throw GradleException("The following type cannot be part of a procedure parameter: $type")
+            }.copy(nullable = !isRequired)
+
+            val paramSpec = ParameterSpec.builder(paramName, paramTypeName)
+
+            when (type) {
+                is BooleanField -> {
+                    if (type.description != null) {
+                        paramSpec.addKdoc(type.description)
+                    }
+                    if (type.const != null) {
+                        hardCodedQueryParams[paramName] = type.const.toString()
+                    } else {
+                        paramSpec.addAnnotation(AnnotationSpec.builder(ClassName("retrofit2.http", "Query")).addMember("%S", paramName).build())
+                        if (type.default != null) {
+                            paramSpec.defaultValue("%L", type.default)
+                        }
+                    }
+                }
+                is IntegerField -> {
+                    if (type.description != null) {
+                        paramSpec.addKdoc(type.description)
+                    }
+                    if (type.const != null) {
+                        hardCodedQueryParams[paramName] = type.const.toString()
+                    } else {
+                        paramSpec.addAnnotation(AnnotationSpec.builder(ClassName("retrofit2.http", "Query")).addMember("%S", paramName).build())
+                        if (type.default != null) {
+                            paramSpec.defaultValue("%L", type.default)
+                        }
+                    }
+                }
+                is StringField -> {
+                    if (type.description != null) {
+                        paramSpec.addKdoc(type.description)
+                    }
+                    if (type.const != null) {
+                        hardCodedQueryParams[paramName] = type.const
+                    } else {
+                        paramSpec.addAnnotation(AnnotationSpec.builder(ClassName("retrofit2.http", "Query")).addMember("%S", paramName).build())
+                        if (type.default != null) {
+                            paramSpec.defaultValue("%S", type.default)
+                        }
+                    }
+                }
+                else -> throw GradleException("The following type cannot be part of a procedure parameter: $type")
+            }
+
+            val memberString = if (hardCodedQueryParams.isNotEmpty()) {
+                "${id}?${hardCodedQueryParams.map { (n, v) -> "$n=$v" }.joinToString(",")}"
+            } else {
+                id
+            }
+
+            procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(ClassName("retrofit2.http", "POST")).addMember("%S", memberString).build())
+            procedureFunSpecBuilder.addParameter(paramSpec.build())
+        }
+    }
+
+    if (input != null) {
+        val inputClassName = when (val schema = input.schema) {
+            is ObjectField -> {
+                val cn = ClassName(id, "${name.capitalized()}Request")
+                val outputTypeSpec = TypeSpec.classBuilder(cn)
+                    .addAnnotation(Serializable::class)
+                    .addModifiers(KModifier.PUBLIC)
+
+                if (schema.description != null) {
+                    outputTypeSpec.addKdoc(schema.description)
+                }
+
+                val constructor = FunSpec.constructorBuilder()
+                val initCodeBlock = CodeBlock.builder()
+                val companion = TypeSpec.companionObjectBuilder()
+                schema.generateClass(
+                    className = cn,
+                    typeSpecBuilder = outputTypeSpec,
+                    constructor = constructor,
+                    initCodeBlock = initCodeBlock,
+                    companion = companion,
+                    toGenerateCollector = toGenerateCollector,
+                    rkeyMap = rkeyMap
+                )
+
+                if (constructor.parameters.isNotEmpty()) {
+                    outputTypeSpec.primaryConstructor(constructor.build())
+                }
+
+                if (initCodeBlock.isNotEmpty()) {
+                    outputTypeSpec.addInitializerBlock(initCodeBlock.build())
+                }
+
+                if (companion.typeSpecs.isNotEmpty() || companion.propertySpecs.isNotEmpty()) {
+                    outputTypeSpec.addType(companion.build())
+                }
+
+                if (outputTypeSpec.propertySpecs.isNotEmpty()) {
+                    outputTypeSpec.addModifiers(KModifier.DATA)
+                }
+                fileBuilder.addType(outputTypeSpec.build())
+                cn
+            }
+            is RefField -> {
+                val (packageName, refName) = schema.ref.split('#')
+                if (packageName.isBlank()) {
+                    toGenerateCollector.add("$id#$refName")
+                    ClassName(id, refName)
+                } else {
+                    toGenerateCollector.add(schema.ref)
+                    ClassName(packageName, refName)
+                }
+            }
+            is UnionField -> {
+                val cn = ClassName(id, "${name.capitalized()}RequestUnion")
+                val unionTypeSpec = schema.generateUnionFieldInterface(
+                    typeName = cn,
+                    toGenerateCollector = toGenerateCollector
+                )
+                fileBuilder.addType(unionTypeSpec)
+                cn
+            }
+            else -> null
+        }
+
+        val paramSpec = ParameterSpec.builder("requestBody", inputClassName ?: ClassName("okhttp3", "ResponseBody"))
+            .addAnnotation(ClassName("retrofit2.http", "Body"))
+
+        if (input.description != null) {
+            paramSpec.addKdoc(input.description)
+        }
+
+        procedureFunSpecBuilder.addParameter(paramSpec.build())
+    }
+
+    // TODO Handle errors
+
+    typeSpecBuilder.addFunction(procedureFunSpecBuilder.build())
+    return fileBuilder.addType(typeSpecBuilder.build()).build()
+}
+
+private fun ObjectField.generateClass(
+    className: ClassName,
+    typeSpecBuilder: TypeSpec.Builder,
+    constructor: FunSpec.Builder,
+    initCodeBlock: CodeBlock.Builder,
+    companion: TypeSpec.Builder,
+    toGenerateCollector: MutableSet<String>,
+    rkeyMap: Map<String, ClassName>
+) {
+    val required = required.orEmpty().toSet()
+    val nullable = nullable.orEmpty().toSet()
+
+    properties.forEach { (name, type) ->
         val isRequired = name in required
         val isNullable = name in nullable
         when (type) {
@@ -187,22 +476,4 @@ internal fun RecordField.generateClass(
             else -> throw GradleException("Type not supported yet. Name=$name, type=$type")
         }
     }
-
-    if (constructor.parameters.isNotEmpty()) {
-        typeSpecBuilder.primaryConstructor(constructor.build())
-    }
-
-    if (initCodeBlock.isNotEmpty()) {
-        typeSpecBuilder.addInitializerBlock(initCodeBlock.build())
-    }
-
-    if (companion.typeSpecs.isNotEmpty() || companion.propertySpecs.isNotEmpty()) {
-        typeSpecBuilder.addType(companion.build())
-    }
-
-    if (typeSpecBuilder.propertySpecs.isNotEmpty()) {
-        typeSpecBuilder.addModifiers(KModifier.DATA)
-    }
-
-    return fileBuilder.addType(typeSpecBuilder.build()).build()
 }

@@ -30,6 +30,7 @@ import com.squareup.kotlinpoet.ClassName
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputDirectory
@@ -85,15 +86,28 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
         records.values.forEach { lexicon ->
             val lexiconType = lexicon.defs["main"] ?: return@forEach
             if (lexiconType !is PrimaryField) return@forEach
-            val className = ClassName(lexicon.id, lexicon.id.split('.').last().capitalized())
+            logger.lifecycle(lexiconType::class.toString())
             val fileSpec = when (lexiconType) {
                 is RecordField -> {
-                    lexiconType.generateClass(className, toGenerate, rkeyMap)
+                    val className = ClassName(lexicon.id, lexicon.id.split('.').last().capitalized())
+                    lexiconType.generateClass(
+                        className = className,
+                        toGenerateCollector = toGenerate,
+                        rkeyMap = rkeyMap
+                    )
                 }
-                is PermissionSetField -> TODO()
-                is ProcedureField -> TODO()
+                is ProcedureField -> {
+                    val className = ClassName(lexicon.id, "${lexicon.id.split('.').last().capitalized()}Api")
+                    lexiconType.generateClass(
+                        className = className,
+                        id = lexicon.id,
+                        toGenerateCollector = toGenerate,
+                        rkeyMap = rkeyMap
+                    )
+                }
                 is QueryField -> TODO()
                 is SubscriptionField -> TODO()
+                is PermissionSetField -> throw GradleException("PermissionSets are not currently generated. ${lexicon.id}")
             }
             generatedSources.file(fileSpec.relativePath).get().asFile.toPath().createParentDirectories().writeText(fileSpec.toString())
         }
