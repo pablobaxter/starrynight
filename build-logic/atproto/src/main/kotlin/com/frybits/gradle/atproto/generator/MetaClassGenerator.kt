@@ -43,13 +43,23 @@ internal fun RefField.generateField(
     isNullable: Boolean,
     toGenerateCollector: MutableSet<String>
 ) {
-    val (packageName, type) = ref.split('#')
-    val typeName = if (packageName.isBlank()) {
-        toGenerateCollector.add("${className.packageName}#$type")
-        ClassName(packageName = className.packageName, type.capitalized())
-    } else {
-        toGenerateCollector.add(ref)
-        ClassName(packageName = packageName, type.capitalized())
+    val packageName = ref.substringBefore('#')
+    val type = ref.substringAfter('#', missingDelimiterValue = "")
+    val typeName = when {
+        packageName.isBlank() -> {
+            toGenerateCollector.add("${className.packageName}#$type")
+            ClassName(packageName = className.packageName, type.capitalized())
+        }
+
+        type.isBlank() -> {
+            toGenerateCollector.add(packageName)
+            ClassName(packageName = packageName, packageName.split('.').last().capitalized())
+        }
+
+        else -> {
+            toGenerateCollector.add(ref)
+            ClassName(packageName = packageName, type.capitalized())
+        }
     }.copy(nullable = isNullable)
 
     val property = PropertySpec.builder(name, typeName)
@@ -114,10 +124,12 @@ internal fun UnionField.generateUnionFieldInterface(
         .addModifiers(KModifier.PUBLIC, KModifier.SEALED)
 
     val unionFields = refs.map { ref ->
-        val (internalPackageName, internalType) = ref.split('#')
-
+        val internalPackageName = ref.substringBefore('#')
+        val internalType = ref.substringAfter('#', missingDelimiterValue = "")
         val fullRefName = if (internalPackageName.isBlank()) {
             "${typeName.packageName}#$internalType"
+        } else if (internalType.isBlank()) {
+            internalPackageName
         } else {
             ref
         }
@@ -126,6 +138,8 @@ internal fun UnionField.generateUnionFieldInterface(
 
         val refTypeName = if (internalPackageName.isBlank()) {
             ClassName(packageName = typeName.packageName, internalType.capitalized())
+        } else if (internalType.isBlank()) {
+            ClassName(packageName = internalPackageName, internalPackageName.split('.').last().capitalized())
         } else {
             ClassName(packageName = internalPackageName, internalType.capitalized())
         }

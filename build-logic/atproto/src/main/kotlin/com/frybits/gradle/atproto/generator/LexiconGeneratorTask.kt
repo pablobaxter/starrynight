@@ -27,6 +27,7 @@ import com.frybits.gradle.atproto.lexicon.categories.RecordField
 import com.frybits.gradle.atproto.lexicon.categories.SubscriptionField
 import com.frybits.gradle.atproto.lexicon.lexiconJson
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FileSpec
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import org.gradle.api.DefaultTask
@@ -86,14 +87,15 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
         records.values.forEach { lexicon ->
             val lexiconType = lexicon.defs["main"] ?: return@forEach
             if (lexiconType !is PrimaryField) return@forEach
-            logger.lifecycle(lexiconType::class.toString())
-            val fileSpec = when (lexiconType) {
+            val fileSpecList = arrayListOf<FileSpec>()
+            when (lexiconType) {
                 is RecordField -> {
                     val className = ClassName(lexicon.id, lexicon.id.split('.').last().capitalized())
                     lexiconType.generateClass(
                         className = className,
                         toGenerateCollector = toGenerate,
-                        rkeyMap = rkeyMap
+                        rkeyMap = rkeyMap,
+                        fileSpecCollector = fileSpecList
                     )
                 }
                 is ProcedureField -> {
@@ -102,18 +104,22 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
                         className = className,
                         id = lexicon.id,
                         toGenerateCollector = toGenerate,
-                        rkeyMap = rkeyMap
+                        rkeyMap = rkeyMap,
+                        fileSpecCollector = fileSpecList
                     )
                 }
                 is QueryField -> TODO()
                 is SubscriptionField -> TODO()
                 is PermissionSetField -> throw GradleException("PermissionSets are not currently generated. ${lexicon.id}")
             }
-            generatedSources.file(fileSpec.relativePath).get().asFile.toPath().createParentDirectories().writeText(fileSpec.toString())
+            fileSpecList.forEach { fileSpec ->
+                generatedSources.file(fileSpec.relativePath).get().asFile.toPath()
+                    .createParentDirectories().writeText(fileSpec.toString())
+            }
         }
 
         toGenerate.forEach {
-
+            logger.lifecycle(it)
         }
     }
 }

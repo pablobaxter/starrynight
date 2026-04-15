@@ -89,10 +89,14 @@ internal fun ArrayField.generateField(
         }
         is ObjectField -> JsonObject::class.asTypeName()
         is RefField -> {
-            val (packageName, type) = items.ref.split('#')
+            val packageName = items.ref.substringBefore('#')
+            val type = items.ref.substringAfter('#', missingDelimiterValue = "")
             if (packageName.isBlank()) {
                 toGenerateCollector.add("${className.packageName}#$type")
                 ClassName(packageName = className.packageName, type.capitalized())
+            } else if (type.isBlank()) {
+                toGenerateCollector.add(packageName)
+                ClassName(packageName = packageName, packageName.split('.').last().capitalized())
             } else {
                 toGenerateCollector.add(items.ref)
                 ClassName(packageName = packageName, type.capitalized())

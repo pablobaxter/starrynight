@@ -346,7 +346,7 @@ internal fun StringField.generateField(
     }
 
     knownValues?.forEach { knownValue ->
-        if (knownValue.contains('#')) {
+        if (knownValue.contains('.') || knownValue.contains('#')) {
             // Parsing for the token
             toGenerateCollector.add(knownValue)
         } else {

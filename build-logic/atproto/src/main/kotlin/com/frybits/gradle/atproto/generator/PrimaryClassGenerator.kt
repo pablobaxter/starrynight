@@ -49,8 +49,9 @@ import org.gradle.internal.extensions.stdlib.capitalized
 internal fun RecordField.generateClass(
     className: ClassName,
     toGenerateCollector: MutableSet<String>,
-    rkeyMap: Map<String, ClassName>
-): FileSpec {
+    rkeyMap: Map<String, ClassName>,
+    fileSpecCollector: MutableList<FileSpec>
+) {
     val fileBuilder = FileSpec.builder(className)
 
     fileBuilder.addFileComment("GENERATED FILE. DO NOT MODIFY!")
@@ -94,15 +95,16 @@ internal fun RecordField.generateClass(
         typeSpecBuilder.addModifiers(KModifier.DATA)
     }
 
-    return fileBuilder.addType(typeSpecBuilder.build()).build()
+    fileSpecCollector.add(fileBuilder.addType(typeSpecBuilder.build()).build())
 }
 
 internal fun ProcedureField.generateClass(
     className: ClassName,
     id: String,
     toGenerateCollector: MutableSet<String>,
-    rkeyMap: Map<String, ClassName>
-): FileSpec {
+    rkeyMap: Map<String, ClassName>,
+    fileSpecCollector: MutableList<FileSpec>
+) {
     val name = id.split('.').last()
     val fileBuilder = FileSpec.builder(className)
 
@@ -160,14 +162,21 @@ internal fun ProcedureField.generateClass(
                 if (outputTypeSpec.propertySpecs.isNotEmpty()) {
                     outputTypeSpec.addModifiers(KModifier.DATA)
                 }
-                fileBuilder.addType(outputTypeSpec.build())
+                val outputFileBuilder = FileSpec.builder(cn)
+                outputFileBuilder.addFileComment("GENERATED FILE. DO NOT MODIFY!")
+                outputFileBuilder.addType(outputTypeSpec.build())
+                fileSpecCollector.add(outputFileBuilder.build())
                 cn
             }
             is RefField -> {
-                val (packageName, refName) = schema.ref.split('#')
+                val packageName = schema.ref.substringBefore('#')
+                val refName = schema.ref.substringAfter('#', missingDelimiterValue = "")
                 if (packageName.isBlank()) {
                     toGenerateCollector.add("$id#$refName")
                     ClassName(id, refName)
+                } else if (refName.isBlank()) {
+                    toGenerateCollector.add(packageName)
+                    ClassName(packageName, packageName.split('.').last().capitalized())
                 } else {
                     toGenerateCollector.add(schema.ref)
                     ClassName(packageName, refName)
@@ -179,7 +188,10 @@ internal fun ProcedureField.generateClass(
                     typeName = cn,
                     toGenerateCollector = toGenerateCollector
                 )
-                fileBuilder.addType(unionTypeSpec)
+                val unionFileBuilder = FileSpec.builder(cn)
+                unionFileBuilder.addFileComment("GENERATED FILE. DO NOT MODIFY!")
+                unionFileBuilder.addType(unionTypeSpec)
+                fileSpecCollector.add(unionFileBuilder.build())
                 cn
             }
             else -> null
@@ -264,12 +276,12 @@ internal fun ProcedureField.generateClass(
         val inputClassName = when (val schema = input.schema) {
             is ObjectField -> {
                 val cn = ClassName(id, "${name.capitalized()}Request")
-                val outputTypeSpec = TypeSpec.classBuilder(cn)
+                val inputTypeSpec = TypeSpec.classBuilder(cn)
                     .addAnnotation(Serializable::class)
                     .addModifiers(KModifier.PUBLIC)
 
                 if (schema.description != null) {
-                    outputTypeSpec.addKdoc(schema.description)
+                    inputTypeSpec.addKdoc(schema.description)
                 }
 
                 val constructor = FunSpec.constructorBuilder()
@@ -277,7 +289,7 @@ internal fun ProcedureField.generateClass(
                 val companion = TypeSpec.companionObjectBuilder()
                 schema.generateClass(
                     className = cn,
-                    typeSpecBuilder = outputTypeSpec,
+                    typeSpecBuilder = inputTypeSpec,
                     constructor = constructor,
                     initCodeBlock = initCodeBlock,
                     companion = companion,
@@ -286,21 +298,24 @@ internal fun ProcedureField.generateClass(
                 )
 
                 if (constructor.parameters.isNotEmpty()) {
-                    outputTypeSpec.primaryConstructor(constructor.build())
+                    inputTypeSpec.primaryConstructor(constructor.build())
                 }
 
                 if (initCodeBlock.isNotEmpty()) {
-                    outputTypeSpec.addInitializerBlock(initCodeBlock.build())
+                    inputTypeSpec.addInitializerBlock(initCodeBlock.build())
                 }
 
                 if (companion.typeSpecs.isNotEmpty() || companion.propertySpecs.isNotEmpty()) {
-                    outputTypeSpec.addType(companion.build())
+                    inputTypeSpec.addType(companion.build())
                 }
 
-                if (outputTypeSpec.propertySpecs.isNotEmpty()) {
-                    outputTypeSpec.addModifiers(KModifier.DATA)
+                if (inputTypeSpec.propertySpecs.isNotEmpty()) {
+                    inputTypeSpec.addModifiers(KModifier.DATA)
                 }
-                fileBuilder.addType(outputTypeSpec.build())
+                val inputFileBuilder = FileSpec.builder(cn)
+                inputFileBuilder.addFileComment("GENERATED FILE. DO NOT MODIFY!")
+                inputFileBuilder.addType(inputTypeSpec.build())
+                fileSpecCollector.add(inputFileBuilder.build())
                 cn
             }
             is RefField -> {
@@ -319,7 +334,10 @@ internal fun ProcedureField.generateClass(
                     typeName = cn,
                     toGenerateCollector = toGenerateCollector
                 )
-                fileBuilder.addType(unionTypeSpec)
+                val unionFileBuilder = FileSpec.builder(cn)
+                unionFileBuilder.addFileComment("GENERATED FILE. DO NOT MODIFY!")
+                unionFileBuilder.addType(unionTypeSpec)
+                fileSpecCollector.add(unionFileBuilder.build())
                 cn
             }
             else -> null
@@ -338,7 +356,7 @@ internal fun ProcedureField.generateClass(
     // TODO Handle errors
 
     typeSpecBuilder.addFunction(procedureFunSpecBuilder.build())
-    return fileBuilder.addType(typeSpecBuilder.build()).build()
+    fileSpecCollector.add(fileBuilder.addType(typeSpecBuilder.build()).build())
 }
 
 private fun ObjectField.generateClass(
