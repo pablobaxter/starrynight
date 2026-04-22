@@ -1,4 +1,22 @@
-package com.frybits.gradle.atproto.pull
+/*
+ * Starry Nights - A BlueSky Android Client
+ * Copyright (C) 2026 Pablo Baxter
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.frybits.gradle.atproto.tasks
 
 import com.frybits.gradle.atproto.lexicon.RecordResponse
 import com.frybits.gradle.atproto.lexicon.categories.ArrayField
@@ -14,7 +32,7 @@ import com.frybits.gradle.atproto.lexicon.categories.RecordField
 import com.frybits.gradle.atproto.lexicon.categories.RefField
 import com.frybits.gradle.atproto.lexicon.categories.SubscriptionField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
-import com.frybits.gradle.atproto.lexicon.lexiconJson
+import com.frybits.gradle.atproto.utils.lexiconJson
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import org.gradle.api.DefaultTask

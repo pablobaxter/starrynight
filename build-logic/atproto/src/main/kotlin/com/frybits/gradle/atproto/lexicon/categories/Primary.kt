@@ -18,10 +18,10 @@
 
 package com.frybits.gradle.atproto.lexicon.categories
 
-import com.frybits.gradle.atproto.lexicon.HttpBodyLimitedProperties
-import com.frybits.gradle.atproto.lexicon.RecordLimitedProperties
-import com.frybits.gradle.atproto.lexicon.SubscriptionLimitedProperties
-import com.frybits.gradle.atproto.lexicon.XRPCParamsLimitedProperties
+import com.frybits.gradle.atproto.utils.HttpBodyLimitedProperties
+import com.frybits.gradle.atproto.utils.RecordLimitedProperties
+import com.frybits.gradle.atproto.utils.SubscriptionLimitedProperties
+import com.frybits.gradle.atproto.utils.XRPCParamsLimitedProperties
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

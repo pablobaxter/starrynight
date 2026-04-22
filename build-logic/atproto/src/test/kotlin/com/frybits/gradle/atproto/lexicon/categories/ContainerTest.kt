@@ -1,6 +1,6 @@
 package com.frybits.gradle.atproto.lexicon.categories
 
-import com.frybits.gradle.atproto.lexicon.lexiconJson
+import com.frybits.gradle.atproto.utils.lexiconJson
 import org.intellij.lang.annotations.Language
 import kotlin.test.Test
 import kotlin.test.assertEquals

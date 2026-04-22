@@ -1,6 +1,7 @@
 package com.frybits.gradle.atproto.lexicon
 
 import com.frybits.gradle.atproto.lexicon.categories.BooleanField
+import com.frybits.gradle.atproto.utils.lexiconJson
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.intellij.lang.annotations.Language

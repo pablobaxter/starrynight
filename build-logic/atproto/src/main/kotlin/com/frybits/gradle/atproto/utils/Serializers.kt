@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.atproto.lexicon
+package com.frybits.gradle.atproto.utils
 
 import com.frybits.gradle.atproto.lexicon.categories.LexiconType
 import com.frybits.gradle.atproto.lexicon.categories.PermissionField

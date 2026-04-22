@@ -18,8 +18,8 @@
 
 package com.frybits.gradle.atproto
 
-import com.frybits.gradle.atproto.generator.LexiconGeneratorTask
-import com.frybits.gradle.atproto.pull.LexiconPullTask
+import com.frybits.gradle.atproto.tasks.LexiconGeneratorTask
+import com.frybits.gradle.atproto.tasks.LexiconPullTask
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
@@ -53,6 +53,7 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
             }
 
             val lexiconGeneratedTask = tasks.register<LexiconGeneratorTask>("lexiconGenerate") {
+                nsids.set(buildFile.lexicons)
                 inputDirectory.set(lexiconPullTask.map { it.outputDir.get() })
                 generatedSources.set(layout.buildDirectory.dir("generated/lexicons"))
             }

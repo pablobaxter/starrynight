@@ -18,7 +18,7 @@
 
 package com.frybits.gradle.atproto.lexicon.categories
 
-import com.frybits.gradle.atproto.lexicon.ParamsLimitedProperties
+import com.frybits.gradle.atproto.utils.ParamsLimitedProperties
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
