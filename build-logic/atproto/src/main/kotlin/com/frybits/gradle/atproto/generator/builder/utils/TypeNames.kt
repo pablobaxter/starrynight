@@ -42,4 +42,12 @@ internal object TypeNames {
     val URISerializer = ClassName("com.frybits.starrynight.atproto.serializers", "URISerializer")
 
     val Language = ClassName(STRING_PACKAGE_NAME, "Language")
+
+    val BytesSerializer = ClassName("com.frybits.starrynight.atproto.serializers", "ATBytesSerializer")
+
+    val Blob = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "Blob")
+
+    val StandardBlob = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "StandardBlob")
+
+    val EmptyBlob = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "EmptyBlob")
 }

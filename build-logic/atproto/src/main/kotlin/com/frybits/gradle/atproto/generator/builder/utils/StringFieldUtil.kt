@@ -18,12 +18,10 @@
 
 package com.frybits.gradle.atproto.generator.builder.utils
 
-import com.frybits.gradle.atproto.lexicon.categories.IntegerField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.StringFormat
 import com.frybits.gradle.atproto.utils.camelToSnakeCase
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
@@ -56,7 +54,7 @@ internal fun TypeSpec.Builder.handleConst(name: String, lexiconType: StringField
                 property.initializer("%T(%S)", TypeNames.Handle, const)
             }
         }
-        else -> property.initializer("%T(%S)", typeName, const)
+        else -> property.initializer("%T(%S)", lexiconType.getTypeName(), const)
     }
 
     property.handleDescription(lexiconType)
@@ -64,6 +62,7 @@ internal fun TypeSpec.Builder.handleConst(name: String, lexiconType: StringField
     addProperty(property.build())
 }
 
+@OptIn(ExperimentalTime::class)
 internal fun FunSpec.Builder.handleParam(name: String, lexiconType: StringField, isRequired: Boolean, isNullable: Boolean) {
     val typeName = lexiconType.getTypeName().copy(nullable = isNullable)
     val parameter = ParameterSpec.builder(name, typeName)
@@ -71,21 +70,49 @@ internal fun FunSpec.Builder.handleParam(name: String, lexiconType: StringField,
 
     val default = lexiconType.default
     if (default != null) {
-        parameter.defaultValue("%L", default)
+        when (lexiconType.format) {
+            StringFormat.DATETIME -> parameter.defaultValue("%T.parse(%S)", Instant::class, default)
+            StringFormat.URI, StringFormat.AT_URI, StringFormat.CID -> parameter.defaultValue("%T.create(%S)", URI::class, default)
+            StringFormat.AT_IDENTIFIER -> {
+                if (default.startsWith("did:")) {
+                    parameter.defaultValue("%T(%S)", TypeNames.Did, default)
+                } else {
+                    parameter.defaultValue("%T(%S)", TypeNames.Handle, default)
+                }
+            }
+            null -> parameter.defaultValue("%S", default)
+            else -> parameter.defaultValue("%T(%S)", lexiconType.getTypeName(), default)
+        }
     } else if (!isRequired) {
         if (isNullable) {
             parameter.defaultValue("%L", null)
         } else {
-            parameter.defaultValue("%L", 0)
+            when (lexiconType.format) {
+                StringFormat.DATETIME -> parameter.defaultValue("%T.now()", Instant::class)
+                StringFormat.URI, StringFormat.AT_URI, StringFormat.CID -> parameter.defaultValue("%T.create(%S)", URI::class, "")
+                StringFormat.AT_IDENTIFIER -> parameter.defaultValue("%T(%S)", TypeNames.Handle, "")
+                null -> parameter.defaultValue("%S", "")
+                else -> parameter.defaultValue("%T(%S)", lexiconType.getTypeName(), "")
+            }
         }
     }
 
     addParameter(parameter.build())
 }
 
+internal fun TypeSpec.Builder.handleProperty(name: String, lexiconType: StringField, isNullable: Boolean) {
+    val typeName = lexiconType.getTypeName().copy(nullable = isNullable)
+    val property = PropertySpec.builder(name, typeName)
+        .initializer(name)
+
+    property.handleDescription(lexiconType)
+
+    addProperty(property.build())
+}
+
 
 @OptIn(ExperimentalTime::class)
-private fun StringField.getTypeName(): TypeName {
+internal fun StringField.getTypeName(): TypeName {
     return when (format) {
         StringFormat.AT_IDENTIFIER -> TypeNames.ATIdentifier
         StringFormat.DID -> TypeNames.Did

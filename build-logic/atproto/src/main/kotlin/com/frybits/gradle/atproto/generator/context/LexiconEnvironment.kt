@@ -55,6 +55,6 @@ internal data class LexiconEnvironment(
             loadLexicon(schemaId)
         }
 
-        return requireNotNull(lexicon.defs[reference.objectRef])
+        return requireNotNull(lexicon.defs[reference.objectRef.ifBlank { "main" }])
     }
 }
