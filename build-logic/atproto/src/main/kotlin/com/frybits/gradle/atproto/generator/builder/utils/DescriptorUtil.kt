@@ -20,6 +20,7 @@ package com.frybits.gradle.atproto.generator.builder.utils
 
 import com.frybits.gradle.atproto.lexicon.categories.LexiconType
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
@@ -40,6 +41,11 @@ internal fun PropertySpec.Builder.handleDescription(lexiconType: LexiconType): P
 }
 
 internal fun ParameterSpec.Builder.handleDescription(lexiconType: LexiconType): ParameterSpec.Builder {
+    val description = lexiconType.description.takeIf { !it.isNullOrBlank() } ?: return this
+    return addKdoc(description)
+}
+
+internal fun FunSpec.Builder.handleDescription(lexiconType: LexiconType): FunSpec.Builder {
     val description = lexiconType.description.takeIf { !it.isNullOrBlank() } ?: return this
     return addKdoc(description)
 }

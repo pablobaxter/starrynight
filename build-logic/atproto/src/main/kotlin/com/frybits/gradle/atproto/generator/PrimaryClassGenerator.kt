@@ -32,6 +32,7 @@ import com.frybits.gradle.atproto.lexicon.categories.RefField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.lexicon.categories.UnknownField
+import com.frybits.gradle.atproto.utils.titleCaseFirstChar
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -44,7 +45,6 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import kotlinx.serialization.Serializable
 import org.gradle.api.GradleException
-import org.gradle.internal.extensions.stdlib.capitalized
 
 internal fun RecordField.generateClass(
     className: ClassName,
@@ -125,7 +125,7 @@ internal fun ProcedureField.generateClass(
     if (output != null) {
         val outputClassName = when (val schema = output.schema) {
             is ObjectField -> {
-                val cn = ClassName(id, "${name.capitalized()}Response")
+                val cn = ClassName(id, "${name.titleCaseFirstChar()}Response")
                 val outputTypeSpec = TypeSpec.classBuilder(cn)
                     .addAnnotation(Serializable::class)
                     .addModifiers(KModifier.PUBLIC)
@@ -176,14 +176,14 @@ internal fun ProcedureField.generateClass(
                     ClassName(id, refName)
                 } else if (refName.isBlank()) {
                     toGenerateCollector.add(packageName)
-                    ClassName(packageName, packageName.split('.').last().capitalized())
+                    ClassName(packageName, packageName.split('.').last().titleCaseFirstChar())
                 } else {
                     toGenerateCollector.add(schema.ref)
                     ClassName(packageName, refName)
                 }
             }
             is UnionField -> {
-                val cn = ClassName(id, "${name.capitalized()}ResponseUnion")
+                val cn = ClassName(id, "${name.titleCaseFirstChar()}ResponseUnion")
                 val unionTypeSpec = schema.generateUnionFieldInterface(
                     typeName = cn,
                     toGenerateCollector = toGenerateCollector
@@ -275,7 +275,7 @@ internal fun ProcedureField.generateClass(
     if (input != null) {
         val inputClassName = when (val schema = input.schema) {
             is ObjectField -> {
-                val cn = ClassName(id, "${name.capitalized()}Request")
+                val cn = ClassName(id, "${name.titleCaseFirstChar()}Request")
                 val inputTypeSpec = TypeSpec.classBuilder(cn)
                     .addAnnotation(Serializable::class)
                     .addModifiers(KModifier.PUBLIC)
@@ -329,7 +329,7 @@ internal fun ProcedureField.generateClass(
                 }
             }
             is UnionField -> {
-                val cn = ClassName(id, "${name.capitalized()}RequestUnion")
+                val cn = ClassName(id, "${name.titleCaseFirstChar()}RequestUnion")
                 val unionTypeSpec = schema.generateUnionFieldInterface(
                     typeName = cn,
                     toGenerateCollector = toGenerateCollector

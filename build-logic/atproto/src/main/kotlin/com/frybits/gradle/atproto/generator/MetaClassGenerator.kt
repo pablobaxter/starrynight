@@ -21,6 +21,7 @@ package com.frybits.gradle.atproto.generator
 import com.frybits.gradle.atproto.lexicon.categories.RefField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.lexicon.categories.UnknownField
+import com.frybits.gradle.atproto.utils.titleCaseFirstChar
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
@@ -32,7 +33,6 @@ import com.squareup.kotlinpoet.asTypeName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
-import org.gradle.internal.extensions.stdlib.capitalized
 
 internal fun RefField.generateField(
     name: String,
@@ -48,17 +48,17 @@ internal fun RefField.generateField(
     val typeName = when {
         packageName.isBlank() -> {
             toGenerateCollector.add("${className.packageName}#$type")
-            ClassName(packageName = className.packageName, type.capitalized())
+            ClassName(packageName = className.packageName, type.titleCaseFirstChar())
         }
 
         type.isBlank() -> {
             toGenerateCollector.add(packageName)
-            ClassName(packageName = packageName, packageName.split('.').last().capitalized())
+            ClassName(packageName = packageName, packageName.split('.').last().titleCaseFirstChar())
         }
 
         else -> {
             toGenerateCollector.add(ref)
-            ClassName(packageName = packageName, type.capitalized())
+            ClassName(packageName = packageName, type.titleCaseFirstChar())
         }
     }.copy(nullable = isNullable)
 
@@ -91,7 +91,7 @@ internal fun UnionField.generateField(
     isNullable: Boolean,
     toGenerateCollector: MutableSet<String>
 ) {
-    val typeName = className.nestedClass("${name.capitalized()}Union")
+    val typeName = className.nestedClass("${name.titleCaseFirstChar()}Union")
 
     val property = PropertySpec.builder(name, typeName)
         .initializer(name)
@@ -109,7 +109,7 @@ internal fun UnionField.generateField(
         }
     }
 
-    typeSpecBuilder.addType(generateUnionFieldInterface(className.nestedClass("${name.capitalized()}Union"), toGenerateCollector))
+    typeSpecBuilder.addType(generateUnionFieldInterface(className.nestedClass("${name.titleCaseFirstChar()}Union"), toGenerateCollector))
 
     constructorBuilder.addParameter(parameter.build())
     typeSpecBuilder.addProperty(property.build())
@@ -137,14 +137,14 @@ internal fun UnionField.generateUnionFieldInterface(
         toGenerateCollector.add(fullRefName)
 
         val refTypeName = if (internalPackageName.isBlank()) {
-            ClassName(packageName = typeName.packageName, internalType.capitalized())
+            ClassName(packageName = typeName.packageName, internalType.titleCaseFirstChar())
         } else if (internalType.isBlank()) {
-            ClassName(packageName = internalPackageName, internalPackageName.split('.').last().capitalized())
+            ClassName(packageName = internalPackageName, internalPackageName.split('.').last().titleCaseFirstChar())
         } else {
-            ClassName(packageName = internalPackageName, internalType.capitalized())
+            ClassName(packageName = internalPackageName, internalType.titleCaseFirstChar())
         }
 
-        val refName = "${internalType.capitalized()}UnionField"
+        val refName = "${internalType.titleCaseFirstChar()}UnionField"
         val unionFieldClassName = ClassName(typeName.packageName, refName)
         return@map TypeSpec.classBuilder(unionFieldClassName)
             .addAnnotation(Serializable::class)

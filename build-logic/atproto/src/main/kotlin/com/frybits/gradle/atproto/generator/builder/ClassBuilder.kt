@@ -34,17 +34,107 @@ import com.frybits.gradle.atproto.lexicon.categories.CidLinkField
 import com.frybits.gradle.atproto.lexicon.categories.IntegerField
 import com.frybits.gradle.atproto.lexicon.categories.ObjectField
 import com.frybits.gradle.atproto.lexicon.categories.RecordField
+import com.frybits.gradle.atproto.lexicon.categories.RefField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.TokenField
+import com.frybits.gradle.atproto.lexicon.categories.UnionField
+import com.frybits.gradle.atproto.lexicon.categories.UnknownField
 import com.frybits.gradle.atproto.utils.LexiconRef
+import com.frybits.gradle.atproto.utils.titleCaseFirstChar
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.io.path.createFile
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.writeText
+
+internal fun generateClass(lexiconType: UnionField, context: LexiconContext, environment: LexiconEnvironment) {
+    val className = ClassName(context.authority, "${context.name}Union")
+    val fileBuilder = createFileBuilder(className)
+
+    val typeSpec = TypeSpec.interfaceBuilder(className)
+        .addAnnotation(Serializable::class)
+        .addModifiers(KModifier.PUBLIC, KModifier.SEALED)
+
+    typeSpec.handleDescription(lexiconType)
+
+    lexiconType.refs.forEach { reference ->
+        val ref = LexiconRef(reference)
+
+        val lexicon = if (ref.schemaId.isBlank()) {
+            context.lexicon
+        } else {
+            environment.loadLexicon(ref.schemaId)
+        }
+
+        val refLexiconType = environment.loadReference(lexicon, ref)
+
+        when (val refLexiconType = environment.loadReference(lexicon, ref)) {
+            is ObjectField -> generateDataClass(refLexiconType, LexiconContext(ref.objectRef.titleCaseFirstChar(), lexicon), environment)
+            is RecordField -> generateClass(refLexiconType, LexiconContext(ref.schemaId.split('.').last().titleCaseFirstChar(), lexicon), environment)
+            else -> return@forEach
+        }
+
+        val refClassName = if (refLexiconType is ObjectField) {
+            if (ref.schemaId.isBlank()) {
+                ClassName(packageName = context.authority, ref.objectRef.titleCaseFirstChar())
+            } else if (ref.objectRef.isBlank()) {
+                ClassName(
+                    packageName = ref.schemaId,
+                    ref.schemaId.split('.').last().titleCaseFirstChar()
+                )
+            } else {
+                ClassName(packageName = ref.schemaId, ref.objectRef.titleCaseFirstChar())
+            }
+        } else if (refLexiconType is RecordField) {
+            val lexicon = environment.loadLexicon(ref.schemaId)
+            ClassName(
+                lexicon.id,
+                lexicon.id.split('.').last().titleCaseFirstChar()
+            )
+        } else {
+            return@forEach
+        }
+
+        val unionFieldClassName = ClassName(context.authority, "${refClassName.simpleName}UnionField")
+
+        TypeSpec.classBuilder(unionFieldClassName)
+            .addAnnotation(Serializable::class)
+            .addAnnotation(JvmInline::class)
+            .addAnnotation(AnnotationSpec.builder(SerialName::class).addMember("%S", ref).build())
+            .addModifiers(KModifier.PUBLIC, KModifier.VALUE)
+            .addSuperinterface(className)
+            .primaryConstructor(
+                FunSpec.constructorBuilder().addParameter(
+                    ParameterSpec.builder("prop", refClassName).build()
+                ).build()
+            )
+            .addProperty(
+                PropertySpec.builder("prop", refClassName)
+                    .initializer("prop")
+                    .build()
+            ).build()
+    }
+
+    fileBuilder.addType(typeSpec.build())
+
+    val fileSpec = fileBuilder.build()
+
+    val path = environment.outputDirectory.file(fileSpec.relativePath).asFile.toPath()
+    path.deleteIfExists()
+    path.createParentDirectories()
+        .createFile()
+        .writeText(fileSpec.toString())
+}
 
 internal fun generateClass(lexiconType: RecordField, context: LexiconContext, environment: LexiconEnvironment) {
     val className = ClassName(context.authority, context.name)
@@ -252,6 +342,60 @@ internal fun generateDataClass(lexiconType: ObjectField, context: LexiconContext
                     isNullable = isNullable
                 )
             }
+            is ObjectField -> {
+                constructorBuilder.handleParam(
+                    name = name,
+                    lexiconType = type,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    context = context
+                )
+
+                typeSpecBuilder.handleProperty(
+                    name = name,
+                    lexiconType = type,
+                    isNullable = isNullable,
+                    context = context
+                )
+
+                generateDataClass(type, context, environment)
+            }
+            is UnknownField -> {
+                // TODO
+            }
+            is UnionField -> {
+                // TODO
+            }
+            is RefField -> {
+                // TODO
+            }
+            else -> throw IllegalArgumentException("Unknown type to parse $type")
         }
     }
+
+    if (constructorBuilder.parameters.isNotEmpty()) {
+        typeSpecBuilder.primaryConstructor(constructorBuilder.build())
+    }
+
+    if (initCodeBlockBuilder.isNotEmpty()) {
+        typeSpecBuilder.addInitializerBlock(initCodeBlockBuilder.build())
+    }
+
+    if (companionBuilder.typeSpecs.isNotEmpty() || companionBuilder.propertySpecs.isNotEmpty()) {
+        typeSpecBuilder.addType(companionBuilder.build())
+    }
+
+    if (typeSpecBuilder.propertySpecs.isNotEmpty()) {
+        typeSpecBuilder.addModifiers(KModifier.DATA)
+    }
+
+    dataFileBuilder.addType(typeSpecBuilder.build())
+
+    val fileSpec = dataFileBuilder.build()
+
+    val path = environment.outputDirectory.file(fileSpec.relativePath).asFile.toPath()
+    path.deleteIfExists()
+    path.createParentDirectories()
+        .createFile()
+        .writeText(fileSpec.toString())
 }

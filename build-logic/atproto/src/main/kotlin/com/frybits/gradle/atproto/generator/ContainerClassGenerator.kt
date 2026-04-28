@@ -31,6 +31,7 @@ import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.StringFormat
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.lexicon.categories.UnknownField
+import com.frybits.gradle.atproto.utils.titleCaseFirstChar
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -44,7 +45,6 @@ import com.squareup.kotlinpoet.asTypeName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import org.gradle.api.GradleException
-import org.gradle.internal.extensions.stdlib.capitalized
 import java.net.URI
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -93,17 +93,17 @@ internal fun ArrayField.generateField(
             val type = items.ref.substringAfter('#', missingDelimiterValue = "")
             if (packageName.isBlank()) {
                 toGenerateCollector.add("${className.packageName}#$type")
-                ClassName(packageName = className.packageName, type.capitalized())
+                ClassName(packageName = className.packageName, type.titleCaseFirstChar())
             } else if (type.isBlank()) {
                 toGenerateCollector.add(packageName)
-                ClassName(packageName = packageName, packageName.split('.').last().capitalized())
+                ClassName(packageName = packageName, packageName.split('.').last().titleCaseFirstChar())
             } else {
                 toGenerateCollector.add(items.ref)
-                ClassName(packageName = packageName, type.capitalized())
+                ClassName(packageName = packageName, type.titleCaseFirstChar())
             }
         }
         is UnionField -> {
-            val nestedClassName = className.nestedClass("${name.capitalized()}Union")
+            val nestedClassName = className.nestedClass("${name.titleCaseFirstChar()}Union")
             typeSpecBuilder.addType(items.generateUnionFieldInterface(
                 typeName = nestedClassName,
                 toGenerateCollector = toGenerateCollector

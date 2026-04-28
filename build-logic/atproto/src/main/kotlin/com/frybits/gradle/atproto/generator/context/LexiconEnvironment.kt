@@ -25,11 +25,12 @@ import com.frybits.gradle.atproto.utils.LexiconRef
 import com.frybits.gradle.atproto.utils.lexiconJson
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
+import org.gradle.api.file.Directory
 import java.io.File
 
 internal data class LexiconEnvironment(
     val recordFiles: List<File>,
-    val outputDirectory: File
+    val outputDirectory: Directory
 ) {
 
     private val schemaById = recordFiles.associateBy { it.name }

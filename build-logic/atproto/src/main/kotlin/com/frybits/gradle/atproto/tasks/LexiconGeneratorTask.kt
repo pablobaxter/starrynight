@@ -18,9 +18,14 @@
 
 package com.frybits.gradle.atproto.tasks
 
+import com.frybits.gradle.atproto.generator.builder.generateClass
 import com.frybits.gradle.atproto.generator.context.LexiconContext
 import com.frybits.gradle.atproto.generator.context.LexiconEnvironment
+import com.frybits.gradle.atproto.lexicon.categories.ProcedureField
+import com.frybits.gradle.atproto.lexicon.categories.QueryField
+import com.frybits.gradle.atproto.lexicon.categories.SubscriptionField
 import com.frybits.gradle.atproto.lexicon.categories.XRPCField
+import com.frybits.gradle.atproto.utils.titleCaseFirstChar
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
@@ -32,7 +37,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.work.Incremental
 
 @CacheableTask
@@ -59,18 +63,24 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
     internal fun generateSources() {
         val environment = LexiconEnvironment(
             inputDirectory.asFileTree.files.toList(),
-            generatedSources.get().asFile
+            generatedSources.get()
         )
 
-        val contexts = nsids.get().map { schemaId ->
+        nsids.get().map { schemaId ->
             val lexicon = environment.loadLexicon(schemaId)
 
             val lexiconType = requireNotNull(lexicon.defs["main"]) { "No main definition in requested lexicon $schemaId" }
             require(lexiconType is XRPCField) { "Only lexicons with XRPC calls can be requested. SchemaId: $schemaId" }
 
-            val name = schemaId.split('.').last().capitalized()
+            val name = schemaId.split('.').last().titleCaseFirstChar()
 
-            return@map LexiconContext(name = name, lexicon = lexicon)
+            val context = LexiconContext(name = name, lexicon = lexicon)
+
+            when (lexiconType) {
+                is ProcedureField -> generateClass(lexiconType, context, environment)
+                is QueryField -> TODO()
+                is SubscriptionField -> TODO()
+            }
         }
 
 //        val toGenerate = hashSetOf<String>()

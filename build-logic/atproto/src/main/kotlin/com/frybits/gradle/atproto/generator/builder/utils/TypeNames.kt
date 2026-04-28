@@ -25,6 +25,12 @@ private const val STRING_PACKAGE_NAME = "com.frybits.starrynight.atproto.models.
 internal object TypeNames {
     val RetrofitResponse = ClassName("retrofit2", "Response")
 
+    val RetrofitQuery = ClassName("retrofit2.http", "Query")
+
+    val RetrofitPost = ClassName("retrofit2.http", "POST")
+
+    val OkHttpResponseBody = ClassName("okhttp3", "ResponseBody")
+
     val ATIdentifier = ClassName(STRING_PACKAGE_NAME, "ATIdentifier")
 
     val DateTimeSerializer = ClassName("com.frybits.starrynight.atproto.serializers", "DateTimeSerializer")

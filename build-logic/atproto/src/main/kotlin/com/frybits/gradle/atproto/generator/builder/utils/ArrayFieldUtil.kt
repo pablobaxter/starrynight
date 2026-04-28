@@ -19,7 +19,6 @@
 package com.frybits.gradle.atproto.generator.builder.utils
 
 import com.frybits.gradle.atproto.generator.builder.generateClass
-import com.frybits.gradle.atproto.generator.builder.generateDataClass
 import com.frybits.gradle.atproto.generator.context.LexiconContext
 import com.frybits.gradle.atproto.generator.context.LexiconEnvironment
 import com.frybits.gradle.atproto.lexicon.categories.ArrayField
@@ -36,6 +35,7 @@ import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.lexicon.categories.UnknownField
 import com.frybits.gradle.atproto.utils.LexiconRef
+import com.frybits.gradle.atproto.utils.titleCaseFirstChar
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ParameterSpec
@@ -46,7 +46,6 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import kotlinx.serialization.json.JsonObject
 import org.gradle.api.GradleException
-import org.gradle.internal.extensions.stdlib.capitalized
 import java.net.URI
 
 internal fun FunSpec.Builder.handleParam(name: String, lexiconType: ArrayField, isRequired: Boolean, isNullable: Boolean, environment: LexiconEnvironment, context: LexiconContext) {
@@ -83,25 +82,6 @@ internal fun TypeSpec.Builder.handleProperty(name: String, lexiconType: ArrayFie
     addProperty(property.build())
 }
 
-internal fun handleRefGeneration(context: LexiconContext, environment: LexiconEnvironment, lexiconType: ArrayField) {
-    val items = lexiconType.items
-    when (items) {
-        is RefField -> {
-            //TODO What if context lexicon doesn't match the lexiconType returned?
-            val ref = LexiconRef(items.ref)
-            when (val lexiconType = environment.loadReference(context.lexicon, ref)) {
-                is ObjectField -> generateDataClass(lexiconType, LexiconContext(ref.objectRef.capitalized(), context.lexicon), environment)
-                is RecordField -> generateClass(lexiconType, LexiconContext(ref.schemaId.split('.').last().capitalized(), context.lexicon), environment)
-                else -> Unit
-            }
-        }
-        is UnionField -> {
-
-        }
-        else -> Unit
-    }
-}
-
 internal fun ArrayField.parameterizedType(environment: LexiconEnvironment, context: LexiconContext): TypeName {
     return items.toTypeName(environment, context)
 }
@@ -116,24 +96,34 @@ private fun LexiconType.toTypeName(environment: LexiconEnvironment, context: Lex
         is StringField -> getTypeName()
         is ObjectField, is UnknownField -> JsonObject::class.asTypeName()
         is RefField -> {
+            handleRefGeneration(context, environment)
             val ref = LexiconRef(ref)
             val lexiconType = environment.loadReference(context.lexicon, ref)
             if (lexiconType is ObjectField) {
                 if (ref.schemaId.isBlank()) {
-                    ClassName(packageName = context.authority, ref.objectRef.capitalized())
+                    ClassName(packageName = context.authority, ref.objectRef.titleCaseFirstChar())
                 } else if (ref.objectRef.isBlank()) {
                     ClassName(
                         packageName = ref.schemaId,
-                        ref.schemaId.split('.').last().capitalized()
+                        ref.schemaId.split('.').last().titleCaseFirstChar()
                     )
                 } else {
-                    ClassName(packageName = ref.schemaId, ref.objectRef.capitalized())
+                    ClassName(packageName = ref.schemaId, ref.objectRef.titleCaseFirstChar())
                 }
+            } else if (lexiconType is RecordField) {
+                val lexicon = environment.loadLexicon(ref.schemaId)
+                ClassName(
+                    lexicon.id,
+                    lexicon.id.split('.').last().titleCaseFirstChar()
+                )
             } else {
+                require(lexiconType !is RefField) { "References cannot reference another reference" }
+                require(lexiconType !is UnionField) { "References cannot reference a union" }
                 lexiconType.toTypeName(environment, context)
             }
         }
         is UnionField -> {
+            generateClass(this, context, environment)
             ClassName(context.authority, "${context.name}Union")
         }
         else -> throw GradleException("Unable to parameterize array with $this")

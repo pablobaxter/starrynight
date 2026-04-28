@@ -28,4 +28,8 @@ internal value class LexiconRef(private val ref: String) {
 
     val isReference: Boolean
         get() = '.' in ref || '#' in ref
+
+    override fun toString(): String {
+        return ref
+    }
 }
