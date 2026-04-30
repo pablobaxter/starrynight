@@ -23,6 +23,7 @@ import com.frybits.gradle.atproto.generator.builder.utils.handleConst
 import com.frybits.gradle.atproto.generator.builder.utils.handleDescription
 import com.frybits.gradle.atproto.generator.builder.utils.handleParam
 import com.frybits.gradle.atproto.generator.builder.utils.handleProperty
+import com.frybits.gradle.atproto.generator.builder.utils.handleRefGeneration
 import com.frybits.gradle.atproto.generator.builder.utils.handleRequirements
 import com.frybits.gradle.atproto.generator.context.LexiconContext
 import com.frybits.gradle.atproto.generator.context.LexiconEnvironment
@@ -52,10 +53,6 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.io.path.createFile
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.writeText
 
 internal fun generateClass(lexiconType: UnionField, context: LexiconContext, environment: LexiconEnvironment) {
     val className = ClassName(context.authority, "${context.name}Union")
@@ -79,7 +76,7 @@ internal fun generateClass(lexiconType: UnionField, context: LexiconContext, env
         val refLexiconType = environment.loadReference(lexicon, ref)
 
         when (val refLexiconType = environment.loadReference(lexicon, ref)) {
-            is ObjectField -> generateDataClass(refLexiconType, LexiconContext(ref.objectRef.titleCaseFirstChar(), lexicon), environment)
+            is ObjectField -> generateDataClass(refLexiconType, LexiconContext(ref.objectRef.ifBlank { ref.schemaId.split('.').last() }.titleCaseFirstChar(), lexicon), environment)
             is RecordField -> generateClass(refLexiconType, LexiconContext(ref.schemaId.split('.').last().titleCaseFirstChar(), lexicon), environment)
             else -> return@forEach
         }
@@ -105,9 +102,10 @@ internal fun generateClass(lexiconType: UnionField, context: LexiconContext, env
             return@forEach
         }
 
+
         val unionFieldClassName = ClassName(context.authority, "${refClassName.simpleName}UnionField")
 
-        TypeSpec.classBuilder(unionFieldClassName)
+        val unionTypeSpec = TypeSpec.classBuilder(unionFieldClassName)
             .addAnnotation(Serializable::class)
             .addAnnotation(JvmInline::class)
             .addAnnotation(AnnotationSpec.builder(SerialName::class).addMember("%S", ref).build())
@@ -123,17 +121,15 @@ internal fun generateClass(lexiconType: UnionField, context: LexiconContext, env
                     .initializer("prop")
                     .build()
             ).build()
+
+        typeSpec.addType(unionTypeSpec)
     }
 
     fileBuilder.addType(typeSpec.build())
 
     val fileSpec = fileBuilder.build()
 
-    val path = environment.outputDirectory.file(fileSpec.relativePath).asFile.toPath()
-    path.deleteIfExists()
-    path.createParentDirectories()
-        .createFile()
-        .writeText(fileSpec.toString())
+    environment.generateFile(fileSpec)
 }
 
 internal fun generateClass(lexiconType: RecordField, context: LexiconContext, environment: LexiconEnvironment) {
@@ -361,13 +357,83 @@ internal fun generateDataClass(lexiconType: ObjectField, context: LexiconContext
                 generateDataClass(type, context, environment)
             }
             is UnknownField -> {
-                // TODO
+                constructorBuilder.handleParam(
+                    name = name,
+                    lexiconType = type,
+                    isRequired = isRequired,
+                    isNullable = isNullable
+                )
+
+                typeSpecBuilder.handleProperty(
+                    name = name,
+                    lexiconType = type,
+                    isNullable = isNullable
+                )
             }
             is UnionField -> {
-                // TODO
+                constructorBuilder.handleParam(
+                    name = name,
+                    lexiconType = type,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    context = context
+                )
+
+                typeSpecBuilder.handleProperty(
+                    name = name,
+                    lexiconType = type,
+                    isNullable = isNullable,
+                    context = context
+                )
+                generateClass(type, context, environment)
             }
             is RefField -> {
-                // TODO
+                constructorBuilder.handleParam(
+                    name = name,
+                    lexiconType = type,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    context = context,
+                    environment = environment
+                )
+
+                typeSpecBuilder.handleProperty(
+                    name = name,
+                    lexiconType = type,
+                    context = context,
+                    environment = environment
+                )
+                type.handleRefGeneration(context, environment)
+            }
+            is TokenField -> {
+                constructorBuilder.handleParam(
+                    name = name,
+                    lexiconType = type,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                )
+
+                typeSpecBuilder.handleProperty(
+                    name = name,
+                    lexiconType = type,
+                    isNullable = isNullable,
+                )
+            }
+            is RecordField -> {
+                constructorBuilder.handleParam(
+                    name = name,
+                    lexiconType = type,
+                    isRequired = isRequired,
+                    isNullable = isNullable,
+                    context = context
+                )
+
+                typeSpecBuilder.handleProperty(
+                    name = name,
+                    lexiconType = type,
+                    isNullable = isNullable,
+                    context = context
+                )
             }
             else -> throw IllegalArgumentException("Unknown type to parse $type")
         }
@@ -393,9 +459,5 @@ internal fun generateDataClass(lexiconType: ObjectField, context: LexiconContext
 
     val fileSpec = dataFileBuilder.build()
 
-    val path = environment.outputDirectory.file(fileSpec.relativePath).asFile.toPath()
-    path.deleteIfExists()
-    path.createParentDirectories()
-        .createFile()
-        .writeText(fileSpec.toString())
+    environment.generateFile(fileSpec)
 }

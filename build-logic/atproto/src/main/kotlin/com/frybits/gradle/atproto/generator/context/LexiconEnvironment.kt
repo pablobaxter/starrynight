@@ -23,18 +23,29 @@ import com.frybits.gradle.atproto.lexicon.RecordResponse
 import com.frybits.gradle.atproto.lexicon.categories.LexiconType
 import com.frybits.gradle.atproto.utils.LexiconRef
 import com.frybits.gradle.atproto.utils.lexiconJson
+import com.squareup.kotlinpoet.FileSpec
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import org.gradle.api.file.Directory
 import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.createFile
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.writeText
 
 internal data class LexiconEnvironment(
     val recordFiles: List<File>,
-    val outputDirectory: Directory
+    private val outputDirectory: Directory
 ) {
+
+    init {
+        outputDirectory.asFile.deleteRecursively()
+    }
 
     private val schemaById = recordFiles.associateBy { it.name }
     private val schemaCache = hashMapOf<String, Lexicon>()
+
+    private val generatedFileCache = hashMapOf<String, Path>()
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadLexicon(schemaId: String): Lexicon {
@@ -57,5 +68,15 @@ internal data class LexiconEnvironment(
         }
 
         return requireNotNull(lexicon.defs[reference.objectRef.ifBlank { "main" }])
+    }
+
+    fun generateFile(fileSpec: FileSpec) {
+        generatedFileCache.computeIfAbsent(fileSpec.relativePath) { path ->
+            val outputPath = outputDirectory.file(path).asFile.toPath()
+            outputPath.createParentDirectories()
+                .createFile()
+                .writeText(fileSpec.toString())
+            return@computeIfAbsent outputPath
+        }
     }
 }

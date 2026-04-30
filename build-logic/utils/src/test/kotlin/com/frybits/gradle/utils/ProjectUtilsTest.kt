@@ -18,18 +18,7 @@
 
 package com.frybits.gradle.utils
 
-import org.gradle.api.internal.project.DefaultProject
 import org.gradle.testfixtures.ProjectBuilder
-import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlin.gradle.utils.`is`
-import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createDirectory
-import kotlin.io.path.createFile
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.walk
-import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

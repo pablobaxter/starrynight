@@ -3,7 +3,9 @@ type = "atprotoLibrary"
 
 # Lexicons to download and compile
 lexicons = [
-    "com.atproto.moderation.createReport"
+    "com.atproto.moderation.createReport",
+    "com.atproto.identity.signPlcOperation",
+    "com.atproto.identity.requestPlcOperationSignature"
 ]
 
 # Libraries to be used (maven address or version catalog name)

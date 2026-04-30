@@ -18,7 +18,6 @@
 
 package com.frybits.gradle.utils
 
-import org.gradle.api.JavaVersion
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.junit.jupiter.api.io.TempDir

@@ -26,18 +26,4 @@ internal data class LexiconContext(
 ) {
 
     val authority = lexicon.id
-
-    private val _refs = hashSetOf<String>()
-    private val _unions = hashSetOf<String>()
-
-    val refs = _refs.toSet()
-    val unions = _unions.toSet()
-
-    fun addRef(id: String) {
-        _refs.add(id)
-    }
-
-    fun addUnion(ids: List<String>) {
-        _unions.addAll(ids)
-    }
 }

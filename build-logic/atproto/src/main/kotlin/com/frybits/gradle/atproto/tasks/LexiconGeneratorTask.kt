@@ -66,7 +66,7 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
             generatedSources.get()
         )
 
-        nsids.get().map { schemaId ->
+        nsids.get().forEach { schemaId ->
             val lexicon = environment.loadLexicon(schemaId)
 
             val lexiconType = requireNotNull(lexicon.defs["main"]) { "No main definition in requested lexicon $schemaId" }
@@ -82,64 +82,5 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
                 is SubscriptionField -> TODO()
             }
         }
-
-//        val toGenerate = hashSetOf<String>()
-//        val records = inputDirectory.asFileTree.files.associate { file ->
-//            val record = file.inputStream().use { lexiconJson.decodeFromStream<RecordResponse>(it) }
-//            return@associate record.value.id to record.value
-//        }
-//
-//        val rkeyMap = records.flatMap { (id, type) ->
-//            type.defs.mapNotNull { (name, lexiconType) ->
-//                if (lexiconType is RecordField) {
-//                    if (name == "main") {
-//                        lexiconType.key to ClassName(id, id.split('.').last().capitalized())
-//                    } else {
-//                        lexiconType.key to ClassName(id, name.capitalized())
-//
-//                    }
-//                } else {
-//                    null
-//                }
-//            }
-//        }.toMap()
-//
-//        records.values.forEach { lexicon ->
-//            val lexiconType = lexicon.defs["main"] ?: return@forEach
-//            if (lexiconType !is PrimaryField) return@forEach
-//            val fileSpecList = arrayListOf<FileSpec>()
-//            when (lexiconType) {
-//                is RecordField -> {
-//                    val className = ClassName(lexicon.id, lexicon.id.split('.').last().capitalized())
-//                    lexiconType.generateClass(
-//                        className = className,
-//                        toGenerateCollector = toGenerate,
-//                        rkeyMap = rkeyMap,
-//                        fileSpecCollector = fileSpecList
-//                    )
-//                }
-//                is ProcedureField -> {
-//                    val className = ClassName(lexicon.id, "${lexicon.id.split('.').last().capitalized()}Api")
-//                    lexiconType.generateClass(
-//                        className = className,
-//                        id = lexicon.id,
-//                        toGenerateCollector = toGenerate,
-//                        rkeyMap = rkeyMap,
-//                        fileSpecCollector = fileSpecList
-//                    )
-//                }
-//                is QueryField -> TODO()
-//                is SubscriptionField -> TODO()
-//                is PermissionSetField -> throw GradleException("PermissionSets are not currently generated. ${lexicon.id}")
-//            }
-//            fileSpecList.forEach { fileSpec ->
-//                generatedSources.file(fileSpec.relativePath).get().asFile.toPath()
-//                    .createParentDirectories().writeText(fileSpec.toString())
-//            }
-//        }
-//
-//        toGenerate.forEach {
-//            logger.lifecycle(it)
-//        }
     }
 }

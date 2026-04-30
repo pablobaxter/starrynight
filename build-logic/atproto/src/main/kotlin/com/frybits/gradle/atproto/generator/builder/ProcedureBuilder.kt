@@ -45,10 +45,6 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
-import kotlin.io.path.createFile
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.writeText
 
 internal fun generateClass(lexiconType: ProcedureField, context: LexiconContext, environment: LexiconEnvironment) {
     val className = ClassName(context.authority, "${context.name}Api")
@@ -167,14 +163,41 @@ internal fun generateClass(lexiconType: ProcedureField, context: LexiconContext,
 
     procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPost).addMember("%S", memberString).build())
 
+    val input = lexiconType.input
+    if (input != null) {
+        val inputClassName = when (val schema = input.schema) {
+            is ObjectField -> {
+                val inputContext = LexiconContext("${context.name}Request", context.lexicon)
+                generateDataClass(schema, inputContext, environment)
+                ClassName(inputContext.authority, inputContext.name)
+            }
+            is RefField -> {
+                schema.handleRefGeneration(context, environment)
+                val ref = LexiconRef(schema.ref)
+                if (ref.schemaId.isNotBlank()) {
+                    ClassName(ref.schemaId, ref.objectRef.ifBlank { ref.schemaId.split('.').last() }.titleCaseFirstChar())
+                } else {
+                    ClassName(context.authority, ref.objectRef.titleCaseFirstChar())
+                }
+            }
+            is UnionField -> {
+                generateClass(schema, context, environment)
+                ClassName(context.authority, "${context.name}Union")
+            }
+            else -> null
+        }
+        val inputParamSpec = ParameterSpec.builder("requestBody", inputClassName ?: TypeNames.OkHttpRequestBody)
+            .addAnnotation(TypeNames.RetrofitBody)
+
+        input.schema?.let(inputParamSpec::handleDescription)
+
+        procedureFunSpecBuilder.addParameter(inputParamSpec.build())
+    }
+
     typeSpecBuilder.addFunction(procedureFunSpecBuilder.build())
     fileBuilder.addType(typeSpecBuilder.build())
 
     val fileSpec = fileBuilder.build()
 
-    val path = environment.outputDirectory.file(fileSpec.relativePath).asFile.toPath()
-    path.deleteIfExists()
-    path.createParentDirectories()
-        .createFile()
-        .writeText(fileSpec.toString())
+    environment.generateFile(fileSpec)
 }
