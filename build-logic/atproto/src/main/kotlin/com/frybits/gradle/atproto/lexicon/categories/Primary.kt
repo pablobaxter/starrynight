@@ -43,23 +43,28 @@ internal sealed interface XRPCField: PrimaryField {
 }
 
 @Serializable
+internal sealed interface HttpField: XRPCField {
+    val output: BodyField?
+}
+
+@Serializable
 @SerialName("query")
 internal data class QueryField(
     override val description: String? = null,
     @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
-    val output: BodyField? = null,
+    override val output: BodyField? = null,
     override val errors: List<ErrorBodyField>? = null
-): XRPCField
+): HttpField
 
 @Serializable
 @SerialName("procedure")
 internal data class ProcedureField(
     override val description: String? = null,
     @Serializable(XRPCParamsLimitedProperties::class) override val parameters: LexiconType? = null,
-    val output: BodyField? = null,
+    override val output: BodyField? = null,
     override val errors: List<ErrorBodyField>? = null,
     val input: BodyField? = null
-): XRPCField
+): HttpField
 
 @Serializable
 @SerialName("subscription")

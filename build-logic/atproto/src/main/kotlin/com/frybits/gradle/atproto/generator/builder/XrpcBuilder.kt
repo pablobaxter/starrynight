@@ -26,6 +26,7 @@ import com.frybits.gradle.atproto.generator.context.LexiconContext
 import com.frybits.gradle.atproto.generator.context.LexiconEnvironment
 import com.frybits.gradle.atproto.lexicon.categories.ArrayField
 import com.frybits.gradle.atproto.lexicon.categories.BooleanField
+import com.frybits.gradle.atproto.lexicon.categories.HttpField
 import com.frybits.gradle.atproto.lexicon.categories.IntegerField
 import com.frybits.gradle.atproto.lexicon.categories.ObjectField
 import com.frybits.gradle.atproto.lexicon.categories.ParamsField
@@ -46,7 +47,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 
-internal fun generateClass(lexiconType: ProcedureField, context: LexiconContext, environment: LexiconEnvironment) {
+internal fun generateClass(lexiconType: HttpField, context: LexiconContext, environment: LexiconEnvironment) {
     val className = ClassName(context.authority, "${context.name}Api")
     val fileBuilder = createFileBuilder(className)
 
@@ -163,35 +164,44 @@ internal fun generateClass(lexiconType: ProcedureField, context: LexiconContext,
 
     procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPost).addMember("%S", memberString).build())
 
-    val input = lexiconType.input
-    if (input != null) {
-        val inputClassName = when (val schema = input.schema) {
-            is ObjectField -> {
-                val inputContext = LexiconContext("${context.name}Request", context.lexicon)
-                generateDataClass(schema, inputContext, environment)
-                ClassName(inputContext.authority, inputContext.name)
-            }
-            is RefField -> {
-                schema.handleRefGeneration(context, environment)
-                val ref = LexiconRef(schema.ref)
-                if (ref.schemaId.isNotBlank()) {
-                    ClassName(ref.schemaId, ref.objectRef.ifBlank { ref.schemaId.split('.').last() }.titleCaseFirstChar())
-                } else {
-                    ClassName(context.authority, ref.objectRef.titleCaseFirstChar())
+    if (lexiconType is ProcedureField) {
+        val input = lexiconType.input
+        if (input != null) {
+            val inputClassName = when (val schema = input.schema) {
+                is ObjectField -> {
+                    val inputContext = LexiconContext("${context.name}Request", context.lexicon)
+                    generateDataClass(schema, inputContext, environment)
+                    ClassName(inputContext.authority, inputContext.name)
                 }
+
+                is RefField -> {
+                    schema.handleRefGeneration(context, environment)
+                    val ref = LexiconRef(schema.ref)
+                    if (ref.schemaId.isNotBlank()) {
+                        ClassName(ref.schemaId,
+                            ref.objectRef.ifBlank { ref.schemaId.split('.').last() }
+                                .titleCaseFirstChar()
+                        )
+                    } else {
+                        ClassName(context.authority, ref.objectRef.titleCaseFirstChar())
+                    }
+                }
+
+                is UnionField -> {
+                    generateClass(schema, context, environment)
+                    ClassName(context.authority, "${context.name}Union")
+                }
+
+                else -> null
             }
-            is UnionField -> {
-                generateClass(schema, context, environment)
-                ClassName(context.authority, "${context.name}Union")
-            }
-            else -> null
+            val inputParamSpec =
+                ParameterSpec.builder("requestBody", inputClassName ?: TypeNames.OkHttpRequestBody)
+                    .addAnnotation(TypeNames.RetrofitBody)
+
+            input.schema?.let(inputParamSpec::handleDescription)
+
+            procedureFunSpecBuilder.addParameter(inputParamSpec.build())
         }
-        val inputParamSpec = ParameterSpec.builder("requestBody", inputClassName ?: TypeNames.OkHttpRequestBody)
-            .addAnnotation(TypeNames.RetrofitBody)
-
-        input.schema?.let(inputParamSpec::handleDescription)
-
-        procedureFunSpecBuilder.addParameter(inputParamSpec.build())
     }
 
     typeSpecBuilder.addFunction(procedureFunSpecBuilder.build())

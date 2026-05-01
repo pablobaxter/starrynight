@@ -21,9 +21,7 @@ package com.frybits.gradle.atproto.tasks
 import com.frybits.gradle.atproto.generator.builder.generateClass
 import com.frybits.gradle.atproto.generator.context.LexiconContext
 import com.frybits.gradle.atproto.generator.context.LexiconEnvironment
-import com.frybits.gradle.atproto.lexicon.categories.ProcedureField
-import com.frybits.gradle.atproto.lexicon.categories.QueryField
-import com.frybits.gradle.atproto.lexicon.categories.SubscriptionField
+import com.frybits.gradle.atproto.lexicon.categories.HttpField
 import com.frybits.gradle.atproto.lexicon.categories.XRPCField
 import com.frybits.gradle.atproto.utils.titleCaseFirstChar
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -77,9 +75,8 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
             val context = LexiconContext(name = name, lexicon = lexicon)
 
             when (lexiconType) {
-                is ProcedureField -> generateClass(lexiconType, context, environment)
-                is QueryField -> TODO()
-                is SubscriptionField -> TODO()
+                is HttpField -> generateClass(lexiconType, context, environment)
+                else -> throw IllegalArgumentException("Lexicon type not implemented: ${lexiconType::class}")
             }
         }
     }
