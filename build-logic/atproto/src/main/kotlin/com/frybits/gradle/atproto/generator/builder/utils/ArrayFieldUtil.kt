@@ -50,7 +50,7 @@ import java.net.URI
 
 internal fun FunSpec.Builder.handleParam(name: String, lexiconType: ArrayField, isRequired: Boolean, isNullable: Boolean, environment: LexiconEnvironment, context: LexiconContext) {
     val listTypeName = List::class.asTypeName()
-    val parameterizedType = lexiconType.parameterizedType(environment, context)
+    val parameterizedType = lexiconType.items.toTypeName(environment, context)
 
     val typeName = listTypeName.parameterizedBy(parameterizedType).copy(nullable = isNullable)
 
@@ -70,7 +70,7 @@ internal fun FunSpec.Builder.handleParam(name: String, lexiconType: ArrayField, 
 
 internal fun TypeSpec.Builder.handleProperty(name: String, lexiconType: ArrayField, isNullable: Boolean, environment: LexiconEnvironment, context: LexiconContext) {
     val listTypeName = List::class.asTypeName()
-    val parameterizedType = lexiconType.parameterizedType(environment, context)
+    val parameterizedType = lexiconType.items.toTypeName(environment, context)
 
     val typeName = listTypeName.parameterizedBy(parameterizedType).copy(nullable = isNullable)
 
@@ -82,11 +82,7 @@ internal fun TypeSpec.Builder.handleProperty(name: String, lexiconType: ArrayFie
     addProperty(property.build())
 }
 
-internal fun ArrayField.parameterizedType(environment: LexiconEnvironment, context: LexiconContext): TypeName {
-    return items.toTypeName(environment, context)
-}
-
-private fun LexiconType.toTypeName(environment: LexiconEnvironment, context: LexiconContext): TypeName {
+internal fun LexiconType.toTypeName(environment: LexiconEnvironment, context: LexiconContext): TypeName {
     return when (this) {
         is BlobField -> TypeNames.Blob
         is BooleanField -> Boolean::class.asTypeName()
