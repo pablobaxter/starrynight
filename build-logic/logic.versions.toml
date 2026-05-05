@@ -5,6 +5,7 @@ kotlinx-serialization = "1.10.0"
 ksp = "2.3.0"
 r8-version = "8.0.34"
 tomlkt = "0.6.0"
+metro = "1.0.0"
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle-api" }
@@ -15,6 +16,7 @@ kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 r8 = { group = "com.android.tools", name = "r8", version.ref = "r8-version" }
+metro = { group = "dev.zacsweers.metro", name = "gradle-plugin", version.ref = "metro" }
 
 [bundles]
 kotlinx-toml = ["kotlinx-toml-core"]

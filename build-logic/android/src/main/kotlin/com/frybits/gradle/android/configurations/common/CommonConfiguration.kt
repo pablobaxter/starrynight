@@ -28,8 +28,11 @@ import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.definitions.AndroidBuildFile
 import com.frybits.gradle.utils.androidSourceCompatibility
 import com.frybits.gradle.utils.androidTargetCompatibility
+import dev.zacsweers.metro.gradle.ExperimentalMetroGradleApi
+import dev.zacsweers.metro.gradle.MetroPluginExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
 
 /**
  * Base configuration for all android builds
@@ -38,7 +41,7 @@ public fun Project.androidBaseConfiguration(buildFile: AndroidBuildFile) {
     baseProjectConfiguration(buildFile) // All base project configuration
     jvmProjectConfiguration() // All JVM configuration
     kotlinProjectConfiguration() // All Kotlin configuration
-    apply(plugin = "dev.zacsweers.metro")
+    configureMetro()
 }
 
 /**
@@ -118,6 +121,14 @@ private fun Project.configureMinSdk(variantBuilder: VariantBuilder) {
         } else {
             minSdk = minSdkProvider.get()
         }
+    }
+}
+
+@OptIn(ExperimentalMetroGradleApi::class)
+private fun Project.configureMetro() {
+    apply(plugin = "dev.zacsweers.metro")
+    configure<MetroPluginExtension> {
+        generateContributionProviders.set(true)
     }
 }
 
