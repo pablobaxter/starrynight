@@ -1,17 +1,13 @@
 # Project type
-type = "atprotoLibrary"
-
-# Lexicons to download and compile
-lexicons = [
-    "com.atproto.server.createSession"
-]
+type = "androidLibrary"
 
 # Libraries to be used (maven address or version catalog name)
 [dependencies]
 
-# Used to add libraries into the "implementation" configuration
 implementation = [
+    { type = "project", name = ":network:core:api" },
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
     { type = "library", name = "retrofit" },
+    { type = "library", name = "retrofit.kotlin.serialization" },
 ]

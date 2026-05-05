@@ -18,6 +18,11 @@ implementation = [
     { type = "library", name = "androidx.core" },
     { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },
+    { type = "project", name = ":network:auth:api" },
+
+    # Impl modules
+    { type = "project", name = ":network:core:impl" },
+    { type = "project", name = ":network:auth:impl" }
 ]
 
 # Used to add libraries into the "api" configuration

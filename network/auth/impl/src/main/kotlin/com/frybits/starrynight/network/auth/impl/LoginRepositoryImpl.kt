@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,29 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app
+package com.frybits.starrynight.network.auth.impl
 
-import android.app.Activity
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import com.atproto.server.createSession.CreateSessionApi
 import com.frybits.starrynight.network.core.LoginRepository
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
-import dev.zacsweers.metrox.android.ActivityKey
 
-@ContributesIntoMap(AppScope::class, binding<Activity>())
-@ActivityKey
+@ContributesBinding(AppScope::class)
 @Inject
-internal class MainActivity(private val loginRepository: LoginRepository): ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        println(loginRepository)
-        setContent {
-
-        }
+internal class LoginRepositoryImpl(
+    private val createSessionApi: CreateSessionApi
+) : LoginRepository {
+    override suspend fun createSession(
+        identifier: String,
+        password: String
+    ): Result<Unit> {
+        TODO("Not yet implemented")
     }
 }

@@ -1,2 +1,6 @@
 :app
 :atproto
+:network:auth:api
+:network:auth:impl
+:network:core:api
+:network:core:impl
