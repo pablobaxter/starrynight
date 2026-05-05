@@ -63,7 +63,7 @@ internal fun FunSpec.Builder.handleParam(name: String, lexiconType: RefField, is
         is ObjectField -> ClassName(lexicon.id, ref.objectRef.ifBlank { lexicon.id.split('.').last() }.titleCaseFirstChar())
         is UnknownField -> JsonObject::class.asTypeName()
         else -> throw IllegalArgumentException("Type ${refLexiconType::class} cannot be used with a reference")
-    }
+    }.copy(nullable = isNullable)
     val parameter = ParameterSpec.builder(name, typeName)
     parameter.handleDescription(lexiconType)
 
@@ -76,7 +76,7 @@ internal fun FunSpec.Builder.handleParam(name: String, lexiconType: RefField, is
     addParameter(parameter.build())
 }
 
-internal fun TypeSpec.Builder.handleProperty(name: String, lexiconType: RefField, context: LexiconContext, environment: LexiconEnvironment) {
+internal fun TypeSpec.Builder.handleProperty(name: String, lexiconType: RefField, isNullable: Boolean, context: LexiconContext, environment: LexiconEnvironment) {
     val ref = LexiconRef(lexiconType.ref)
     val lexicon = if (ref.schemaId.isBlank()) {
         context.lexicon
@@ -94,7 +94,7 @@ internal fun TypeSpec.Builder.handleProperty(name: String, lexiconType: RefField
         is ObjectField -> ClassName(lexicon.id, ref.objectRef.ifBlank { lexicon.id.split('.').last() }.titleCaseFirstChar())
         is UnknownField -> JsonObject::class.asTypeName()
         else -> throw IllegalArgumentException("Type ${refLexiconType::class} cannot be used with a reference")
-    }
+    }.copy(nullable = isNullable)
     val property = PropertySpec.builder(name, typeName)
         .initializer(name)
 

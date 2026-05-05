@@ -400,6 +400,7 @@ internal fun generateDataClass(lexiconType: ObjectField, context: LexiconContext
                 typeSpecBuilder.handleProperty(
                     name = name,
                     lexiconType = type,
+                    isNullable = isNullable,
                     context = context,
                     environment = environment
                 )
