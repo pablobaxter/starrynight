@@ -18,11 +18,15 @@
 
 package com.frybits.starrynight.network.auth.impl
 
+import android.util.Log
 import com.atproto.server.createSession.CreateSessionApi
+import com.atproto.server.createSession.CreateSessionRequest
 import com.frybits.starrynight.network.core.LoginRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+
+private val TAG = LoginRepository::class.java.simpleName
 
 @ContributesBinding(AppScope::class)
 @Inject
@@ -33,6 +37,23 @@ internal class LoginRepositoryImpl(
         identifier: String,
         password: String
     ): Result<Unit> {
-        TODO("Not yet implemented")
+        val result = createSessionApi.createSession(
+            requestBody = CreateSessionRequest(
+                password = password,
+                identifier = identifier
+            )
+        )
+
+        if (result.isSuccessful) {
+            Log.d(TAG, "Success")
+            Log.d(TAG, result.body().toString())
+            return Result.success(Unit)
+        } else {
+            Log.d(TAG, "Fail")
+            Log.d(TAG, "HTTP Code: ${result.code()}")
+            Log.d(TAG, "HTTP Error: ${result.message()}")
+            Log.d(TAG, result.errorBody().use { it?.string() }.toString())
+            return Result.failure(Exception(result.message()))
+        }
     }
 }

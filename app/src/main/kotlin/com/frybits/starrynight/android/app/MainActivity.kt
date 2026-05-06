@@ -21,13 +21,14 @@ package com.frybits.starrynight.android.app
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import com.frybits.starrynight.network.core.LoginRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.android.ActivityKey
+
+private val TAG = MainActivity::class.java.simpleName
 
 @ContributesIntoMap(AppScope::class, binding<Activity>())
 @ActivityKey
@@ -36,9 +37,5 @@ internal class MainActivity(private val loginRepository: LoginRepository): Compo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        println(loginRepository)
-        setContent {
-
-        }
     }
 }

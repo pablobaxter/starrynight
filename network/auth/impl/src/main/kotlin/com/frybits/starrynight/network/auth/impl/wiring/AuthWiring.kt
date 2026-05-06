@@ -33,7 +33,7 @@ public object AuthWiring {
     @Provides
     public fun provideCreateSessionApi(retrofit: Retrofit): CreateSessionApi {
         return retrofit.newBuilder()
-            .baseUrl("https://public.api.bsky.app/xrpc/")
+            .baseUrl("https://bsky.social/xrpc/")
             .build()
             .create()
     }
