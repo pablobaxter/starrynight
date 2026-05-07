@@ -1,5 +1,6 @@
 package com.frybits.gradle.core.configurations
 
+import com.frybits.gradle.core.definitions.AndroidLibraryBuildFile
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.testfixtures.ProjectBuilder
@@ -25,7 +26,7 @@ class KotlinConfigurationTest {
         val project = ProjectBuilder.builder().build()
         project.apply(plugin = "org.jetbrains.kotlin.jvm")
 
-        project.kotlinProjectConfiguration()
+        project.kotlinProjectConfiguration(AndroidLibraryBuildFile())
 
         assertTrue(project.plugins.hasPlugin("kotlinx-serialization"))
     }
@@ -35,7 +36,7 @@ class KotlinConfigurationTest {
         val project = ProjectBuilder.builder().build()
         project.apply(plugin = "org.jetbrains.kotlin.jvm")
 
-        project.kotlinProjectConfiguration()
+        project.kotlinProjectConfiguration(AndroidLibraryBuildFile())
 
         assertTrue(project.plugins.hasPlugin("com.google.devtools.ksp"))
     }
@@ -48,7 +49,7 @@ class KotlinConfigurationTest {
             .build()
         project.apply(plugin = "org.jetbrains.kotlin.jvm")
 
-        project.kotlinProjectConfiguration()
+        project.kotlinProjectConfiguration(AndroidLibraryBuildFile())
 
         val extension = project.extensions.getByName<HasConfigurableKotlinCompilerOptions<KotlinJvmCompilerOptions>>("kotlin")
 
@@ -61,7 +62,7 @@ class KotlinConfigurationTest {
         val project = ProjectBuilder.builder().build()
         project.apply(plugin = "org.jetbrains.kotlin.jvm")
 
-        project.kotlinProjectConfiguration()
+        project.kotlinProjectConfiguration(AndroidLibraryBuildFile())
 
         val extension = project.kotlinExtension
 

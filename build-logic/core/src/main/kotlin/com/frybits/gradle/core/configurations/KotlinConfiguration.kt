@@ -18,6 +18,7 @@
 
 package com.frybits.gradle.core.configurations
 
+import com.frybits.gradle.core.definitions.BuildFile
 import com.frybits.gradle.utils.kotlinJvmTarget
 import dev.zacsweers.metro.gradle.ExperimentalMetroGradleApi
 import dev.zacsweers.metro.gradle.MetroPluginExtension
@@ -31,10 +32,12 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 /**
  * Configures all Kotlin projects
  */
-public fun Project.kotlinProjectConfiguration() {
+public fun Project.kotlinProjectConfiguration(buildFile: BuildFile) {
     apply(plugin = "kotlinx-serialization")
     apply(plugin = "com.google.devtools.ksp")
-    configureMetro()
+    if (buildFile.enableMetro) {
+        configureMetro()
+    }
 
     extensions.configure<HasConfigurableKotlinCompilerOptions<KotlinJvmCompilerOptions>>("kotlin") {
         compilerOptions {

@@ -39,7 +39,7 @@ public abstract class JavaLibraryConfigurer @Inject internal constructor(
         with(project) {
             baseProjectConfiguration(buildFile) // All base project configuration
             jvmProjectConfiguration() // All JVM configuration
-            kotlinProjectConfiguration() // All Kotlin configuration
+            kotlinProjectConfiguration(buildFile) // All Kotlin configuration
         }
     }
 }

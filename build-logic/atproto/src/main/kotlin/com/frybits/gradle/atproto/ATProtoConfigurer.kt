@@ -44,7 +44,7 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
         with(project) {
             baseProjectConfiguration(buildFile) // All base project configuration
             jvmProjectConfiguration() // All JVM configuration
-            kotlinProjectConfiguration() // All Kotlin configuration
+            kotlinProjectConfiguration(buildFile) // All Kotlin configuration
 
             val lexiconPullTask = tasks.register<LexiconPullTask>("lexiconPull") {
                 outputDir.set(layout.buildDirectory.dir("lexicons"))

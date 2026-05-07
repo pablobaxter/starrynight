@@ -7,6 +7,7 @@ targetSdk = 36
 #previewTargetSdk
 
 enableCompose = true
+enableMetro = true
 
 # Libraries to be used (maven address or version catalog name)
 [dependencies]
@@ -20,8 +21,13 @@ implementation = [
     { type = "library", name = "metrox.android" },
     { type = "library", name = "kotlinx.coroutines.android" },
 
+    # ATProto
+    { type = "project", name = ":atproto" },
+
     # Api modules
     { type = "project", name = ":network:auth:api" },
+    { type = "project", name = ":network:core:api" },
+    { type = "project", name = ":utils:core:api" },
 
     # Impl modules
     { type = "project", name = ":network:core:impl" },

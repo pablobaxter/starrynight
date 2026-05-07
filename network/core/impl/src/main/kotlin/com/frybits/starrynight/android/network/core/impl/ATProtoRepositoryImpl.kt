@@ -22,9 +22,9 @@ import android.annotation.SuppressLint
 import android.net.DnsResolver
 import android.os.CancellationSignal
 import android.util.Log
+import com.frybits.starrynight.utils.core.IODispatcher
 import com.frybits.starrynight.atproto.models.strings.Did
 import com.frybits.starrynight.network.core.ATProtoRepository
-import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject

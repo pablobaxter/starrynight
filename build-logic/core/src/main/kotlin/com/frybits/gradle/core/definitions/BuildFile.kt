@@ -29,6 +29,7 @@ import kotlinx.serialization.Transient
 public sealed interface BuildFile {
     public val dependencies: Map<String, List<Dependency>>
     public val enableCompose: Boolean
+    public val enableMetro: Boolean
 }
 
 @Serializable
@@ -45,6 +46,7 @@ public data class AndroidAppBuildFile(
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
     override val namespace: String? = null,
     override val enableCompose: Boolean = false,
+    override val enableMetro: Boolean = false,
 ): AndroidBuildFile
 
 @Serializable
@@ -53,6 +55,7 @@ public data class AndroidLibraryBuildFile(
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
     override val namespace: String? = null,
     override val enableCompose: Boolean = false,
+    override val enableMetro: Boolean = false,
 ): AndroidBuildFile
 
 @Serializable
@@ -60,13 +63,15 @@ public data class AndroidLibraryBuildFile(
 public data class JavaLibraryBuildFile(
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
     override val enableCompose: Boolean = false,
+    override val enableMetro: Boolean = false,
 ): BuildFile
 
 @Serializable
 @SerialName("atprotoLibrary")
 public data class ATProtoLibrary(
     override val dependencies: Map<String, List<Dependency>>,
-    val lexicons: List<String>
+    val lexicons: List<String>,
+    override val enableMetro: Boolean = false,
 ): BuildFile {
 
     @Transient

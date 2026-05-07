@@ -36,7 +36,7 @@ import org.gradle.api.Project
 public fun Project.androidBaseConfiguration(buildFile: AndroidBuildFile) {
     baseProjectConfiguration(buildFile) // All base project configuration
     jvmProjectConfiguration() // All JVM configuration
-    kotlinProjectConfiguration() // All Kotlin configuration
+    kotlinProjectConfiguration(buildFile) // All Kotlin configuration
 }
 
 /**
