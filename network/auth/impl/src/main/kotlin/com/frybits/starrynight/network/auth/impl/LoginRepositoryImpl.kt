@@ -19,41 +19,61 @@
 package com.frybits.starrynight.network.auth.impl
 
 import android.util.Log
+import com.atproto.identity.resolveDid.ResolveDidApi
+import com.atproto.identity.resolveHandle.ResolveHandleApi
 import com.atproto.server.createSession.CreateSessionApi
 import com.atproto.server.createSession.CreateSessionRequest
 import com.frybits.starrynight.network.core.LoginRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
+import retrofit2.Retrofit
 
 private val TAG = LoginRepository::class.java.simpleName
 
 @ContributesBinding(AppScope::class)
 @Inject
 internal class LoginRepositoryImpl(
-    private val createSessionApi: CreateSessionApi
+    private val retrofit: Retrofit
 ) : LoginRepository {
     override suspend fun createSession(
         identifier: String,
         password: String
     ): Result<Unit> {
-        val result = createSessionApi.createSession(
-            requestBody = CreateSessionRequest(
-                password = password,
-                identifier = identifier
-            )
-        )
+//        val handleResponse = resolveHandleApi.resolveHandle(identifier)
+//        Log.d(TAG, "Respons: ${handleResponse.code()}")
+//        Log.d(TAG, "Message: ${handleResponse.errorBody().use { it?.string() }}")
+//        val did = handleResponse.body()?.did ?: return Result.failure(Exception())
+//
+//        Log.d(TAG, "Got did: $did")
 
-        if (result.isSuccessful) {
-            Log.d(TAG, "Success")
-            Log.d(TAG, result.body().toString())
-            return Result.success(Unit)
-        } else {
-            Log.d(TAG, "Fail")
-            Log.d(TAG, "HTTP Code: ${result.code()}")
-            Log.d(TAG, "HTTP Error: ${result.message()}")
-            Log.d(TAG, result.errorBody().use { it?.string() }.toString())
-            return Result.failure(Exception(result.message()))
-        }
+//        val didResponse = resolveDidApi.resolveDid("did:plc:cguwfiesizkt4ssgx6q7d6yy")
+//        Log.d(TAG, "Code: ${didResponse.code()}")
+//        val service = didResponse.body()
+//        Log.d(TAG, "Got did doc: ${service?.didDoc}")
+
+        return Result.success(Unit)
+
+//        val result = createSessionApi.createSession(
+//            requestBody = CreateSessionRequest(
+//                password = password,
+//                identifier = identifier
+//            )
+//        )
+//
+//        if (result.isSuccessful) {
+//            Log.d(TAG, "Success")
+//            Log.d(TAG, result.body().toString())
+//            return Result.success(Unit)
+//        } else {
+//            Log.d(TAG, "Fail")
+//            Log.d(TAG, "HTTP Code: ${result.code()}")
+//            Log.d(TAG, "HTTP Error: ${result.message()}")
+//            Log.d(TAG, result.errorBody().use { it?.string() }.toString())
+//            return Result.failure(Exception(result.message()))
+//        }
     }
 }

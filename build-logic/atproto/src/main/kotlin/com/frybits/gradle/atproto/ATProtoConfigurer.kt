@@ -47,7 +47,6 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
             kotlinProjectConfiguration() // All Kotlin configuration
 
             val lexiconPullTask = tasks.register<LexiconPullTask>("lexiconPull") {
-                endpoint.set("bsky.social")
                 outputDir.set(layout.buildDirectory.dir("lexicons"))
                 nsids.set(buildFile.lexicons)
             }

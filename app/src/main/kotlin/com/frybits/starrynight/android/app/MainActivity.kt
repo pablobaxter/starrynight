@@ -21,12 +21,14 @@ package com.frybits.starrynight.android.app
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import com.frybits.starrynight.network.core.LoginRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.android.ActivityKey
+import kotlinx.coroutines.launch
 
 private val TAG = MainActivity::class.java.simpleName
 
@@ -37,5 +39,8 @@ internal class MainActivity(private val loginRepository: LoginRepository): Compo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycleScope.launch {
+            loginRepository.createSession("pablobaxter.com", "blah")
+        }
     }
 }

@@ -34,7 +34,11 @@ import com.frybits.gradle.atproto.lexicon.categories.SubscriptionField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
 import com.frybits.gradle.atproto.utils.lexiconJson
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -75,9 +79,6 @@ public abstract class LexiconPullTask @Inject constructor(
     }
 
     @get:Input
-    public abstract val endpoint: Property<String>
-
-    @get:Input
     public abstract val nsids: SetProperty<String>
 
     @get:OutputDirectory
@@ -86,7 +87,6 @@ public abstract class LexiconPullTask @Inject constructor(
     @TaskAction
     internal fun pull() {
         if (nsids.get().isEmpty()) throw StopExecutionException("No NSIDs found, skipping lexicon pull task.")
-        if (endpoint.get().isBlank()) throw StopExecutionException("No endpoint, skipping lexicon pull task.")
         val queue = workExecutor.noIsolation()
 
         // Queue for current NSIDs to check
@@ -106,7 +106,6 @@ public abstract class LexiconPullTask @Inject constructor(
 
                 // Queue the download for the lexicon associated to this NSID
                 queue.submit(PullLexiconWorker::class) {
-                    host.set(endpoint.get())
                     destinationFile.set(outputDir.file(nsid))
                     lexiconPath.set(nsid)
                 }
@@ -206,7 +205,6 @@ public abstract class LexiconPullTask @Inject constructor(
 }
 
 private interface PullLexiconParameters : WorkParameters {
-    val host: Property<String>
     val lexiconPath: Property<String>
     val destinationFile: RegularFileProperty
 }
@@ -245,20 +243,40 @@ private abstract class PullLexiconWorker : WorkAction<PullLexiconParameters> {
 
         logger.info("DNS TXT record for $nsid: $did")
 
-        val host = parameters.host.get()
+        val didSplit = did.split(':')
+        if (didSplit.size < 3) {
+            logger.error("Unable to determine did type for $did")
+            return
+        }
+        val resolverUri = when (val type = didSplit[1]) {
+            "plc" -> {
+                logger.debug("Got plc type")
+                URI(
+                    "https",
+                    "plc.directory",
+                    "/$did",
+                    null,
+                    null
+                )
+            }
+            "web" -> {
+                logger.debug("Got web type")
+                URI(
+                    "https",
+                    didSplit[2],
+                    "/.well-known/did.json",
+                    null,
+                    null
+                )
+            }
+            else -> {
+                logger.error("Unknown Did type $type for Did: $did")
+                return
+            }
+        }
 
-        val uri = URI(
-            "https",
-            host,
-            "/xrpc/com.atproto.repo.getRecord",
-            "repo=$did&collection=com.atproto.lexicon.schema&rkey=$nsid",
-            null
-        )
-
-        logger.info("Requesting lexicon from $uri")
-
-        val request = HttpRequest.newBuilder()
-            .uri(uri)
+        val didDocRequest = HttpRequest.newBuilder()
+            .uri(resolverUri)
             .header("Content-Type", "application/json")
             .GET()
             .build()
@@ -267,6 +285,50 @@ private abstract class PullLexiconWorker : WorkAction<PullLexiconParameters> {
             .connectTimeout(30.seconds.toJavaDuration())
             .followRedirects(HttpClient.Redirect.NORMAL)
             .build().use { client ->
+                val didDocResponse = client.send(didDocRequest, HttpResponse.BodyHandlers.ofString())
+                val host = when (val code = didDocResponse.statusCode()) {
+                    HttpURLConnection.HTTP_OK -> {
+                        val didDoc = Json.decodeFromString<JsonObject>(didDocResponse.body())
+                        val services = didDoc["service"]?.jsonArray ?: run {
+                            logger.error("No services found for ${didDocRequest.uri()}")
+                            return@use
+                        }
+                        val pds = services.filterIsInstance<JsonObject>()
+                            .firstOrNull { it["id"]?.jsonPrimitive?.content == "#atproto_pds" && it["type"]?.jsonPrimitive?.content == "AtprotoPersonalDataServer" }
+                            ?: run {
+                                logger.error("No PDS found for ${didDocRequest.uri()}")
+                                return@use
+                            }
+                        val serviceEndpoint = pds["serviceEndpoint"]?.jsonPrimitive?.content ?: run {
+                            logger.error("No service endpoint found for ${didDocRequest.uri()}")
+                            return@use
+                        }
+                        logger.info("Got service endpoint: $serviceEndpoint")
+
+                        URI(serviceEndpoint)
+                    }
+                    else -> {
+                        logger.error("Error while resolving did for $nsid. HTTP code: $code, response: ${didDocResponse.body()}")
+                        return@use
+                    }
+                }
+
+                val uri = URI(
+                    host.scheme,
+                    host.authority,
+                    "/xrpc/com.atproto.repo.getRecord",
+                    "repo=$did&collection=com.atproto.lexicon.schema&rkey=$nsid",
+                    null
+                )
+
+                logger.info("Requesting lexicon from $uri")
+
+                val request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .header("Content-Type", "application/json")
+                    .GET()
+                    .build()
+
                 val response = client.send(request, HttpResponse.BodyHandlers.ofString())
                 when (val code = response.statusCode()) {
                     HttpURLConnection.HTTP_OK -> {

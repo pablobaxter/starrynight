@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.network.core.impl
+package com.frybits.starrynight.network.core.impl.wiring
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
@@ -34,7 +34,7 @@ public object CoreNetworkBindings {
 
     @Provides
     public fun provideJson(): Json {
-        return Json
+        return Json.Default
     }
 
     @Provides

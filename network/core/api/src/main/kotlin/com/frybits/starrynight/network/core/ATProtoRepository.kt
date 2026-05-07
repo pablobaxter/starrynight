@@ -16,28 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.network.auth.impl.wiring
+package com.frybits.starrynight.network.core
 
-import com.atproto.identity.resolveDid.ResolveDidApi
-import com.atproto.identity.resolveHandle.ResolveHandleApi
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.BindingContainer
-import dev.zacsweers.metro.ContributesTo
-import dev.zacsweers.metro.Provides
-import dev.zacsweers.metro.SingleIn
-import retrofit2.Retrofit
-import retrofit2.create
+import com.frybits.starrynight.atproto.models.strings.Did
 
-@ContributesTo(AppScope::class)
-@BindingContainer
-public object AuthWiring {
+public interface ATProtoRepository {
 
-    @Provides
-    @SingleIn(AppScope::class)
-    public fun provideResolveHandleApi(retrofit: Retrofit): ResolveHandleApi {
-        return retrofit.newBuilder()
-            .baseUrl("https://bsky.social/xrpc/")
-            .build()
-            .create()
-    }
+    public suspend fun resolveHandle(handle: String): Did
 }
