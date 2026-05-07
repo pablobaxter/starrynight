@@ -21,6 +21,23 @@ pluginManagement {
     }
 
     includeBuild("build-logic")
+
+    buildscript {
+        val r8Version = providers.gradleProperty("com.frybits.r8.version")
+        repositories {
+            mavenCentral()
+            if (r8Version.isPresent) {
+                maven {
+                    url = uri("https://storage.googleapis.com/r8-releases/raw")
+                }
+            }
+        }
+        dependencies {
+            if (r8Version.isPresent) {
+                classpath(r8Version.map { "com.android.tools:r8:$it" })
+            }
+        }
+    }
 }
 
 plugins {

@@ -33,7 +33,7 @@ import java.security.MessageDigest
 internal fun Project.rootProjectConfiguration() {
     require(isRoot) { "This method should only be used with the root project" }
     logVersions()
-    checkBuildFileModification()
+    checkForBuildFile()
 }
 
 // Helper function to log the versions of major tools used for the build
@@ -51,13 +51,7 @@ private fun Project.logVersions() {
     logger.lifecycle("Versions: ${list.joinToString(separator = ", ", prefix = "[ ", postfix = " ]")}")
 }
 
-// Ensure that nothing new is added to the root build file
-private fun Project.checkBuildFileModification() {
-    val digest = MessageDigest.getInstance("SHA-256")
-    val buildFileUnmodified = providers.fileContents(layout.projectDirectory.file(buildFile.name)).asBytes
-        .zip(providers.gradleProperty("com.frybits.root.build.hash")) { bytes, hash ->
-            return@zip digest.digest(bytes).toHexString() == hash
-        }
-
-    require(buildFileUnmodified.get()) { "$buildFile should not be modified" }
+// Ensure that build file does not exist
+private fun Project.checkForBuildFile() {
+    require(!layout.projectDirectory.file(buildFile.name).asFile.exists()) { "Root build file should not exist" }
 }
