@@ -21,6 +21,8 @@ dependencies {
 
     compileOnly(logic.kotlin.gradle)
 
+    compileOnly(logic.metro)
+
     implementation(logic.kotlinx.serialization.core)
 
     testImplementation(logic.kotlin.gradle)

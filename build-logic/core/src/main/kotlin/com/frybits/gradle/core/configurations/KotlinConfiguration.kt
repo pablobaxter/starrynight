@@ -19,8 +19,11 @@
 package com.frybits.gradle.core.configurations
 
 import com.frybits.gradle.utils.kotlinJvmTarget
+import dev.zacsweers.metro.gradle.ExperimentalMetroGradleApi
+import dev.zacsweers.metro.gradle.MetroPluginExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
@@ -31,6 +34,7 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 public fun Project.kotlinProjectConfiguration() {
     apply(plugin = "kotlinx-serialization")
     apply(plugin = "com.google.devtools.ksp")
+    configureMetro()
 
     extensions.configure<HasConfigurableKotlinCompilerOptions<KotlinJvmCompilerOptions>>("kotlin") {
         compilerOptions {
@@ -41,5 +45,13 @@ public fun Project.kotlinProjectConfiguration() {
 
     kotlinExtension.run {
         explicitApi()
+    }
+}
+
+@OptIn(ExperimentalMetroGradleApi::class)
+private fun Project.configureMetro() {
+    apply(plugin = "dev.zacsweers.metro")
+    configure<MetroPluginExtension> {
+        generateContributionProviders.set(true)
     }
 }

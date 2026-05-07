@@ -10,7 +10,6 @@ dependencies {
     compileOnly(gradleKotlinDsl())
 
     compileOnly(logic.agp.zip(providers.gradleProperty("agp")) { lib, version -> "$lib:$version" })
-    compileOnly(logic.metro)
 }
 
 kotlin {
