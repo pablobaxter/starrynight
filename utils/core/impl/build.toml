@@ -1,0 +1,10 @@
+# Project type
+type = "androidLibrary"
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+implementation = [
+    { type = "project", name = ":utils:core:api" },
+    { type = "library", name = "kotlinx.coroutines.core" },
+]

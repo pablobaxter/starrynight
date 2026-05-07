@@ -6,7 +6,9 @@ type = "androidLibrary"
 
 implementation = [
     { type = "project", name = ":atproto" },
+    { type = "project", name = ":utils:core:api" },
     { type = "project", name = ":network:core:api" },
+    { type = "library", name = "kotlinx.coroutines.core" },
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
     { type = "library", name = "retrofit" },

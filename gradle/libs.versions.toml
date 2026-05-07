@@ -3,6 +3,7 @@ androidx-core-version="1.18.0"
 activity-compose-version = "1.13.0"
 kotlin-version = "2.3.20"
 kotlinx-serialization = "1.10.0"
+kotlinx-coroutines = "1.10.0"
 compose-bom-version = "2026.03.01"
 google-material="1.13.0"
 retrofit = "3.0.0"
@@ -15,7 +16,10 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 metrox-android = { group = "dev.zacsweers.metro", name = "metrox-android", version.ref = "metro-version" }
+metro-runtime = { group = "dev.zacsweers.metro", name = "runtime-jvm", version.ref = "metro-version" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 

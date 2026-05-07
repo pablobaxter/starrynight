@@ -20,12 +20,14 @@ package com.frybits.starrynight.android.app
 
 import android.app.Application
 import com.frybits.starrynight.android.app.di.StarryNightGraph
-import dev.zacsweers.metro.createGraph
+import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.android.MetroAppComponentProviders
 import dev.zacsweers.metrox.android.MetroApplication
 
-internal class StarryNightApp: Application(), MetroApplication {
-    private val appGraph by lazy { createGraph<StarryNightGraph>() }
+internal class StarryNightApp : Application(), MetroApplication {
+    private val appGraph by lazy {
+        createGraphFactory<StarryNightGraph.Factory>().create(this)
+    }
 
     override val appComponentProviders: MetroAppComponentProviders
         get() = appGraph

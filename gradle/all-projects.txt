@@ -4,3 +4,5 @@
 :network:auth:impl
 :network:core:api
 :network:core:impl
+:utils:core:api
+:utils:core:impl

@@ -1,5 +1,5 @@
 # Project type
-type = "androidLibrary"
+type = "javaLibrary"
 
 # Libraries to be used (maven address or version catalog name)
 [dependencies]

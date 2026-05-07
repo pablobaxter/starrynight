@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app.di
+package com.frybits.starrynight.android.utils.core.impl.wiring
 
 import android.app.Application
+import android.content.Context
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.DependencyGraph
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
-import dev.zacsweers.metrox.android.MetroAppComponentProviders
+import dev.zacsweers.metro.SingleIn
 
-@DependencyGraph(AppScope::class)
-internal interface StarryNightGraph: MetroAppComponentProviders {
+@ContributesTo(AppScope::class)
+@BindingContainer
+public object AndroidUtilsBindings {
 
-    @DependencyGraph.Factory
-    interface Factory {
-        fun create(
-            @Provides application: Application
-        ): StarryNightGraph
-    }
+    @Provides
+    @SingleIn(AppScope::class)
+    public fun provideApplicationContext(application: Application): Context = application
 }

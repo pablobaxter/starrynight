@@ -16,19 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.network.core.impl
+package com.frybits.starrynight.utils.core
 
-import com.frybits.starrynight.atproto.models.strings.Did
-import com.frybits.starrynight.network.core.ATProtoRepository
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.Qualifier
 
-@ContributesBinding(AppScope::class)
-@Inject
-internal class ATProtoRepositoryImpl(): ATProtoRepository {
-
-    override suspend fun resolveHandle(handle: String): Did {
-
-    }
-}
+@Target(
+    AnnotationTarget.CLASS,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.VALUE_PARAMETER,
+    AnnotationTarget.TYPE,
+)
+@Qualifier
+public annotation class IODispatcher

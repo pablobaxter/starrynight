@@ -16,42 +16,42 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.network.core.impl.wiring
+package com.frybits.starrynight.android.utils.core.impl.wiring
 
+import com.frybits.starrynight.utils.core.DefaultDispatcher
+import com.frybits.starrynight.utils.core.IODispatcher
+import com.frybits.starrynight.utils.core.MainDispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Named
 import dev.zacsweers.metro.Provides
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 @ContributesTo(AppScope::class)
 @BindingContainer
-public object CoreNetworkBindings {
+public object CoreUtilsBindings {
 
     @Provides
-    public fun provideJson(): Json {
-        return Json.Default
+    @SingleIn(AppScope::class)
+    @MainDispatcher
+    public fun providesMainDispatcher(): CoroutineDispatcher {
+        return Dispatchers.Main.immediate
     }
 
     @Provides
-    public fun provideOkHttp(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .build()
+    @SingleIn(AppScope::class)
+    @IODispatcher
+    public fun providesIODispatcher(): CoroutineDispatcher {
+        return Dispatchers.IO
     }
 
     @Provides
-    public fun provideRetrofitClient(
-        okHttpClient: OkHttpClient,
-        json: Json
-    ): Retrofit {
-        return Retrofit.Builder()
-            .client(okHttpClient)
-            .baseUrl("https://public.api.bsky.app/xrpc/")
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
+    @SingleIn(AppScope::class)
+    @DefaultDispatcher
+    public fun providesDefaultDispatcher(): CoroutineDispatcher {
+        return Dispatchers.Default
     }
 }

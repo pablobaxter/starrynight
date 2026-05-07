@@ -18,11 +18,15 @@ implementation = [
     { type = "library", name = "androidx.core" },
     { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },
+    { type = "library", name = "kotlinx.coroutines.android" },
+
+    # Api modules
     { type = "project", name = ":network:auth:api" },
 
     # Impl modules
     { type = "project", name = ":network:core:impl" },
-    { type = "project", name = ":network:auth:impl" }
+    { type = "project", name = ":network:auth:impl" },
+    { type = "project", name = ":utils:core:impl" },
 ]
 
 # Used to add libraries into the "api" configuration

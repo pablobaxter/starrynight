@@ -22,5 +22,5 @@ import com.frybits.starrynight.atproto.models.strings.Did
 
 public interface ATProtoRepository {
 
-    public suspend fun resolveHandle(handle: String): Did
+    public suspend fun resolveHandle(handle: String): Result<Did>
 }

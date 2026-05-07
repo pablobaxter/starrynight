@@ -16,20 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.network.auth.impl
+package com.frybits.starrynight.android.network.auth.impl
 
-import android.util.Log
-import com.atproto.identity.resolveDid.ResolveDidApi
-import com.atproto.identity.resolveHandle.ResolveHandleApi
-import com.atproto.server.createSession.CreateSessionApi
-import com.atproto.server.createSession.CreateSessionRequest
+import com.frybits.starrynight.network.core.ATProtoRepository
 import com.frybits.starrynight.network.core.LoginRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
 import retrofit2.Retrofit
 
 private val TAG = LoginRepository::class.java.simpleName
@@ -37,12 +30,14 @@ private val TAG = LoginRepository::class.java.simpleName
 @ContributesBinding(AppScope::class)
 @Inject
 internal class LoginRepositoryImpl(
-    private val retrofit: Retrofit
+    private val retrofit: Retrofit,
+    private val atprotoRepository: ATProtoRepository
 ) : LoginRepository {
     override suspend fun createSession(
         identifier: String,
         password: String
     ): Result<Unit> {
+        atprotoRepository.resolveHandle(identifier)
 //        val handleResponse = resolveHandleApi.resolveHandle(identifier)
 //        Log.d(TAG, "Respons: ${handleResponse.code()}")
 //        Log.d(TAG, "Message: ${handleResponse.errorBody().use { it?.string() }}")
