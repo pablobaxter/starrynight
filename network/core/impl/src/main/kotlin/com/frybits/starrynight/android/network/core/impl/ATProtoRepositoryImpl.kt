@@ -22,9 +22,11 @@ import android.annotation.SuppressLint
 import android.net.DnsResolver
 import android.os.CancellationSignal
 import android.util.Log
+import com.frybits.starrynight.android.network.core.impl.dns.TXT
+import com.frybits.starrynight.android.network.core.impl.dns.parseMessage
 import com.frybits.starrynight.atproto.models.strings.Did
 import com.frybits.starrynight.network.core.ATProtoRepository
-import com.frybits.starrynight.android.network.core.impl.dns.TXT
+import com.frybits.starrynight.network.core.ATProtoServicesApi
 import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -34,11 +36,6 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.coroutines.executeAsync
-import java.net.URL
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -47,32 +44,19 @@ private const val LOG_TAG = "ATProtoRepository"
 @ContributesBinding(AppScope::class)
 @Inject
 internal class ATProtoRepositoryImpl(
-    private val okHttpClient: OkHttpClient,
+    private val atProtoServicesApi: ATProtoServicesApi,
     private val dnsResolver: DnsResolver,
-    @param:IODispatcher private val ioDispatcher: CoroutineDispatcher,
+    @IODispatcher ioDispatcher: CoroutineDispatcher,
 ): ATProtoRepository {
 
     private val limitedDispatcherExecutor = ioDispatcher.limitedParallelism(1).asExecutor()
 
     override suspend fun resolveHandle(handle: String): Result<Did> {
-        return runCatching { resolveHandleViaDNS(handle) }.recover {
+        return runCatching { resolveHandleViaDNS(handle) }.recoverCatching {
             currentCoroutineContext().ensureActive()
             Log.w(LOG_TAG, "Failed resolution via dns", it)
 
-            return@recover resolveHandleViaWellKnown(handle)
-        }
-    }
-
-    private suspend fun resolveHandleViaWellKnown(handle: String): Did {
-        val request = Request.Builder()
-            .url(URL("https://$handle/.well-known/atproto-did"))
-            .get()
-            .build()
-
-        return okHttpClient.newCall(request).executeAsync().use { response ->
-            withContext(ioDispatcher) {
-                response.body.use { Did(it.string()) }
-            }
+            return@recoverCatching Did(atProtoServicesApi.resolveHandleViaWellKnown(handle))
         }
     }
 

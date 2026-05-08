@@ -20,6 +20,7 @@ package com.frybits.starrynight.android.network.core.impl.wiring
 
 import android.app.Application
 import android.net.DnsResolver
+import com.frybits.starrynight.network.core.ATProtoServicesApi
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
@@ -30,6 +31,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.create
 
 @ContributesTo(AppScope::class)
 @BindingContainer
@@ -56,13 +58,19 @@ public object CoreNetworkBindings {
 
     @Provides
     @SingleIn(AppScope::class)
+    public fun provideATProtoServicesApi(retrofit: Retrofit): ATProtoServicesApi {
+        return retrofit.create()
+    }
+
+    @Provides
+    @SingleIn(AppScope::class)
     public fun provideRetrofitClient(
         okHttpClient: OkHttpClient,
         json: Json
     ): Retrofit {
         return Retrofit.Builder()
             .client(okHttpClient)
-            .baseUrl("https://public.api.bsky.app/xrpc/")
+            .baseUrl("https://frybits.com")
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }

@@ -40,7 +40,7 @@ internal class MainActivity(private val loginRepository: LoginRepository): Compo
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
-            loginRepository.createSession("pablobaxter.com", "blah")
+            loginRepository.createSession("foobar.blah", "blah")
         }
     }
 }

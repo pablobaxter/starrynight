@@ -16,18 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.network.core.impl
+package com.frybits.starrynight.android.network.core.impl.dns
 
-import com.frybits.starrynight.android.network.core.impl.dns.A
-import com.frybits.starrynight.android.network.core.impl.dns.AAAA
-import com.frybits.starrynight.android.network.core.impl.dns.CNAME
-import com.frybits.starrynight.android.network.core.impl.dns.DnsHeader
-import com.frybits.starrynight.android.network.core.impl.dns.DnsMessage
-import com.frybits.starrynight.android.network.core.impl.dns.DnsQuestion
-import com.frybits.starrynight.android.network.core.impl.dns.DnsResourceRecord
-import com.frybits.starrynight.android.network.core.impl.dns.MX
-import com.frybits.starrynight.android.network.core.impl.dns.NS
-import com.frybits.starrynight.android.network.core.impl.dns.TXT
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

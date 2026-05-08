@@ -5,5 +5,6 @@ type = "javaLibrary"
 [dependencies]
 
 implementation = [
-    { type = "project", name = ":atproto" }
+    { type = "project", name = ":atproto" },
+    { type = "library", name = "retrofit" },
 ]
