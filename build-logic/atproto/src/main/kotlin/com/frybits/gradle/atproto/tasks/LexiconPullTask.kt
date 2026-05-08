@@ -224,16 +224,20 @@ private abstract class PullLexiconWorker : WorkAction<PullLexiconParameters> {
 
         val env = mapOf("java.naming.factory.initial" to "com.sun.jndi.dns.DnsContextFactory")
         val ictx = InitialDirContext(Hashtable(env))
-        val attrs = ictx.getAttributes(authority, arrayOf("TXT"))
+        val attrs = try {
+            ictx.getAttributes(authority, arrayOf("TXT"))
+        } finally {
+            ictx.close()
+        }
 
         // Search for the correct record
-        val did = attrs.get("TXT").all.toList().mapNotNull { txt ->
-            val didRecord = txt.toString()
+        val did = attrs.get("TXT")?.all?.toList()?.mapNotNull { txt ->
+            val didRecord = txt.toString().trim('"')
             if (didRecord.startsWith("did=")) {
                 return@mapNotNull didRecord.substringAfter('=')
             }
             return@mapNotNull null
-        }.firstOrNull()
+        }?.firstOrNull()
 
         // Exit early for missing did
         if (did == null) {
@@ -261,10 +265,12 @@ private abstract class PullLexiconWorker : WorkAction<PullLexiconParameters> {
             }
             "web" -> {
                 logger.debug("Got web type")
+                val path = didSplit.drop(3).ifEmpty { listOf(".well-known") }
+                    .joinToString("/", prefix = "/", postfix = "/")
                 URI(
                     "https",
-                    didSplit[2],
-                    "/.well-known/did.json",
+                    didSplit[2].replace("%3A", ":"),
+                    "${path}did.json",
                     null,
                     null
                 )
@@ -277,7 +283,7 @@ private abstract class PullLexiconWorker : WorkAction<PullLexiconParameters> {
 
         val didDocRequest = HttpRequest.newBuilder()
             .uri(resolverUri)
-            .header("Content-Type", "application/json")
+            .header("Accept", "application/json")
             .GET()
             .build()
 

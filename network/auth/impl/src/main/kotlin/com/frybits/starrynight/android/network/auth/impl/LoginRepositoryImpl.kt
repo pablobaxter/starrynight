@@ -18,6 +18,7 @@
 
 package com.frybits.starrynight.android.network.auth.impl
 
+import android.util.Log
 import com.frybits.starrynight.network.core.ATProtoRepository
 import com.frybits.starrynight.network.core.LoginRepository
 import dev.zacsweers.metro.AppScope
@@ -37,7 +38,9 @@ internal class LoginRepositoryImpl(
         identifier: String,
         password: String
     ): Result<Unit> {
-        atprotoRepository.resolveHandle(identifier)
+        val result = atprotoRepository.resolveHandle(identifier)
+
+        Log.d("Blah", result.getOrThrow().toString())
 //        val handleResponse = resolveHandleApi.resolveHandle(identifier)
 //        Log.d(TAG, "Respons: ${handleResponse.code()}")
 //        Log.d(TAG, "Message: ${handleResponse.errorBody().use { it?.string() }}")

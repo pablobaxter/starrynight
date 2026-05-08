@@ -6,6 +6,7 @@ kotlinx-serialization = "1.10.0"
 kotlinx-coroutines = "1.10.0"
 compose-bom-version = "2026.03.01"
 google-material="1.13.0"
+okhttp-bom = "5.3.0"
 retrofit = "3.0.0"
 
 [libraries]
@@ -20,6 +21,9 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 metrox-android = { group = "dev.zacsweers.metro", name = "metrox-android", version.ref = "metro-version" }
 metro-runtime = { group = "dev.zacsweers.metro", name = "runtime-jvm", version.ref = "metro-version" }
+okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp-bom" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }
+okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 

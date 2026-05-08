@@ -13,6 +13,9 @@ implementation = [
     { type = "library", name = "kotlinx.coroutines.core" },
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
+    { type = "platform", module = { type = "library", name = "okhttp.bom" } },
+    { type = "library", name = "okhttp" },
+    { type = "library", name = "okhttp.coroutines" },
     { type = "library", name = "retrofit" },
     { type = "library", name = "retrofit.kotlin.serialization" },
 ]
