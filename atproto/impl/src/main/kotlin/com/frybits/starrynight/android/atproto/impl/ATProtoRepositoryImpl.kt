@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.atproto.network.impl
+package com.frybits.starrynight.android.atproto.impl
 
 import com.atproto.server.createSession.CreateSessionApi
 import com.atproto.server.createSession.CreateSessionRequest
 import com.frybits.starrynight.android.atproto.models.strings.Did
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
-import com.frybits.starrynight.atproto.network.ATProtoRepository
-import com.frybits.starrynight.atproto.network.models.ATProtoSession
-import com.frybits.starrynight.atproto.network.models.PlcData
-import com.frybits.starrynight.atproto.network.models.Service
+import com.frybits.starrynight.atproto.ATProtoRepository
+import com.frybits.starrynight.atproto.models.ATProtoSession
+import com.frybits.starrynight.atproto.models.PlcData
+import com.frybits.starrynight.atproto.models.Service
 import com.frybits.starrynight.network.DnsRecordRepository
 import com.frybits.starrynight.network.models.TXT
 import dev.zacsweers.metro.AppScope

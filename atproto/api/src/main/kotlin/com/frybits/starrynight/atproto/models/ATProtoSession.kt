@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.atproto.network.models
+package com.frybits.starrynight.atproto.models
 
 public data class ATProtoSession(
     val id: String,

@@ -5,5 +5,7 @@
 :auth:impl
 :network:api
 :network:impl
+:persistence:api
+:persistence:impl
 :utils:core:api
 :utils:core:impl

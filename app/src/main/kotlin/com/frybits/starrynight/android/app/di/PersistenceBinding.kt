@@ -16,22 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.atproto.network
+package com.frybits.starrynight.android.app.di
 
-import com.frybits.starrynight.atproto.models.PlcData
-import kotlinx.serialization.json.JsonObject
-import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
+import android.content.Context
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.frybits.starrynight.android.app.persistence.StarryNightAppDatabase
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 
-internal interface ATProtoNetworkApi {
+@ContributesTo(AppScope::class)
+@BindingContainer
+public object PersistenceBinding {
 
-    @GET("https://{host}/.well-known/atproto-did")
-    suspend fun resolveHandleViaWellKnown(@Path("host") host: String): Response<String>
-
-    @GET("https://plc.directory/{did}/data")
-    suspend fun resolveDidViaPlcDirectory(@Path("did") did: String): Response<PlcData>
-
-    @GET("https://{host}/{user}/did.json")
-    suspend fun resolveDidViaHost(@Path("host") host: String, @Path("user", encoded = true) user: String): Response<JsonObject>
+    @Provides
+    @SingleIn(AppScope::class)
+    internal fun provideDatabase(context: Context): StarryNightAppDatabase {
+        return Room.databaseBuilder<StarryNightAppDatabase>(
+            context,
+            "app-database"
+        ).build()
+    }
 }

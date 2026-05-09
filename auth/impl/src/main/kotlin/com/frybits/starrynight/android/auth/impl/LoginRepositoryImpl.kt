@@ -19,7 +19,7 @@
 package com.frybits.starrynight.android.auth.impl
 
 import android.util.Log
-import com.frybits.starrynight.atproto.network.ATProtoRepository
+import com.frybits.starrynight.atproto.ATProtoRepository
 import com.frybits.starrynight.auth.LoginRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding

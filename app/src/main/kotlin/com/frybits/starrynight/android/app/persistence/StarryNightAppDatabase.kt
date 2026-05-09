@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.atproto.network
+package com.frybits.starrynight.android.app.persistence
 
-import com.frybits.starrynight.atproto.network.models.ATProtoSession
-import com.frybits.starrynight.atproto.network.models.PlcData
+import androidx.room.Database
+import androidx.room.RoomDatabase
 
-public interface ATProtoRepository {
+@Database(
+    entities = [
 
-    public suspend fun resolveHandle(username: String): Result<String>
-
-    public suspend fun resolveDid(did: String): Result<PlcData>
-
-    public suspend fun createSession(pds: String, username: String, password: String): Result<ATProtoSession>
-}
+   ],
+    version = 1
+)
+internal abstract class StarryNightAppDatabase : RoomDatabase()

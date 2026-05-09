@@ -1,0 +1,11 @@
+# Project type
+type = "androidLibrary"
+
+enableMetro = true
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+implementation = [
+    { type = "project", name = ":persistence:api" },
+]

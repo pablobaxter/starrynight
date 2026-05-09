@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,21 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.atproto.network.models
+package com.frybits.starrynight.atproto
 
-import kotlinx.serialization.Serializable
+import com.frybits.starrynight.atproto.models.ATProtoSession
+import com.frybits.starrynight.atproto.models.PlcData
 
-@Serializable
-public data class PlcData(
-    val did: String,
-    val rotationKeys: List<String>,
-    val verificationMethods: Map<String, String>,
-    val alsoKnownAs: List<String>,
-    val services: Map<String, Service>
-)
+public interface ATProtoRepository {
 
-@Serializable
-public data class Service(
-    val type: String,
-    val endpoint: String
-)
+    public suspend fun resolveHandle(username: String): Result<String>
+
+    public suspend fun resolveDid(did: String): Result<PlcData>
+
+    public suspend fun createSession(pds: String, username: String, password: String): Result<ATProtoSession>
+}
