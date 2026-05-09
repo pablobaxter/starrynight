@@ -16,19 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app.persistence
+package com.frybits.starrynight.android.atproto.db.models
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import com.frybits.starrynight.android.atproto.db.DidDao
-import com.frybits.starrynight.android.atproto.db.models.ResolvedDid
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
-@Database(
-    entities = [
-        ResolvedDid::class
-   ], version = 1
+@Entity(indices = [Index(value = ["did"])])
+public data class ResolvedDid(
+    @PrimaryKey val handle: String,
+    val did: String
 )
-internal abstract class StarryNightAppDatabase : RoomDatabase() {
-
-    abstract fun didDao(): DidDao
-}
