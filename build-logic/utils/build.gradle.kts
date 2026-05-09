@@ -8,6 +8,10 @@ testing {
     suites {
         val test by getting(JvmTestSuite::class) {
             useKotlinTest()
+
+            dependencies {
+                implementation(logic.kotlin.gradle)
+            }
         }
     }
 }
@@ -17,8 +21,6 @@ dependencies {
     compileOnly(gradleKotlinDsl())
 
     compileOnly(logic.kotlin.gradle)
-
-    testImplementation(logic.kotlin.gradle)
 }
 
 kotlin {

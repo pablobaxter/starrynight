@@ -9,6 +9,10 @@ testing {
     suites {
         val test by getting(JvmTestSuite::class) {
             useKotlinTest()
+
+            dependencies {
+                implementation(logic.kotlin.gradle)
+            }
         }
     }
 }
@@ -24,8 +28,6 @@ dependencies {
     compileOnly(logic.metro)
 
     implementation(logic.kotlinx.serialization.core)
-
-    testImplementation(logic.kotlin.gradle)
 }
 
 kotlin {

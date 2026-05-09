@@ -1,28 +1,28 @@
 [versions]
-androidx-core-version="1.18.0"
 activity-compose-version = "1.13.0"
-kotlin-version = "2.3.20"
-kotlinx-serialization = "1.10.0"
-kotlinx-coroutines = "1.10.0"
-compose-bom-version = "2026.03.01"
+androidx-core-version="1.18.0"
+compose-bom-version = "2026.05.00"
 google-material="1.13.0"
-okhttp-bom = "5.3.0"
+kotlin-version = "2.3.21"
+kotlinx-coroutines = "1.10.2"
+kotlinx-serialization = "1.11.0"
+okhttp-bom = "5.3.2"
 retrofit = "3.0.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose-version" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom-version" }
-androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-version" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-version" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 metrox-android = { group = "dev.zacsweers.metro", name = "metrox-android", version.ref = "metro-version" }
 metro-runtime = { group = "dev.zacsweers.metro", name = "runtime-jvm", version.ref = "metro-version" }
-okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp-bom" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }
+okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp-bom" }
 okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
@@ -32,9 +32,9 @@ retrofit-scalar = { group = "com.squareup.retrofit2", name = "converter-scalars"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
+android-cache-fix = { id = "org.gradle.android.cache-fix", version = "3.0.3" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-version" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.3.20" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.3.21" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-version" }
-android-cache-fix = { id = "org.gradle.android.cache-fix", version = "3.0.3" }
