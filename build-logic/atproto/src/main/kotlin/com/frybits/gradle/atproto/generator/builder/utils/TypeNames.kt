@@ -23,6 +23,9 @@ import com.squareup.kotlinpoet.ClassName
 private const val STRING_PACKAGE_NAME = "com.frybits.starrynight.android.atproto.models.strings"
 
 internal object TypeNames {
+
+    val Retrofit = ClassName("retrofit2", "Retrofit")
+
     val RetrofitResponse = ClassName("retrofit2", "Response")
 
     val RetrofitBody = ClassName("retrofit2.http", "Body")
@@ -60,4 +63,14 @@ internal object TypeNames {
     val StandardBlob = ClassName(packageName = "com.frybits.starrynight.android.atproto.models.blob", "StandardBlob")
 
     val EmptyBlob = ClassName(packageName = "com.frybits.starrynight.android.atproto.models.blob", "EmptyBlob")
+
+    val ContributesTo = ClassName("dev.zacsweers.metro", "ContributesTo")
+
+    val AppScope = ClassName("dev.zacsweers.metro", "AppScope")
+
+    val BindingContainer = ClassName("dev.zacsweers.metro", "BindingContainer")
+
+    val Provides = ClassName("dev.zacsweers.metro", "Provides")
+
+    val SingleIn = ClassName("dev.zacsweers.metro", "SingleIn")
 }

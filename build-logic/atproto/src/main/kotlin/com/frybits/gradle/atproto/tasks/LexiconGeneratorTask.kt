@@ -19,11 +19,19 @@
 package com.frybits.gradle.atproto.tasks
 
 import com.frybits.gradle.atproto.generator.builder.generateClass
+import com.frybits.gradle.atproto.generator.builder.utils.TypeNames
+import com.frybits.gradle.atproto.generator.builder.utils.createFileBuilder
 import com.frybits.gradle.atproto.generator.context.LexiconContext
 import com.frybits.gradle.atproto.generator.context.LexiconEnvironment
 import com.frybits.gradle.atproto.lexicon.categories.HttpField
 import com.frybits.gradle.atproto.lexicon.categories.XRPCField
 import com.frybits.gradle.atproto.utils.titleCaseFirstChar
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.TypeSpec
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
@@ -35,6 +43,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.work.Incremental
 
 @CacheableTask
@@ -64,6 +73,20 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
             generatedSources.get()
         )
 
+
+        val className = ClassName("com.frybits.starrynight.android.atproto.wiring", "ATProtoLexiconBindings")
+        val fileBuilder = createFileBuilder(className)
+        val typeSPecBuilder = TypeSpec.objectBuilder(className)
+            .addModifiers(KModifier.PUBLIC)
+            .addAnnotation(
+                AnnotationSpec.builder(TypeNames.ContributesTo)
+                    .addMember("%T::class", TypeNames.AppScope)
+                    .build()
+            )
+            .addAnnotation(TypeNames.BindingContainer)
+
+        val createMember = MemberName("retrofit2", "create")
+
         nsids.get().forEach { schemaId ->
             val lexicon = environment.loadLexicon(schemaId)
 
@@ -75,9 +98,27 @@ public abstract class LexiconGeneratorTask: DefaultTask() {
             val context = LexiconContext(name = name, lexicon = lexicon)
 
             when (lexiconType) {
-                is HttpField -> generateClass(lexiconType, context, environment)
+                is HttpField -> {
+                    generateClass(lexiconType, context, environment)
+                    val funcSpec = FunSpec.builder("provide${context.name.uppercaseFirstChar()}Api")
+                        .addModifiers(KModifier.INTERNAL)
+                        .returns(ClassName(context.authority, "${context.name}Api"))
+                        .addAnnotation(TypeNames.Provides)
+                        .addAnnotation(
+                            AnnotationSpec.builder(TypeNames.SingleIn)
+                                .addMember("%T::class", TypeNames.AppScope)
+                                .build()
+                        )
+                        .addParameter("retrofit", TypeNames.Retrofit)
+                        .addCode("return retrofit.%M()", createMember)
+                        .build()
+                    typeSPecBuilder.addFunction(funcSpec)
+                }
                 else -> throw IllegalArgumentException("Lexicon type not implemented: ${lexiconType::class}")
             }
         }
+
+        fileBuilder.addType(typeSPecBuilder.build())
+        environment.generateFile(fileBuilder.build())
     }
 }
