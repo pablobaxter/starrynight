@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,9 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.auth
+package com.frybits.starrynight.atproto.network.models
 
-internal interface LoginRemoteService {
+public data class ATProtoSession(
+    val id: String,
+    val email: String,
+    val active: Boolean,
+    val alsoKnownAs: List<String>,
+    val handle: String,
+    val status: ATProtoSessionStatus?,
+    val accessJwt: String,
+    val refreshJwt: String,
+    val emailConfirmed: Boolean,
+    val emailAuthFactor: Boolean
+)
 
-    suspend fun createSession(identifier: String, password: String)
+public enum class ATProtoSessionStatus {
+    TAKEN_DOWN,
+    SUSPENDED,
+    DEACTIVATED,
+    OTHER
 }

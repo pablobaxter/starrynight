@@ -5,4 +5,6 @@ type = "javaLibrary"
 [dependencies]
 
 # Used to add libraries into the "implementation" configuration
-implementation = []
+implementation = [
+    { type = "library", name = "kotlinx.serialization" },
+]

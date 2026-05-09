@@ -19,10 +19,10 @@
 package com.frybits.starrynight.android.app
 
 import android.app.Activity
-import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
-import com.frybits.starrynight.android.auth.LoginRemoteService
+import com.frybits.starrynight.auth.LoginRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -35,12 +35,14 @@ private val TAG = MainActivity::class.java.simpleName
 @ContributesIntoMap(AppScope::class, binding<Activity>())
 @ActivityKey
 @Inject
-internal class MainActivity(private val loginRepository: LoginRemoteService): ComponentActivity() {
+internal class MainActivity(private val loginRepository: LoginRepository): ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch {
-            loginRepository.createSession("pablobaxter.com", "blah")
+            loginRepository.login("pablobaxter.com", "blah").onFailure {
+                Log.d("Blah", "Something failed", it)
+            }
         }
     }
 }

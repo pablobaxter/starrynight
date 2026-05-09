@@ -18,20 +18,62 @@
 
 package com.frybits.starrynight.android.network.impl
 
-import com.frybits.starrynight.android.network.DnsRecordRemoteService
+import android.annotation.SuppressLint
+import android.net.DnsResolver
+import android.os.CancellationSignal
+import com.frybits.starrynight.android.network.parseMessage
 import com.frybits.starrynight.network.DnsRecordRepository
 import com.frybits.starrynight.network.models.DnsMessage
+import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @ContributesBinding(AppScope::class)
 @Inject
 internal class DnsRecordRepositoryImpl(
-    private val dnsRecordRemoteService: DnsRecordRemoteService
+    private val dnsResolver: DnsResolver,
+    @IODispatcher ioDispatcher: CoroutineDispatcher,
 ) : DnsRecordRepository {
 
+    private val limitedDispatcherExecutor = ioDispatcher.limitedParallelism(1).asExecutor()
+
     override suspend fun fetchDnsMessage(host: String): Result<DnsMessage> {
-        return runCatching { dnsRecordRemoteService.fetchDnsMessage(host) }
+        return runCatching {
+            suspendCancellableCoroutine { continuation ->
+                val cancellationSignal = CancellationSignal()
+
+                @SuppressLint("WrongConstant")
+                dnsResolver.rawQuery(
+                    null,
+                    "_atproto.$host",
+                    DnsResolver.CLASS_IN,
+                    16,
+                    DnsResolver.FLAG_EMPTY,
+                    limitedDispatcherExecutor,
+                    cancellationSignal,
+                    object : DnsResolver.Callback<ByteArray> {
+                        override fun onAnswer(answer: ByteArray, rcode: Int) {
+                            continuation.resume(parseMessage(answer))
+                        }
+
+                        override fun onError(error: DnsResolver.DnsException) {
+                            continuation.resumeWithException(Exception("Unable to get did", error))
+                        }
+                    }
+                )
+
+                continuation.invokeOnCancellation { cancellationSignal.cancel() }
+
+                cancellationSignal.setOnCancelListener {
+                    continuation.cancel()
+                }
+            }
+        }
     }
 }

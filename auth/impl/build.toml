@@ -13,4 +13,5 @@ implementation = [
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
     { type = "library", name = "retrofit" },
+    { type = "library", name = "androidx.core" },
 ]

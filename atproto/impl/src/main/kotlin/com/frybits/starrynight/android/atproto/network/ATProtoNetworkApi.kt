@@ -18,11 +18,20 @@
 
 package com.frybits.starrynight.android.atproto.network
 
+import com.frybits.starrynight.atproto.network.models.PlcData
+import kotlinx.serialization.json.JsonObject
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 
 internal interface ATProtoNetworkApi {
 
     @GET("https://{host}/.well-known/atproto-did")
-    suspend fun resolveHandleViaWellKnown(@Path("host") host: String): String
+    suspend fun resolveHandleViaWellKnown(@Path("host") host: String): Response<String>
+
+    @GET("https://plc.directory/{did}/data")
+    suspend fun resolveDidViaPlcDirectory(@Path("did") did: String): Response<PlcData>
+
+    @GET("https://{host}/{user}/did.json")
+    suspend fun resolveDidViaHost(@Path("host") host: String, @Path("user", encoded = true) user: String): Response<JsonObject>
 }

@@ -18,7 +18,14 @@
 
 package com.frybits.starrynight.atproto.network
 
+import com.frybits.starrynight.atproto.network.models.ATProtoSession
+import com.frybits.starrynight.atproto.network.models.PlcData
+
 public interface ATProtoRepository {
 
-    public suspend fun resolveHandle(handle: String): Result<String>
+    public suspend fun resolveHandle(username: String): Result<String>
+
+    public suspend fun resolveDid(did: String): Result<PlcData>
+
+    public suspend fun createSession(pds: String, username: String, password: String): Result<ATProtoSession>
 }

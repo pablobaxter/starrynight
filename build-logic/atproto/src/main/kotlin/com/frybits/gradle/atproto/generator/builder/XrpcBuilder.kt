@@ -89,6 +89,12 @@ internal fun generateClass(lexiconType: HttpField, context: LexiconContext, envi
 
     val hardCodedQueryParams = hashMapOf<String, String>()
 
+    val hostParamSpec = ParameterSpec.builder("host", String::class)
+        .addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPath).addMember("%S", "host").build())
+        .build()
+
+    procedureFunSpecBuilder.addParameter(hostParamSpec)
+
     val parameters = lexiconType.parameters
     if (parameters != null) {
         require(parameters is ParamsField)
@@ -162,7 +168,7 @@ internal fun generateClass(lexiconType: HttpField, context: LexiconContext, envi
         context.authority
     }
 
-    procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPost).addMember("%S", memberString).build())
+    procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPost).addMember("%S", "https://{host}/xrpc/$memberString").build())
 
     if (lexiconType is ProcedureField) {
         val input = lexiconType.input
