@@ -21,17 +21,16 @@ implementation = [
     { type = "library", name = "metrox.android" },
     { type = "library", name = "kotlinx.coroutines.android" },
 
-    # ATProto
-    { type = "project", name = ":atproto" },
-
     # Api modules
-    { type = "project", name = ":network:auth:api" },
-    { type = "project", name = ":network:core:api" },
+    { type = "project", name = ":atproto:api" },
+    { type = "project", name = ":auth:api" },
+    { type = "project", name = ":network:api" },
     { type = "project", name = ":utils:core:api" },
 
     # Impl modules
-    { type = "project", name = ":network:core:impl" },
-    { type = "project", name = ":network:auth:impl" },
+    { type = "project", name = ":atproto:impl" },
+    { type = "project", name = ":network:impl" },
+    { type = "project", name = ":auth:impl" },
     { type = "project", name = ":utils:core:impl" },
 ]
 

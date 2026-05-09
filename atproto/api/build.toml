@@ -1,0 +1,8 @@
+# Project type
+type = "javaLibrary"
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+# Used to add libraries into the "implementation" configuration
+implementation = []

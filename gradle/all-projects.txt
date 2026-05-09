@@ -1,8 +1,9 @@
 :app
-:atproto
-:network:auth:api
-:network:auth:impl
-:network:core:api
-:network:core:impl
+:atproto:api
+:atproto:impl
+:auth:api
+:auth:impl
+:network:api
+:network:impl
 :utils:core:api
 :utils:core:impl

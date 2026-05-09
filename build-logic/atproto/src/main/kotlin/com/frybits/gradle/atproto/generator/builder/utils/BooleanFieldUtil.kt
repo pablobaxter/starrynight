@@ -30,7 +30,7 @@ import com.squareup.kotlinpoet.asTypeName
 internal fun TypeSpec.Builder.handleConst(name: String, lexiconType: BooleanField) {
     val const = lexiconType.const ?: return
     val property = PropertySpec.builder(name.camelToSnakeCase().uppercase(), Boolean::class)
-        .addModifiers(KModifier.PUBLIC, KModifier.CONST)
+        .addModifiers(KModifier.INTERNAL, KModifier.CONST)
         .initializer("%L", const)
 
     property.handleDescription(lexiconType)

@@ -20,7 +20,7 @@ package com.frybits.gradle.atproto.generator.builder.utils
 
 import com.squareup.kotlinpoet.ClassName
 
-private const val STRING_PACKAGE_NAME = "com.frybits.starrynight.atproto.models.strings"
+private const val STRING_PACKAGE_NAME = "com.frybits.starrynight.android.atproto.models.strings"
 
 internal object TypeNames {
     val RetrofitResponse = ClassName("retrofit2", "Response")
@@ -55,9 +55,9 @@ internal object TypeNames {
 
     val BytesSerializer = ClassName("com.frybits.starrynight.atproto.serializers", "ATBytesSerializer")
 
-    val Blob = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "Blob")
+    val Blob = ClassName(packageName = "com.frybits.starrynight.android.atproto.models.blob", "Blob")
 
-    val StandardBlob = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "StandardBlob")
+    val StandardBlob = ClassName(packageName = "com.frybits.starrynight.android.atproto.models.blob", "StandardBlob")
 
-    val EmptyBlob = ClassName(packageName = "com.frybits.starrynight.atproto.models.blob", "EmptyBlob")
+    val EmptyBlob = ClassName(packageName = "com.frybits.starrynight.android.atproto.models.blob", "EmptyBlob")
 }

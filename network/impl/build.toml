@@ -1,0 +1,18 @@
+# Project type
+type = "androidLibrary"
+
+enableMetro = true
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+implementation = [
+    { type = "project", name = ":utils:core:api" },
+    { type = "project", name = ":network:api" },
+    { type = "library", name = "kotlinx.coroutines.core" },
+    { type = "library", name = "kotlinx.serialization" },
+    { type = "library", name = "kotlinx.serialization.json" },
+    { type = "library", name = "retrofit" },
+    { type = "library", name = "retrofit.scalar" },
+    { type = "library", name = "retrofit.kotlin.serialization" },
+]

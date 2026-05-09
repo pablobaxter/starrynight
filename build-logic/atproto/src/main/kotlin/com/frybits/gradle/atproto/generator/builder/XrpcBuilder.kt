@@ -52,11 +52,11 @@ internal fun generateClass(lexiconType: HttpField, context: LexiconContext, envi
     val fileBuilder = createFileBuilder(className)
 
     val typeSpecBuilder = TypeSpec.interfaceBuilder(className)
-        .addModifiers(KModifier.PUBLIC)
+        .addModifiers(KModifier.INTERNAL)
         .handleDescription(lexiconType)
 
     val procedureFunSpecBuilder = FunSpec.builder(context.name.lowerCaseFirstChar())
-        .addModifiers(KModifier.PUBLIC, KModifier.SUSPEND, KModifier.ABSTRACT)
+        .addModifiers(KModifier.SUSPEND, KModifier.ABSTRACT)
 
     val output = lexiconType.output
     if (output != null) {

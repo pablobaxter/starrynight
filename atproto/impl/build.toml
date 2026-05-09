@@ -1,0 +1,22 @@
+# Project type
+type = "atprotoLibrary"
+
+# Lexicons to download and compile
+lexicons = [
+    "com.atproto.server.createSession"
+]
+
+enableMetro = true
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+implementation = [
+    { type = "project", name = ":atproto:api" },
+    { type = "project", name = ":utils:core:api" },
+    { type = "project", name = ":network:api" },
+    { type = "library", name = "kotlinx.coroutines.core" },
+    { type = "library", name = "retrofit" },
+    { type = "library", name = "kotlinx.serialization" },
+    { type = "library", name = "kotlinx.serialization.json" },
+]

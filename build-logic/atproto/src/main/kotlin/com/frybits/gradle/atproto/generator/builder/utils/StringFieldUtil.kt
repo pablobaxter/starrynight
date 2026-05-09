@@ -40,7 +40,7 @@ internal fun TypeSpec.Builder.handleConst(name: String, lexiconType: StringField
     val const = lexiconType.const ?: return
     val typeName = lexiconType.getTypeName()
     val property = PropertySpec.builder(name.camelToSnakeCase().uppercase(), typeName)
-        .addModifiers(KModifier.PUBLIC)
+        .addModifiers(KModifier.INTERNAL)
         .initializer("%L", const)
 
     when (lexiconType.format) {

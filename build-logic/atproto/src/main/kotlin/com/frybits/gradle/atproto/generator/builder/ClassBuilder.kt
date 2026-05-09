@@ -60,7 +60,7 @@ internal fun generateClass(lexiconType: UnionField, context: LexiconContext, env
 
     val typeSpec = TypeSpec.interfaceBuilder(className)
         .addAnnotation(Serializable::class)
-        .addModifiers(KModifier.PUBLIC, KModifier.SEALED)
+        .addModifiers(KModifier.INTERNAL, KModifier.SEALED)
 
     typeSpec.handleDescription(lexiconType)
 
@@ -102,14 +102,13 @@ internal fun generateClass(lexiconType: UnionField, context: LexiconContext, env
             return@forEach
         }
 
-
         val unionFieldClassName = ClassName(context.authority, "${refClassName.simpleName}UnionField")
 
         val unionTypeSpec = TypeSpec.classBuilder(unionFieldClassName)
             .addAnnotation(Serializable::class)
             .addAnnotation(JvmInline::class)
             .addAnnotation(AnnotationSpec.builder(SerialName::class).addMember("%S", ref).build())
-            .addModifiers(KModifier.PUBLIC, KModifier.VALUE)
+            .addModifiers(KModifier.INTERNAL, KModifier.VALUE)
             .addSuperinterface(className)
             .primaryConstructor(
                 FunSpec.constructorBuilder().addParameter(
@@ -145,7 +144,7 @@ internal fun generateDataClass(lexiconType: ObjectField, context: LexiconContext
 
     val typeSpecBuilder = TypeSpec.classBuilder(className)
         .addAnnotation(Serializable::class)
-        .addModifiers(KModifier.PUBLIC, KModifier.DATA)
+        .addModifiers(KModifier.INTERNAL, KModifier.DATA)
 
     typeSpecBuilder.handleDescription(lexiconType)
 
@@ -238,7 +237,7 @@ internal fun generateDataClass(lexiconType: ObjectField, context: LexiconContext
                             PropertySpec.builder(
                                 ref.objectRef.uppercase(),
                                 String::class,
-                                KModifier.CONST, KModifier.PUBLIC
+                                KModifier.CONST, KModifier.INTERNAL
                             ).initializer("%S", ref.objectRef)
                                 .handleDescription(lexiconRef)
                                 .build()
@@ -248,7 +247,7 @@ internal fun generateDataClass(lexiconType: ObjectField, context: LexiconContext
                             PropertySpec.builder(
                                 knownValue.uppercase(),
                                 String::class,
-                                KModifier.PUBLIC, KModifier.CONST
+                                KModifier.INTERNAL, KModifier.CONST
                             ).initializer("%S", knownValue).build()
                         )
                     }
