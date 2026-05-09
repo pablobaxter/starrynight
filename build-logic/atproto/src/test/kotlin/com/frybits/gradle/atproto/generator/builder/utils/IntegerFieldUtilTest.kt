@@ -128,7 +128,7 @@ class IntegerFieldUtilTest {
         assertEquals(1, properties.size)
         val property = properties.first()
         assertEquals("FOOBAR_TEST", property.name)
-        assertContentEquals(listOf(KModifier.PUBLIC, KModifier.CONST), property.modifiers)
+        assertContentEquals(listOf(KModifier.INTERNAL, KModifier.CONST), property.modifiers)
         assertEquals("2", property.initializer.toString())
     }
 }
