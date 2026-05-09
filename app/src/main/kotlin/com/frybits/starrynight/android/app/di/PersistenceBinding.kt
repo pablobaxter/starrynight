@@ -20,8 +20,8 @@ package com.frybits.starrynight.android.app.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.frybits.starrynight.android.app.persistence.StarryNightAppDatabase
-import com.frybits.starrynight.android.atproto.db.DidDao
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
@@ -39,11 +39,5 @@ public object PersistenceBinding {
             context,
             "app-database"
         ).build()
-    }
-
-    @Provides
-    @SingleIn(AppScope::class)
-    internal fun provideDidDao(database: StarryNightAppDatabase): DidDao {
-        return database.didDao()
     }
 }

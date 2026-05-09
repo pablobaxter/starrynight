@@ -20,15 +20,11 @@ package com.frybits.starrynight.android.app.persistence
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.frybits.starrynight.android.atproto.db.DidDao
-import com.frybits.starrynight.android.atproto.db.models.ResolvedDid
 
 @Database(
     entities = [
-        ResolvedDid::class
-   ], version = 1
-)
-internal abstract class StarryNightAppDatabase : RoomDatabase() {
 
-    abstract fun didDao(): DidDao
-}
+   ],
+    version = 1
+)
+internal abstract class StarryNightAppDatabase : RoomDatabase()

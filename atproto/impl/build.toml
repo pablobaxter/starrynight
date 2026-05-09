@@ -19,5 +19,4 @@ implementation = [
     { type = "library", name = "retrofit" },
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
-    { type = "library", name = "room.common" },
 ]

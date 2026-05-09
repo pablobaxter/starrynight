@@ -20,7 +20,6 @@ package com.frybits.starrynight.android.atproto.impl
 
 import com.atproto.server.createSession.CreateSessionApi
 import com.atproto.server.createSession.CreateSessionRequest
-import com.frybits.starrynight.android.atproto.db.DidDao
 import com.frybits.starrynight.android.atproto.models.strings.Did
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
 import com.frybits.starrynight.atproto.ATProtoRepository
@@ -51,13 +50,11 @@ private val LOGGER = Logger.getLogger("ATProtoRepository")
 internal class ATProtoRepositoryImpl(
     private val atProtoServicesApi: ATProtoNetworkApi,
     private val createSessionApi: CreateSessionApi,
-    private val didDao: DidDao,
     private val dnsRecordRepository: DnsRecordRepository,
     private val json: Json
 ): ATProtoRepository {
 
     override suspend fun resolveHandle(username: String): Result<String> {
-        val result = didDao.getResolvedDidForHandle(username)
         return resolveHandleViaDNS(username).recoverCatching {
             currentCoroutineContext().ensureActive()
             LOGGER.warning("Failed resolution via dns: ${it.message}")

@@ -42,9 +42,9 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
     override fun configureBuild(buildFile: BuildFile) {
         require(buildFile is ATProtoLibrary) { "Attempting to configure ${buildFile::class} with ATProto configurations" }
         with(project) {
+            baseProjectConfiguration(buildFile) // All base project configuration
             jvmProjectConfiguration() // All JVM configuration
             kotlinProjectConfiguration(buildFile) // All Kotlin configuration
-            baseProjectConfiguration(buildFile) // All base project configuration
 
             val lexiconPullTask = tasks.register<LexiconPullTask>("lexiconPull") {
                 outputDir.set(layout.buildDirectory.dir("lexicons"))

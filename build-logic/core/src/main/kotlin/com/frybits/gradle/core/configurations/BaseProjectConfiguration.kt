@@ -31,8 +31,8 @@ import org.gradle.kotlin.dsl.the
  * Configuration that should be common to all projects (excluding root)
  */
 public fun Project.baseProjectConfiguration(buildFile: BuildFile) {
-    handleComposeConfiguration(buildFile)
     handleDependencies(buildFile)
+    handleComposeConfiguration(buildFile)
 }
 
 // AfterEvaluate needed to allow Gradle to register the version catalog extension, since we are running before the current project is evaluated
@@ -41,15 +41,15 @@ private fun Project.handleDependencies(buildFile: BuildFile) = afterEvaluate {
     dependencies {
         buildFile.dependencies.forEach { (configuration, deps) ->
             deps.forEach { dep ->
-                when (dep) {
+                val notation = when (dep) {
                     is com.frybits.gradle.core.definitions.Project -> {
-                        add(configuration, project(dep.name))
+                        project(dep.name)
                     }
 
                     is Library -> {
-                        add(configuration, libs.findLibrary(dep.name).orElseThrow {
+                        libs.findLibrary(dep.name).orElseThrow {
                             GradleException("Dependency ${dep.name} not found in version catalog ${libs.name}")
-                        })
+                        }
                     }
 
                     is Platform -> {
@@ -64,9 +64,11 @@ private fun Project.handleDependencies(buildFile: BuildFile) = afterEvaluate {
                                 }.get()
                             }
                         }
-                        add(configuration, platform(module))
+                        platform(module)
                     }
                 }
+
+                add(configuration, notation)
             }
         }
     }
