@@ -41,15 +41,15 @@ private fun Project.handleDependencies(buildFile: BuildFile) = afterEvaluate {
     dependencies {
         buildFile.dependencies.forEach { (configuration, deps) ->
             deps.forEach { dep ->
-                when (dep) {
+                val notation = when (dep) {
                     is com.frybits.gradle.core.definitions.Project -> {
-                        add(configuration, project(dep.name))
+                        project(dep.name)
                     }
 
                     is Library -> {
-                        add(configuration, libs.findLibrary(dep.name).orElseThrow {
+                        libs.findLibrary(dep.name).orElseThrow {
                             GradleException("Dependency ${dep.name} not found in version catalog ${libs.name}")
-                        })
+                        }
                     }
 
                     is Platform -> {
@@ -64,9 +64,11 @@ private fun Project.handleDependencies(buildFile: BuildFile) = afterEvaluate {
                                 }.get()
                             }
                         }
-                        add(configuration, platform(module))
+                        platform(module)
                     }
                 }
+
+                add(configuration, notation)
             }
         }
     }
