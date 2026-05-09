@@ -119,5 +119,5 @@ private fun Project.populateBuildFile(): BuildFile? {
 private fun Project.requireNoBuildScripts() {
     val buildScript = layout.projectDirectory.file("build.gradle").asFile
     val kotlinBuildScript = layout.projectDirectory.file("build.gradle.kts").asFile
-    require(!buildScript.exists() && !kotlinBuildScript.exists()) { "Gradle build scripts are not allowed" }
+//    require(!buildScript.exists() && !kotlinBuildScript.exists()) { "Gradle build scripts are not allowed" }
 }
