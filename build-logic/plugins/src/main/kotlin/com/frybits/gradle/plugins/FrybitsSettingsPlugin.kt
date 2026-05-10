@@ -18,6 +18,7 @@
 
 package com.frybits.gradle.plugins
 
+import com.frybits.gradle.configurations.handleDependencies
 import com.frybits.gradle.configurations.projectConfiguration
 import com.frybits.gradle.configurations.rootProjectConfiguration
 import com.frybits.gradle.utils.isRoot
@@ -44,44 +45,48 @@ internal class FrybitsSettingsPlugin : Plugin<Settings> {
 
         rootProject.name = providers.gradleProperty("com.frybits.name").get()
 
-        gradle.settingsEvaluated {
-            @Suppress("UnstableApiUsage")
-            dependencyResolutionManagement {
-                repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-                repositories {
-                    google()
-                    mavenCentral()
-                }
-
-                versionCatalogs {
-                    register("libs") {
-                        version(
-                            "agp-version",
-                            providers.gradleProperty("com.frybits.agp.version").get()
-                        )
-                        version(
-                            "kotlin-version",
-                            providers.gradleProperty("com.frybits.kotlin.version").get()
-                        )
-                        version(
-                            "ksp-version",
-                            providers.gradleProperty("com.frybits.ksp.version").get()
-                        )
-                        version(
-                            "metro-version",
-                            providers.gradleProperty("com.frybits.metro.version").get()
-                        )
-                    }
-                }
+        @Suppress("UnstableApiUsage")
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
             }
 
-            @Suppress("UnstableApiUsage")
-            gradle.lifecycle.beforeProject {
-                if (isRoot) {
-                    rootProjectConfiguration()
-                } else {
-                    projectConfiguration()
+            versionCatalogs {
+                register("libs") {
+                    version(
+                        "agp-version",
+                        providers.gradleProperty("com.frybits.agp.version").get()
+                    )
+                    version(
+                        "kotlin-version",
+                        providers.gradleProperty("com.frybits.kotlin.version").get()
+                    )
+                    version(
+                        "ksp-version",
+                        providers.gradleProperty("com.frybits.ksp.version").get()
+                    )
+                    version(
+                        "metro-version",
+                        providers.gradleProperty("com.frybits.metro.version").get()
+                    )
                 }
+            }
+        }
+
+        @Suppress("UnstableApiUsage")
+        gradle.lifecycle.beforeProject {
+            if (isRoot) {
+                rootProjectConfiguration()
+            } else {
+                projectConfiguration()
+            }
+        }
+
+        gradle.lifecycle.afterProject {
+            if (!isRoot) {
+                handleDependencies()
             }
         }
     }

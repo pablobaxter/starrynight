@@ -31,6 +31,7 @@ import com.frybits.gradle.core.definitions.AndroidLibraryBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
 import com.frybits.gradle.core.definitions.JavaLibraryBuildFile
 import com.frybits.gradle.core.jvm.JavaLibraryConfigurer
+import com.frybits.gradle.utils.isRoot
 import dev.eav.tomlkt.Toml
 import kotlinx.serialization.decodeFromString
 import org.gradle.api.Project
@@ -50,6 +51,38 @@ internal fun Project.projectConfiguration() {
 
     // Configures based on build file
     buildFileConfiguration(buildFile)
+}
+
+internal fun Project.handleDependencies() {
+    require(!isRoot) { "Root project should have no dependencies!" }
+
+    // Intermediate projects will not have build files, so skip those
+    val buildFile = populateBuildFile() ?: return
+
+    val configurer = when (buildFile) {
+        is AndroidAppBuildFile -> {
+            apply<AppPlugin>()
+            enableKotlinPluginIfNeeded()
+            getAndroidConfigurer()
+        }
+        is AndroidLibraryBuildFile -> {
+            apply<LibraryPlugin>()
+            enableKotlinPluginIfNeeded()
+            getAndroidConfigurer()
+        }
+        is JavaLibraryBuildFile -> {
+            apply<JavaLibraryPlugin>()
+            apply(plugin = "org.jetbrains.kotlin.jvm")
+            objects.newInstance<JavaLibraryConfigurer>()
+        }
+        is ATProtoLibrary -> {
+            apply<JavaLibraryPlugin>()
+            apply(plugin = "org.jetbrains.kotlin.jvm")
+            objects.newInstance<ATProtoConfigurer>()
+        }
+    }
+
+    configurer.configureDependencies(buildFile)
 }
 
 // Configure based off the provided [BuildFile]

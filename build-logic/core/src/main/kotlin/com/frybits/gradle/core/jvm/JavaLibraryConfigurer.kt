@@ -20,6 +20,7 @@ package com.frybits.gradle.core.jvm
 
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
+import com.frybits.gradle.core.configurations.handleDependencies
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.definitions.BuildFile
@@ -41,5 +42,9 @@ public abstract class JavaLibraryConfigurer @Inject internal constructor(
             kotlinProjectConfiguration(buildFile) // All Kotlin configuration
             baseProjectConfiguration(buildFile) // All base project configuration
         }
+    }
+
+    override fun configureDependencies(buildFile: BuildFile) {
+        project.handleDependencies(buildFile)
     }
 }

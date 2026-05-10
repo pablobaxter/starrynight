@@ -22,6 +22,7 @@ import com.frybits.gradle.atproto.tasks.LexiconGeneratorTask
 import com.frybits.gradle.atproto.tasks.LexiconPullTask
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
+import com.frybits.gradle.core.configurations.handleDependencies
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.definitions.ATProtoLibrary
@@ -60,5 +61,9 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
             @OptIn(ExperimentalKotlinGradlePluginApi::class)
             kotlinExtension.sourceSets.getByName("main").generatedKotlin.srcDirs(lexiconGeneratedTask)
         }
+    }
+
+    override fun configureDependencies(buildFile: BuildFile) {
+        project.handleDependencies(buildFile)
     }
 }

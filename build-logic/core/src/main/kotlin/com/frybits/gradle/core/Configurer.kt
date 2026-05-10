@@ -29,4 +29,6 @@ public interface Configurer {
      * Configures the current project based on the provided build file
      */
     public fun configureBuild(buildFile: BuildFile)
+
+    public fun configureDependencies(buildFile: BuildFile)
 }

@@ -46,6 +46,7 @@ import com.frybits.gradle.android.configurations.library.androidLibraryVariantBu
 import com.frybits.gradle.android.configurations.library.androidLibraryVariantConfiguration
 import com.frybits.gradle.android.wrappers.AGP8ComponentsExtensionWrapper
 import com.frybits.gradle.core.Configurer
+import com.frybits.gradle.core.configurations.handleDependencies
 import com.frybits.gradle.core.definitions.AndroidBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.GradleException
@@ -96,5 +97,9 @@ public abstract class AGP8Configurer @Inject internal constructor(
                 }
             }
         }
+    }
+
+    override fun configureDependencies(buildFile: BuildFile) {
+        project.handleDependencies(buildFile)
     }
 }
