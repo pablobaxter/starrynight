@@ -23,9 +23,9 @@ val pluginsUnderTest by configurations.registering
 gradlePlugin {
     plugins {
         // Base plugin
-        register("frybitsPlugin") {
+        register("frybitsSettingsPlugin") {
             id = "com.frybits.plugin"
-            implementationClass = "com.frybits.gradle.plugins.FrybitsPlugin"
+            implementationClass = "com.frybits.gradle.plugins.FrybitsSettingsPlugin"
         }
     }
 
