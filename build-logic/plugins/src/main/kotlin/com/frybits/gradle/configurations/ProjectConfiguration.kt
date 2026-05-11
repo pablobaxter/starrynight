@@ -31,7 +31,6 @@ import com.frybits.gradle.core.definitions.AndroidLibraryBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
 import com.frybits.gradle.core.definitions.JavaLibraryBuildFile
 import com.frybits.gradle.core.jvm.JavaLibraryConfigurer
-import com.frybits.gradle.utils.isRoot
 import dev.eav.tomlkt.Toml
 import kotlinx.serialization.decodeFromString
 import org.gradle.api.Project
@@ -40,84 +39,61 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.newInstance
 
 /**
- * Entry for configuration that will apply to all projects (excluding root)
+ * Entry for configuration that will apply to all projects (excluding root) before they are evaluated
  */
-internal fun Project.projectConfiguration() {
+internal fun Project.configurePlugins() {
     // No build scripts allowed!
     requireNoBuildScripts()
 
     // Intermediate projects will not have build files, so skip those
     val buildFile = populateBuildFile() ?: return
 
-    // Configures based on build file
-    buildFileConfiguration(buildFile)
+    val configurer = getConfigurer(buildFile, applyBuildPlugins = true)
+
+    configurer.applyPlugins(buildFile)
 }
 
-internal fun Project.handleDependencies() {
-    require(!isRoot) { "Root project should have no dependencies!" }
+/**
+ * Entry for configuration that will apply to all projects (excluding root) after they are evaluated
+ */
+internal fun Project.configureBuilds() {
+    // No build scripts allowed!
+    requireNoBuildScripts()
 
     // Intermediate projects will not have build files, so skip those
     val buildFile = populateBuildFile() ?: return
 
-    val configurer = when (buildFile) {
-        is AndroidAppBuildFile -> {
-            apply<AppPlugin>()
-            enableKotlinPluginIfNeeded()
-            getAndroidConfigurer()
-        }
-        is AndroidLibraryBuildFile -> {
-            apply<LibraryPlugin>()
-            enableKotlinPluginIfNeeded()
-            getAndroidConfigurer()
-        }
-        is JavaLibraryBuildFile -> {
-            apply<JavaLibraryPlugin>()
-            apply(plugin = "org.jetbrains.kotlin.jvm")
-            objects.newInstance<JavaLibraryConfigurer>()
-        }
-        is ATProtoLibrary -> {
-            apply<JavaLibraryPlugin>()
-            apply(plugin = "org.jetbrains.kotlin.jvm")
-            objects.newInstance<ATProtoConfigurer>()
-        }
-    }
-
-    configurer.configureDependencies(buildFile)
-}
-
-// Configure based off the provided [BuildFile]
-private fun Project.buildFileConfiguration(buildFile: BuildFile) {
-    val configurer = when (buildFile) {
-        is AndroidAppBuildFile -> {
-            apply<AppPlugin>()
-            enableKotlinPluginIfNeeded()
-            getAndroidConfigurer()
-        }
-        is AndroidLibraryBuildFile -> {
-            apply<LibraryPlugin>()
-            enableKotlinPluginIfNeeded()
-            getAndroidConfigurer()
-        }
-        is JavaLibraryBuildFile -> {
-            apply<JavaLibraryPlugin>()
-            apply(plugin = "org.jetbrains.kotlin.jvm")
-            objects.newInstance<JavaLibraryConfigurer>()
-        }
-        is ATProtoLibrary -> {
-            apply<JavaLibraryPlugin>()
-            apply(plugin = "org.jetbrains.kotlin.jvm")
-            objects.newInstance<ATProtoConfigurer>()
-        }
-    }
+    val configurer = getConfigurer(buildFile)
 
     configurer.configureBuild(buildFile)
 }
 
-// Handles applying the kotlin plugin if AGP 9 is used
-private fun Project.enableKotlinPluginIfNeeded() {
-    val androidCurrentVersion = AndroidPluginVersion.getCurrent()
-    if (androidCurrentVersion.major < 9) {
-        apply(plugin = "org.jetbrains.kotlin.android")
+private fun Project.getConfigurer(buildFile: BuildFile, applyBuildPlugins: Boolean = false): Configurer {
+    return when (buildFile) {
+        is AndroidAppBuildFile -> {
+            if (applyBuildPlugins) {
+                apply<AppPlugin>()
+            }
+            getAndroidConfigurer()
+        }
+        is AndroidLibraryBuildFile -> {
+            if (applyBuildPlugins) {
+                apply<LibraryPlugin>()
+            }
+            getAndroidConfigurer()
+        }
+        is JavaLibraryBuildFile -> {
+            if (applyBuildPlugins) {
+                apply<JavaLibraryPlugin>()
+            }
+            objects.newInstance<JavaLibraryConfigurer>()
+        }
+        is ATProtoLibrary -> {
+            if (applyBuildPlugins) {
+                apply<JavaLibraryPlugin>()
+            }
+            objects.newInstance<ATProtoConfigurer>()
+        }
     }
 }
 
@@ -135,7 +111,7 @@ private fun Project.getAndroidConfigurer(): Configurer {
                 extensions.getByName("androidComponents")
             )
         }
-        else -> throw Exception()
+        else -> throw Exception("Unsupported AGP version: $androidCurrentVersion")
     }
 }
 

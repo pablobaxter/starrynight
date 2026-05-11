@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,22 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.gradle.core
+package com.frybits.gradle.android
 
-import com.frybits.gradle.core.definitions.BuildFile
+import com.android.build.api.AndroidPluginVersion
+import com.android.build.gradle.api.AndroidBasePlugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.hasPlugin
 
-/**
- * Configures the Android projects with the given build file
- */
-public interface Configurer {
-
-    /**
-     * Applies plugins required based on build file
-     */
-    public fun applyPlugins(buildFile: BuildFile)
-
-    /**
-     * Configures the current project based on the provided build file
-     */
-    public fun configureBuild(buildFile: BuildFile)
+// Handles applying the kotlin plugin if AGP 9 is used
+internal fun Project.enableKotlinPluginIfNeeded() {
+    require(plugins.hasPlugin(AndroidBasePlugin::class)) { "This function should not be used on a non-android project" }
+    val androidCurrentVersion = AndroidPluginVersion.getCurrent()
+    if (androidCurrentVersion.major < 9) {
+        apply(plugin = "org.jetbrains.kotlin.android")
+    }
 }

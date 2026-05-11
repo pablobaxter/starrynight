@@ -18,9 +18,10 @@
 
 package com.frybits.gradle.plugins
 
-import com.frybits.gradle.configurations.handleDependencies
-import com.frybits.gradle.configurations.projectConfiguration
-import com.frybits.gradle.configurations.rootProjectConfiguration
+import com.frybits.gradle.configurations.configureBuilds
+import com.frybits.gradle.configurations.configurePlugins
+import com.frybits.gradle.configurations.rootAfterProjectConfiguration
+import com.frybits.gradle.configurations.rootBeforeProjectConfiguration
 import com.frybits.gradle.utils.isRoot
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
@@ -78,15 +79,18 @@ internal class FrybitsSettingsPlugin : Plugin<Settings> {
         @Suppress("UnstableApiUsage")
         gradle.lifecycle.beforeProject {
             if (isRoot) {
-                rootProjectConfiguration()
+                rootBeforeProjectConfiguration()
             } else {
-                projectConfiguration()
+                configurePlugins()
             }
         }
 
+        @Suppress("UnstableApiUsage")
         gradle.lifecycle.afterProject {
-            if (!isRoot) {
-                handleDependencies()
+            if (isRoot) {
+                rootAfterProjectConfiguration()
+            } else {
+                configureBuilds()
             }
         }
     }

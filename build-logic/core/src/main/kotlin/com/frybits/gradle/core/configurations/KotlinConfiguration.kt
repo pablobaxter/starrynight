@@ -30,11 +30,20 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 /**
+ * Applies all Kotlin plugins
+ */
+public fun Project.kotlinProjectPlugins(buildFile: BuildFile) {
+    apply(plugin = "kotlinx-serialization")
+    apply(plugin = "com.google.devtools.ksp")
+    if (buildFile.enableMetro) {
+        apply(plugin = "dev.zacsweers.metro")
+    }
+}
+
+/**
  * Configures all Kotlin projects
  */
 public fun Project.kotlinProjectConfiguration(buildFile: BuildFile) {
-    apply(plugin = "kotlinx-serialization")
-    apply(plugin = "com.google.devtools.ksp")
     if (buildFile.enableMetro) {
         configureMetro()
     }
@@ -53,7 +62,6 @@ public fun Project.kotlinProjectConfiguration(buildFile: BuildFile) {
 
 @OptIn(ExperimentalMetroGradleApi::class)
 private fun Project.configureMetro() {
-    apply(plugin = "dev.zacsweers.metro")
     configure<MetroPluginExtension> {
         generateContributionProviders.set(true)
     }

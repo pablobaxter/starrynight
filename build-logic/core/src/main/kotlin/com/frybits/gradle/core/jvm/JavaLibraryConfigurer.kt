@@ -20,12 +20,14 @@ package com.frybits.gradle.core.jvm
 
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
-import com.frybits.gradle.core.configurations.handleDependencies
+import com.frybits.gradle.core.configurations.baseProjectPlugins
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
+import com.frybits.gradle.core.configurations.kotlinProjectPlugins
 import com.frybits.gradle.core.definitions.BuildFile
 import com.frybits.gradle.core.definitions.JavaLibraryBuildFile
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 import javax.inject.Inject
 
 /**
@@ -35,6 +37,15 @@ public abstract class JavaLibraryConfigurer @Inject internal constructor(
     private val project: Project
 ): Configurer {
 
+    override fun applyPlugins(buildFile: BuildFile) {
+        require(buildFile is JavaLibraryBuildFile) { "Attempting to configure ${buildFile::class} with JavaLibrary configurations" }
+        with(project) {
+            apply(plugin = "org.jetbrains.kotlin.jvm")
+            kotlinProjectPlugins(buildFile)
+            baseProjectPlugins(buildFile)
+        }
+    }
+
     override fun configureBuild(buildFile: BuildFile) {
         require(buildFile is JavaLibraryBuildFile) { "Attempting to configure ${buildFile::class} with JavaLibrary configurations" }
         with(project) {
@@ -42,9 +53,5 @@ public abstract class JavaLibraryConfigurer @Inject internal constructor(
             kotlinProjectConfiguration(buildFile) // All Kotlin configuration
             baseProjectConfiguration(buildFile) // All base project configuration
         }
-    }
-
-    override fun configureDependencies(buildFile: BuildFile) {
-        project.handleDependencies(buildFile)
     }
 }

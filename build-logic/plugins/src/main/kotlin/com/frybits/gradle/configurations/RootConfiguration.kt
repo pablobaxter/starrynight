@@ -25,15 +25,21 @@ import com.google.devtools.ksp.gradle.KSP_VERSION
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
-import java.security.MessageDigest
 
 /**
- * Configuration that will only apply to the root
+ * Configuration that will only apply to the root before it is evaluated
  */
-internal fun Project.rootProjectConfiguration() {
+internal fun Project.rootBeforeProjectConfiguration() {
     require(isRoot) { "This method should only be used with the root project" }
     logVersions()
     checkForBuildFile()
+}
+
+/**
+ * Configuration that will only apply to the root after it is evaluated
+ */
+internal fun Project.rootAfterProjectConfiguration() {
+    require(isRoot) { "This method should only be used with the root project" }
 }
 
 // Helper function to log the versions of major tools used for the build

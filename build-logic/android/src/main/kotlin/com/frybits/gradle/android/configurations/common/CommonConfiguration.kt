@@ -21,14 +21,26 @@ package com.frybits.gradle.android.configurations.common
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
+import com.frybits.gradle.android.enableKotlinPluginIfNeeded
 import com.frybits.gradle.android.wrappers.CommonExtensionWrapper
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
+import com.frybits.gradle.core.configurations.baseProjectPlugins
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
+import com.frybits.gradle.core.configurations.kotlinProjectPlugins
 import com.frybits.gradle.core.definitions.AndroidBuildFile
 import com.frybits.gradle.utils.androidSourceCompatibility
 import com.frybits.gradle.utils.androidTargetCompatibility
 import org.gradle.api.Project
+
+/**
+ * Base plugins for all android builds
+ */
+public fun Project.androidPlugins(buildFile: AndroidBuildFile) {
+    enableKotlinPluginIfNeeded()
+    kotlinProjectPlugins(buildFile)
+    baseProjectPlugins(buildFile)
+}
 
 /**
  * Base configuration for all android builds

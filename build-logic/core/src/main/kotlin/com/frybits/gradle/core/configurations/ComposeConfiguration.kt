@@ -23,10 +23,19 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 
 /**
- * Configures compose for the project
+ * Apply compose plugins for project if requested
  */
-public fun Project.handleComposeConfiguration(buildFile: BuildFile) {
+internal fun Project.handleComposePlugins(buildFile: BuildFile) {
     if (buildFile.enableCompose) {
         apply(plugin = "org.jetbrains.kotlin.plugin.compose")
+    }
+}
+
+/**
+ * Configures compose for the project
+ */
+internal fun Project.handleComposeConfiguration(buildFile: BuildFile) {
+    if (buildFile.enableCompose) {
+
     }
 }

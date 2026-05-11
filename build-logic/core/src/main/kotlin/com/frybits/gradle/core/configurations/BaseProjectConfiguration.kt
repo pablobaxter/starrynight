@@ -28,14 +28,22 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.the
 
 /**
+ * Applies required plugins based on build file
+ */
+public fun Project.baseProjectPlugins(buildFile: BuildFile) {
+    handleComposePlugins(buildFile)
+}
+
+/**
  * Configuration that should be common to all projects (excluding root)
  */
 public fun Project.baseProjectConfiguration(buildFile: BuildFile) {
     handleComposeConfiguration(buildFile)
+    handleDependencies(buildFile)
 }
 
 // AfterEvaluate needed to allow Gradle to register the version catalog extension, since we are running before the current project is evaluated
-public fun Project.handleDependencies(buildFile: BuildFile) {
+private fun Project.handleDependencies(buildFile: BuildFile) {
     val libs = the<VersionCatalogsExtension>().named("libs")
     dependencies {
         buildFile.dependencies.forEach { (configuration, deps) ->

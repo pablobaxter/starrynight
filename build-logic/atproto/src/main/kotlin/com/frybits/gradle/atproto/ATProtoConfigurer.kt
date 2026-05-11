@@ -22,12 +22,14 @@ import com.frybits.gradle.atproto.tasks.LexiconGeneratorTask
 import com.frybits.gradle.atproto.tasks.LexiconPullTask
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.configurations.baseProjectConfiguration
-import com.frybits.gradle.core.configurations.handleDependencies
+import com.frybits.gradle.core.configurations.baseProjectPlugins
 import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
+import com.frybits.gradle.core.configurations.kotlinProjectPlugins
 import com.frybits.gradle.core.definitions.ATProtoLibrary
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.register
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
@@ -39,6 +41,15 @@ import javax.inject.Inject
 public abstract class ATProtoConfigurer @Inject internal constructor(
     private val project: Project
 ): Configurer {
+
+    override fun applyPlugins(buildFile: BuildFile) {
+        require(buildFile is ATProtoLibrary) { "Attempting to configure ${buildFile::class} with ATProto configurations" }
+        with(project) {
+            apply(plugin = "org.jetbrains.kotlin.jvm")
+            kotlinProjectPlugins(buildFile)
+            baseProjectPlugins(buildFile)
+        }
+    }
 
     override fun configureBuild(buildFile: BuildFile) {
         require(buildFile is ATProtoLibrary) { "Attempting to configure ${buildFile::class} with ATProto configurations" }
@@ -61,9 +72,5 @@ public abstract class ATProtoConfigurer @Inject internal constructor(
             @OptIn(ExperimentalKotlinGradlePluginApi::class)
             kotlinExtension.sourceSets.getByName("main").generatedKotlin.srcDirs(lexiconGeneratedTask)
         }
-    }
-
-    override fun configureDependencies(buildFile: BuildFile) {
-        project.handleDependencies(buildFile)
     }
 }
