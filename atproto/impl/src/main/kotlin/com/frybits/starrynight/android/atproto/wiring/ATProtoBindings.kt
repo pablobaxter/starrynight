@@ -19,8 +19,6 @@
 package com.frybits.starrynight.android.atproto.wiring
 
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
-import com.frybits.starrynight.atproto.data.ATProtoDatabase
-import com.frybits.starrynight.atproto.data.DidDao
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
@@ -37,11 +35,5 @@ public object ATProtoBindings {
     @SingleIn(AppScope::class)
     internal fun provideATProtoServicesApi(retrofit: Retrofit): ATProtoNetworkApi {
         return retrofit.create()
-    }
-
-    @Provides
-    @SingleIn(AppScope::class)
-    internal fun provideDidDao(appDatabase: ATProtoDatabase): DidDao {
-        return appDatabase.didDao()
     }
 }

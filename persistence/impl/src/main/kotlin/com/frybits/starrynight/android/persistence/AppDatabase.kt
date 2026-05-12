@@ -22,17 +22,10 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.frybits.starrynight.android.persistence.converters.InstantTypeConverter
-import com.frybits.starrynight.atproto.data.ATProtoDatabase
-import com.frybits.starrynight.atproto.data.models.ResolvedDid
 
-@Database(
-    entities = [
-        ResolvedDid::class
-    ], version = 1
-)
-@TypeConverters(
-    InstantTypeConverter::class
-)
-internal abstract class AppDatabase :
-    RoomDatabase(),
-    ATProtoDatabase
+//@Database(version = 1)
+//@TypeConverters(
+//    InstantTypeConverter::class
+//)
+//internal abstract class AppDatabase :
+//    RoomDatabase()

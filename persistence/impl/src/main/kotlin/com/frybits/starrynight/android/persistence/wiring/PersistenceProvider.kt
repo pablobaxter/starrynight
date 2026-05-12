@@ -18,26 +18,25 @@
 
 package com.frybits.starrynight.android.persistence.wiring
 
-import android.content.Context
-import androidx.room.Room
-import com.frybits.starrynight.android.persistence.AppDatabase
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.BindingContainer
-import dev.zacsweers.metro.Binds
-import dev.zacsweers.metro.ContributesTo
-import dev.zacsweers.metro.Provides
-import dev.zacsweers.metro.SingleIn
-
-@ContributesTo(AppScope::class)
-@BindingContainer
-public object PersistenceProvider {
-
-    @Provides
-    @SingleIn(AppScope::class)
-    internal fun provideDatabase(context: Context): AppDatabase {
-        return Room.databaseBuilder<AppDatabase>(
-            context,
-            "app-database"
-        ).build()
-    }
-}
+//import android.content.Context
+//import androidx.room.Room
+//import com.frybits.starrynight.android.persistence.AppDatabase
+//import dev.zacsweers.metro.AppScope
+//import dev.zacsweers.metro.BindingContainer
+//import dev.zacsweers.metro.ContributesTo
+//import dev.zacsweers.metro.Provides
+//import dev.zacsweers.metro.SingleIn
+//
+//@ContributesTo(AppScope::class)
+//@BindingContainer
+//public object PersistenceProvider {
+//
+//    @Provides
+//    @SingleIn(AppScope::class)
+//    internal fun provideDatabase(context: Context): AppDatabase {
+//        return Room.databaseBuilder<AppDatabase>(
+//            context,
+//            "app-database"
+//        ).build()
+//    }
+//}

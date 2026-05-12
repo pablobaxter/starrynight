@@ -46,11 +46,11 @@ internal class LoginRepositoryImpl(
             val pdsService = requireNotNull(plcData.services["atproto_pds"]) { "No PDS service found for $handle, did=${plcData.did}. Services found: ${plcData.services}" }
             require(pdsService.type == "AtprotoPersonalDataServer") { "PDS service found does not match standard type: AtprotoPersonalDataServer. Type found: ${pdsService.type}" }
 
-            val sessionData = atProtoRepository.createSession(pdsService.endpoint, handle, password).getOrElse {
-                throw Exception("Error creating session", it)
-            }
-
-            Log.d("Blah", sessionData.toString())
+//            val sessionData = atProtoRepository.createSession(pdsService.endpoint, handle, password).getOrElse {
+//                throw Exception("Error creating session", it)
+//            }
+//
+//            Log.d("Blah", sessionData.toString())
         }
     }
 }

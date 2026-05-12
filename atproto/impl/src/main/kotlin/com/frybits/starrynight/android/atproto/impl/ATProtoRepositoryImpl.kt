@@ -23,17 +23,16 @@ import com.atproto.server.createSession.CreateSessionRequest
 import com.frybits.starrynight.android.atproto.models.strings.Did
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
 import com.frybits.starrynight.atproto.ATProtoRepository
-import com.frybits.starrynight.atproto.data.DidDao
-import com.frybits.starrynight.atproto.data.models.ResolvedDid
 import com.frybits.starrynight.atproto.models.ATProtoSession
 import com.frybits.starrynight.atproto.models.PlcData
 import com.frybits.starrynight.atproto.models.Service
 import com.frybits.starrynight.network.DnsRecordRepository
 import com.frybits.starrynight.network.models.TXT
+import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -44,7 +43,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.URI
 import java.util.logging.Logger
-import kotlin.time.Clock
 
 private val LOGGER = Logger.getLogger("ATProtoRepository")
 
@@ -53,37 +51,29 @@ private val LOGGER = Logger.getLogger("ATProtoRepository")
 internal class ATProtoRepositoryImpl(
     private val atProtoServicesApi: ATProtoNetworkApi,
     private val createSessionApi: CreateSessionApi,
-    private val didDao: DidDao,
     private val dnsRecordRepository: DnsRecordRepository,
-    private val json: Json
+    private val json: Json,
+    @param:IODispatcher private val ioDispatcher: CoroutineDispatcher
 ): ATProtoRepository {
 
     override suspend fun resolveHandle(username: String): Result<String> {
-        return runCatching { didDao.getResolvedDidForHandle(username) }
-            .map { it.did }
-            .recoverCatching {
-                resolveHandleViaDNS(username).recover {
-                    currentCoroutineContext().ensureActive()
-                    LOGGER.warning("Failed resolution via dns: ${it.message}")
+        return resolveHandleViaDNS(username).recover {
+            currentCoroutineContext().ensureActive()
+            LOGGER.warning("Failed resolution via dns: ${it.message}")
 
-                    val response = atProtoServicesApi.resolveHandleViaWellKnown(username)
-                    if (response.isSuccessful) {
-                        val did = response.body() ?: throw Exception("Empty did returned")
-                        return@recover Did(did)
-                    } else {
-                        val error = response.errorBody()?.use { errorBody ->
-                            withContext(Dispatchers.IO) { errorBody.string() }
-                        } ?: throw Exception("Unknown error (${response.code()}) - No error body")
+            val response = atProtoServicesApi.resolveHandleViaWellKnown(username)
+            if (response.isSuccessful) {
+                val did = response.body() ?: throw Exception("Empty did returned")
+                return@recover Did(did)
+            } else {
+                val error = response.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                } ?: throw Exception("Unknown error (${response.code()}) - No error body")
 
-                        throw Exception("Unknown error (${response.code()}) - $error")
-                    }
-
-                }.map {
-                    val resolvedHandle = it.toString()
-                    didDao.insertResolvedDid(ResolvedDid(handle = username, resolvedHandle, Clock.System.now()))
-                    return@map resolvedHandle
-                }.getOrThrow()
+                throw Exception("Unknown error (${response.code()}) - $error")
             }
+
+        }.map { it.toString() }
     }
 
     override suspend fun resolveDid(did: String): Result<PlcData> {
@@ -100,7 +90,7 @@ internal class ATProtoRepositoryImpl(
                         return@runCatching plcData
                     } else {
                         val error = response.errorBody()?.use { errorBody ->
-                            withContext(Dispatchers.IO) { errorBody.string() }
+                            withContext(ioDispatcher) { errorBody.string() }
                         } ?: throw Exception("Unknown error (${response.code()}) - No error body")
 
                         throw Exception("Unknown error (${response.code()}) - $error")
@@ -132,7 +122,7 @@ internal class ATProtoRepositoryImpl(
                         )
                     } else {
                         val error = response.errorBody()?.use { errorBody ->
-                            withContext(Dispatchers.IO) { errorBody.string() }
+                            withContext(ioDispatcher) { errorBody.string() }
                         } ?: throw Exception("Unknown error (${response.code()}) - No error body")
 
                         throw Exception("Unknown error (${response.code()}) - $error")
@@ -165,7 +155,7 @@ internal class ATProtoRepositoryImpl(
                 )
             } else {
                 val error = response.errorBody()?.use { errorBody ->
-                    withContext(Dispatchers.IO) { errorBody.string() }
+                    withContext(ioDispatcher) { errorBody.string() }
                 } ?: throw Exception("Unknown error (${response.code()}) - No error body")
 
                 if (response.code() == 400) {

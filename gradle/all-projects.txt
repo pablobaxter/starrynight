@@ -1,6 +1,5 @@
 :app
 :atproto:api
-:atproto:data
 :atproto:impl
 :auth:api
 :auth:impl

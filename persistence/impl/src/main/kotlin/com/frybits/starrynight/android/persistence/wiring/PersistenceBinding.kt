@@ -18,17 +18,12 @@
 
 package com.frybits.starrynight.android.persistence.wiring
 
-import com.frybits.starrynight.android.persistence.AppDatabase
-import com.frybits.starrynight.atproto.data.ATProtoDatabase
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
-import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.ContributesTo
 
 @ContributesTo(AppScope::class)
 @BindingContainer
 public abstract class PersistenceBinding {
 
-    @Binds
-    internal abstract val AppDatabase.bind: ATProtoDatabase
 }
