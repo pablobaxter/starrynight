@@ -18,7 +18,7 @@ pluginManagement {
         id("org.gradle.android.cache-fix") version "3.0.3"
         id("dev.zacsweers.metro") version providers.gradleProperty("com.frybits.metro.version")
         id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
-        id("com.frybits.plugin")
+        id("androidx.room") version "2.8.4"
     }
 
     includeBuild("build-logic")
@@ -53,5 +53,6 @@ plugins {
     id("org.gradle.android.cache-fix") apply false
     id("dev.zacsweers.metro") apply false
     id("org.jetbrains.kotlin.plugin.compose") apply false
+    id("androidx.room") apply false
     id("com.frybits.plugin")
 }

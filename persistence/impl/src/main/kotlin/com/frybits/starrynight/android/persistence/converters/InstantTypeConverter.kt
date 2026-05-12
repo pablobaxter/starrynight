@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,19 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.utils.core.wiring
+package com.frybits.starrynight.android.persistence.converters
 
-import android.app.Application
-import android.content.Context
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.BindingContainer
-import dev.zacsweers.metro.Binds
-import dev.zacsweers.metro.ContributesTo
+import androidx.room.TypeConverter
+import kotlin.time.Instant
 
-@ContributesTo(AppScope::class)
-@BindingContainer
-public interface AndroidUtilsBindings {
+internal class InstantTypeConverter {
 
-    @Binds
-    public val Application.bind: Context
+    @TypeConverter
+    fun fromTimeStamp(time: Long?): Instant? {
+        return time?.let { Instant.fromEpochMilliseconds(time) }
+    }
+
+    @TypeConverter
+    fun dateToTimeStamp(instant: Instant?): Long? {
+        return instant?.toEpochMilliseconds()
+    }
 }

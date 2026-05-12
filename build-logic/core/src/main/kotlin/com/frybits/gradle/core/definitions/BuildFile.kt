@@ -30,6 +30,7 @@ public sealed interface BuildFile {
     public val dependencies: Map<String, List<Dependency>>
     public val enableCompose: Boolean
     public val enableMetro: Boolean
+    public val enableRoom: Boolean
 }
 
 @Serializable
@@ -47,6 +48,7 @@ public data class AndroidAppBuildFile(
     override val namespace: String? = null,
     override val enableCompose: Boolean = false,
     override val enableMetro: Boolean = false,
+    override val enableRoom: Boolean = false,
 ): AndroidBuildFile
 
 @Serializable
@@ -56,6 +58,7 @@ public data class AndroidLibraryBuildFile(
     override val namespace: String? = null,
     override val enableCompose: Boolean = false,
     override val enableMetro: Boolean = false,
+    override val enableRoom: Boolean = false,
 ): AndroidBuildFile
 
 @Serializable
@@ -64,6 +67,7 @@ public data class JavaLibraryBuildFile(
     override val dependencies: Map<String, List<Dependency>> = emptyMap(),
     override val enableCompose: Boolean = false,
     override val enableMetro: Boolean = false,
+    override val enableRoom: Boolean = false,
 ): BuildFile
 
 @Serializable
@@ -76,4 +80,7 @@ public data class ATProtoLibrary(
 
     @Transient
     override val enableCompose: Boolean = false
+
+    @Transient
+    override val enableRoom: Boolean = false
 }

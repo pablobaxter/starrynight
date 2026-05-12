@@ -21,9 +21,11 @@ package com.frybits.starrynight.atproto.data.models
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlin.time.Instant
 
 @Entity(indices = [Index(value = ["did"])])
 public data class ResolvedDid(
     @PrimaryKey val handle: String,
-    val did: String
+    val did: String,
+    val lastUpdated: Instant
 )

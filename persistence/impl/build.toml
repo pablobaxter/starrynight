@@ -2,6 +2,7 @@
 type = "androidLibrary"
 
 enableMetro = true
+enableRoom = true
 
 # Libraries to be used (maven address or version catalog name)
 [dependencies]

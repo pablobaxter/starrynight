@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "5ad3799a1a43333432bf02ec80f55b5b",
+    "entities": [
+      {
+        "tableName": "ResolvedDid",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`handle` TEXT NOT NULL, `did` TEXT NOT NULL, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`handle`))",
+        "fields": [
+          {
+            "fieldPath": "handle",
+            "columnName": "handle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "did",
+            "columnName": "did",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "lastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "handle"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ResolvedDid_did",
+            "unique": false,
+            "columnNames": [
+              "did"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ResolvedDid_did` ON `${TABLE_NAME}` (`did`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5ad3799a1a43333432bf02ec80f55b5b')"
+    ]
+  }
+}

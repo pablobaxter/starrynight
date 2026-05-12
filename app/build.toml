@@ -4,7 +4,6 @@ type = "androidApplication"
 applicationId = "com.frybits.starrynight.android"
 
 targetSdk = 36
-#previewTargetSdk
 
 enableCompose = true
 enableMetro = true
@@ -19,7 +18,7 @@ implementation = [
     { type = "library", name = "androidx.core" },
     { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },
-    { type = "library", name = "kotlinx.coroutines.android" },
+    { type = "library", name = "kotlinx.coroutines.core" },
 
     # Api modules
     { type = "project", name = ":atproto:api" },
@@ -38,11 +37,3 @@ implementation = [
     { type = "project", name = ":persistence:impl" },
     { type = "project", name = ":utils:core:impl" },
 ]
-
-# Used to add libraries into the "api" configuration
-#api = [
-    # Example types to add: "project", "library", "platform"
-    # { type = "project", name = ":foobar" },
-    # { type = "library", name = "androidx.core" }, # Name here should match version catalog dot naming convention
-    # { type = "platform", module = { type = "library", name = "kotlinx.coroutines.bom" } },
-#]

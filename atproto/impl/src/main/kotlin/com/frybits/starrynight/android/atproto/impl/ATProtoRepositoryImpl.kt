@@ -44,6 +44,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.URI
 import java.util.logging.Logger
+import kotlin.time.Clock
 
 private val LOGGER = Logger.getLogger("ATProtoRepository")
 
@@ -79,7 +80,7 @@ internal class ATProtoRepositoryImpl(
 
                 }.map {
                     val resolvedHandle = it.toString()
-                    didDao.insertResolvedDid(ResolvedDid(handle = username, resolvedHandle))
+                    didDao.insertResolvedDid(ResolvedDid(handle = username, resolvedHandle, Clock.System.now()))
                     return@map resolvedHandle
                 }.getOrThrow()
             }
