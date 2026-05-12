@@ -23,11 +23,18 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
+import androidx.datastore.tink.AeadSerializer
 import com.frybits.starrynight.auth.LoggedInUserData
+import com.google.crypto.tink.Aead
+import com.google.crypto.tink.KeyTemplate
+import com.google.crypto.tink.RegistryConfiguration
+import com.google.crypto.tink.aead.PredefinedAeadParameters
+import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import com.google.protobuf.InvalidProtocolBufferException
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.InputStream
@@ -41,14 +48,30 @@ internal interface LoggedInUserDataStore {
 }
 
 @ContributesBinding(AppScope::class)
+@SingleIn(AppScope::class)
 @Inject
 internal class LoggedInUserDataStoreImpl(
     private val context: Context
 ) : LoggedInUserDataStore {
+    private val keysetHandle = AndroidKeysetManager.Builder()
+        .withSharedPref(context, "keyset", "keyset_prefs")
+        .withKeyTemplate(KeyTemplate.createFrom(PredefinedAeadParameters.AES256_GCM))
+        .withMasterKeyUri("android-keystore://master_key")
+        .build()
+        .keysetHandle
+
+    private val aeadSerializer = AeadSerializer(
+        aead = keysetHandle.getPrimitive(
+            RegistryConfiguration.get(),
+            Aead::class.java
+        ),
+        wrappedSerializer = LoggedInUserSerializer,
+        associatedData = "starry-night.loggedInUser.pb".encodeToByteArray()
+    )
 
     private val Context.datastore: DataStore<LoggedInUserProto> by dataStore(
         fileName = "loggedInUser.pb",
-        serializer = LoggedInUserSerializer
+        serializer = aeadSerializer
     )
 
     override suspend fun storeLoggedInUserData(userData: LoggedInUserData) {

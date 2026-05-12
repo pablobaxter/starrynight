@@ -18,5 +18,6 @@ implementation = [
     { type = "library", name = "retrofit" },
     { type = "library", name = "androidx.core" },
     { type = "library", name = "androidx.datastore" },
+    { type = "library", name = "androidx.datastore.tink" },
     { type = "library", name = "protobuf-kotlin" }
 ]

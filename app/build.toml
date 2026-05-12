@@ -19,6 +19,7 @@ implementation = [
     { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },
     { type = "library", name = "kotlinx.coroutines.core" },
+    { type = "library", name = "tink.android" },
 
     # Api modules
     { type = "project", name = ":atproto:api" },
