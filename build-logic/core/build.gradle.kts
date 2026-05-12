@@ -26,6 +26,7 @@ dependencies {
     compileOnly(logic.kotlin.gradle)
 
     compileOnly(logic.metro)
+    compileOnly(logic.protobuf)
     compileOnly(logic.room)
 
     implementation(logic.kotlinx.serialization.core)

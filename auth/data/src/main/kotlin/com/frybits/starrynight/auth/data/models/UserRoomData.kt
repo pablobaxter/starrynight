@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,19 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.persistence.wiring
+package com.frybits.starrynight.auth.data.models
 
-import com.frybits.starrynight.android.persistence.AppDatabase
-import com.frybits.starrynight.auth.data.UserDatabase
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.BindingContainer
-import dev.zacsweers.metro.Binds
-import dev.zacsweers.metro.ContributesTo
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
+import kotlin.time.Instant
 
-@ContributesTo(AppScope::class)
-@BindingContainer
-public abstract class PersistenceBinding {
-
-    @Binds
-    internal abstract val AppDatabase.bind: UserDatabase
-}
+@Entity(indices = [Index(value = ["did"])])
+public data class UserRoomData(
+    @PrimaryKey val handle: String,
+    val did: String,
+    val pds: String,
+    val lastUpdated: Instant
+)

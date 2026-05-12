@@ -28,6 +28,7 @@ implementation = [
     { type = "project", name = ":utils:core:api" },
 
     # Data modules
+    { type = "project", name = ":auth:data" },
 
     # Impl modules
     { type = "project", name = ":atproto:impl" },

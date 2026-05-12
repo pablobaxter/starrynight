@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,19 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.persistence.wiring
+package com.frybits.gradle.core.definitions
 
-import com.frybits.starrynight.android.persistence.AppDatabase
-import com.frybits.starrynight.auth.data.UserDatabase
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.BindingContainer
-import dev.zacsweers.metro.Binds
-import dev.zacsweers.metro.ContributesTo
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@ContributesTo(AppScope::class)
-@BindingContainer
-public abstract class PersistenceBinding {
-
-    @Binds
-    internal abstract val AppDatabase.bind: UserDatabase
-}
+@Serializable
+@SerialName("protoBuf")
+public data class ProtoBuf(
+    public val protocArtifact: String
+)

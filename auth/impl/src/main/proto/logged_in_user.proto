@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_package = "com.frybits.starrynight.android.auth";
+option java_multiple_files = true;
+
+message LoggedInUserProto {
+    string did = 1;
+    string handle = 2;
+    string email = 3;
+    bool active = 4;
+    string status = 5;
+    string token = 6;
+    string refreshToken = 7;
+    bool emailConfirmed = 8;
+}

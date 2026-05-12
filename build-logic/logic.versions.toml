@@ -2,8 +2,9 @@
 kotlin = "2.3.0"
 kotlinpoet = "2.3.0"
 kotlinx-serialization = "1.11.0"
-ksp = "2.3.6"
+ksp = "2.3.7"
 metro = "1.0.0"
+protobuf = "0.10.0"
 r8-version = "9.2.15"
 room = "2.8.4"
 tomlkt = "0.6.0"
@@ -17,6 +18,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-toml-core = { group = "dev.eav.tomlkt", name = "tomlkt", version.ref = "tomlkt" }
 ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 metro = { group = "dev.zacsweers.metro", name = "gradle-plugin", version.ref = "metro" }
+protobuf = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version.ref = "protobuf" }
 r8 = { group = "com.android.tools", name = "r8", version.ref = "r8-version" }
 room = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 

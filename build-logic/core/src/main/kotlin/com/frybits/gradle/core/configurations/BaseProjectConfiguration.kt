@@ -33,6 +33,7 @@ import org.gradle.kotlin.dsl.the
 public fun Project.baseProjectPlugins(buildFile: BuildFile) {
     handleComposePlugins(buildFile)
     handleRoomPlugins(buildFile)
+    handleProtobufPlugins(buildFile)
 }
 
 /**
@@ -41,6 +42,7 @@ public fun Project.baseProjectPlugins(buildFile: BuildFile) {
 public fun Project.baseProjectConfiguration(buildFile: BuildFile) {
     handleComposeConfiguration(buildFile)
     handleRoomConfiguration(buildFile)
+    handleProtobufConfiguration(buildFile)
     handleDependencies(buildFile)
 }
 

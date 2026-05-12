@@ -9,6 +9,7 @@ enableRoom = true
 
 implementation = [
     { type = "project", name = ":persistence:api" },
+    { type = "project", name = ":auth:data" },
     { type = "library", name = "room.runtime" }
 ]
 

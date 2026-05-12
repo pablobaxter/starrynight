@@ -18,18 +18,24 @@
 
 package com.frybits.starrynight.android.auth.impl
 
-import android.util.Log
+import androidx.core.net.toUri
+import com.frybits.starrynight.android.auth.LoggedInUserDataStore
 import com.frybits.starrynight.atproto.ATProtoRepository
+import com.frybits.starrynight.auth.LoggedInUserData
 import com.frybits.starrynight.auth.LoginRepository
+import com.frybits.starrynight.auth.data.UserDao
+import com.frybits.starrynight.auth.data.models.UserRoomData
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import androidx.core.net.toUri
+import kotlin.time.Clock
 
 @ContributesBinding(AppScope::class)
 @Inject
 internal class LoginRepositoryImpl(
-    private val atProtoRepository: ATProtoRepository
+    private val atProtoRepository: ATProtoRepository,
+    private val userDao: UserDao,
+    private val loggedInUserDataStore: LoggedInUserDataStore
 ) : LoginRepository {
 
     override suspend fun login(handle: String, password: String): Result<Unit> {
@@ -46,11 +52,29 @@ internal class LoginRepositoryImpl(
             val pdsService = requireNotNull(plcData.services["atproto_pds"]) { "No PDS service found for $handle, did=${plcData.did}. Services found: ${plcData.services}" }
             require(pdsService.type == "AtprotoPersonalDataServer") { "PDS service found does not match standard type: AtprotoPersonalDataServer. Type found: ${pdsService.type}" }
 
-//            val sessionData = atProtoRepository.createSession(pdsService.endpoint, handle, password).getOrElse {
-//                throw Exception("Error creating session", it)
-//            }
-//
-//            Log.d("Blah", sessionData.toString())
+            userDao.insertUser(UserRoomData(
+                handle = handle,
+                did = plcData.did,
+                pds = pdsService.endpoint,
+                lastUpdated = Clock.System.now()
+            ))
+
+            val sessionData = atProtoRepository.createSession(pdsService.endpoint, handle, password).getOrElse {
+                throw Exception("Error creating session", it)
+            }
+
+            loggedInUserDataStore.storeLoggedInUserData(
+                LoggedInUserData(
+                    did = sessionData.id,
+                    handle = sessionData.handle,
+                    email = sessionData.email,
+                    active = sessionData.active,
+                    status = sessionData.status?.name.orEmpty(),
+                    token = sessionData.accessJwt,
+                    refreshToken = sessionData.refreshJwt,
+                    emailConfirmed = sessionData.emailConfirmed
+                )
+            )
         }
     }
 }

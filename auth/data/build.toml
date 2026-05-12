@@ -1,0 +1,9 @@
+# Project type
+type = "javaLibrary"
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+implementation = [
+    { type = "library", name = "room.common" },
+]

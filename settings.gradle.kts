@@ -19,6 +19,7 @@ pluginManagement {
         id("dev.zacsweers.metro") version providers.gradleProperty("com.frybits.metro.version")
         id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
         id("androidx.room") version "2.8.4"
+        id("com.google.protobuf") version "0.10.0"
     }
 
     includeBuild("build-logic")
@@ -54,5 +55,6 @@ plugins {
     id("dev.zacsweers.metro") apply false
     id("org.jetbrains.kotlin.plugin.compose") apply false
     id("androidx.room") apply false
+    id("com.google.protobuf") apply false
     id("com.frybits.plugin")
 }

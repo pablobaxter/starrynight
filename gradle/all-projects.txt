@@ -2,6 +2,7 @@
 :atproto:api
 :atproto:impl
 :auth:api
+:auth:data
 :auth:impl
 :network:api
 :network:impl

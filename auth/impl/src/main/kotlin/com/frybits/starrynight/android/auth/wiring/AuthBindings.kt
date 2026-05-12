@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,19 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.persistence.wiring
+package com.frybits.starrynight.android.auth.wiring
 
-import com.frybits.starrynight.android.persistence.AppDatabase
+import com.frybits.starrynight.auth.data.UserDao
 import com.frybits.starrynight.auth.data.UserDatabase
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
-import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 
 @ContributesTo(AppScope::class)
 @BindingContainer
-public abstract class PersistenceBinding {
+public object AuthBindings {
 
-    @Binds
-    internal abstract val AppDatabase.bind: UserDatabase
+    @Provides
+    @SingleIn(AppScope::class)
+    internal fun provideUseDao(appDatabase: UserDatabase): UserDao {
+        return appDatabase.userDao()
+    }
 }
