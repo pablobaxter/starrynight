@@ -16,14 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.atproto.db.models
+package com.frybits.starrynight.atproto.data
 
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
+public interface ATProtoDatabase {
 
-@Entity(indices = [Index(value = ["did"])])
-public data class ResolvedDid(
-    @PrimaryKey val handle: String,
-    val did: String
-)
+    public fun didDao(): DidDao
+}

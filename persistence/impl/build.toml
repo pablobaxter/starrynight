@@ -8,4 +8,10 @@ enableMetro = true
 
 implementation = [
     { type = "project", name = ":persistence:api" },
+    { type = "project", name = ":atproto:data" },
+    { type = "library", name = "room.runtime" }
+]
+
+ksp = [
+    { type = "library", name = "room.ksp" },
 ]

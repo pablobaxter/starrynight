@@ -13,11 +13,11 @@ enableMetro = true
 
 implementation = [
     { type = "project", name = ":atproto:api" },
+    { type = "project", name = ":atproto:data" },
     { type = "project", name = ":utils:core:api" },
     { type = "project", name = ":network:api" },
     { type = "library", name = "kotlinx.coroutines.core" },
     { type = "library", name = "retrofit" },
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
-    { type = "library", name = "room.common" },
 ]

@@ -20,7 +20,6 @@ implementation = [
     { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },
     { type = "library", name = "kotlinx.coroutines.android" },
-    { type = "library", name = "room.runtime" },
 
     # Api modules
     { type = "project", name = ":atproto:api" },
@@ -29,16 +28,15 @@ implementation = [
     { type = "project", name = ":persistence:api" },
     { type = "project", name = ":utils:core:api" },
 
+    # Data modules
+    { type = "project", name = ":atproto:data" },
+
     # Impl modules
     { type = "project", name = ":atproto:impl" },
     { type = "project", name = ":auth:impl" },
     { type = "project", name = ":network:impl" },
     { type = "project", name = ":persistence:impl" },
     { type = "project", name = ":utils:core:impl" },
-]
-
-ksp = [
-    { type = "library", name = "room.ksp" },
 ]
 
 # Used to add libraries into the "api" configuration

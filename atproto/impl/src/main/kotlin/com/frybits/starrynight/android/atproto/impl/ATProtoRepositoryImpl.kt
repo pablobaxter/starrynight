@@ -20,10 +20,11 @@ package com.frybits.starrynight.android.atproto.impl
 
 import com.atproto.server.createSession.CreateSessionApi
 import com.atproto.server.createSession.CreateSessionRequest
-import com.frybits.starrynight.android.atproto.db.DidDao
 import com.frybits.starrynight.android.atproto.models.strings.Did
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
 import com.frybits.starrynight.atproto.ATProtoRepository
+import com.frybits.starrynight.atproto.data.DidDao
+import com.frybits.starrynight.atproto.data.models.ResolvedDid
 import com.frybits.starrynight.atproto.models.ATProtoSession
 import com.frybits.starrynight.atproto.models.PlcData
 import com.frybits.starrynight.atproto.models.Service
@@ -57,24 +58,31 @@ internal class ATProtoRepositoryImpl(
 ): ATProtoRepository {
 
     override suspend fun resolveHandle(username: String): Result<String> {
-        val result = didDao.getResolvedDidForHandle(username)
-        return resolveHandleViaDNS(username).recoverCatching {
-            currentCoroutineContext().ensureActive()
-            LOGGER.warning("Failed resolution via dns: ${it.message}")
+        return runCatching { didDao.getResolvedDidForHandle(username) }
+            .map { it.did }
+            .recoverCatching {
+                resolveHandleViaDNS(username).recover {
+                    currentCoroutineContext().ensureActive()
+                    LOGGER.warning("Failed resolution via dns: ${it.message}")
 
-            val response = atProtoServicesApi.resolveHandleViaWellKnown(username)
-            if (response.isSuccessful) {
-                val did = response.body() ?: throw Exception("Empty did returned")
-                return@recoverCatching Did(did)
-            } else {
-                val error = response.errorBody()?.use { errorBody ->
-                    withContext(Dispatchers.IO) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${response.code()}) - No error body")
+                    val response = atProtoServicesApi.resolveHandleViaWellKnown(username)
+                    if (response.isSuccessful) {
+                        val did = response.body() ?: throw Exception("Empty did returned")
+                        return@recover Did(did)
+                    } else {
+                        val error = response.errorBody()?.use { errorBody ->
+                            withContext(Dispatchers.IO) { errorBody.string() }
+                        } ?: throw Exception("Unknown error (${response.code()}) - No error body")
 
-                throw Exception("Unknown error (${response.code()}) - $error")
+                        throw Exception("Unknown error (${response.code()}) - $error")
+                    }
+
+                }.map {
+                    val resolvedHandle = it.toString()
+                    didDao.insertResolvedDid(ResolvedDid(handle = username, resolvedHandle))
+                    return@map resolvedHandle
+                }.getOrThrow()
             }
-
-        }.map { it.toString() }
     }
 
     override suspend fun resolveDid(did: String): Result<PlcData> {

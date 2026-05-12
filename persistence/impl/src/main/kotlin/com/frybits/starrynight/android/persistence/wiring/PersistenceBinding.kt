@@ -16,32 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.atproto.wiring
+package com.frybits.starrynight.android.persistence.wiring
 
-import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
+import com.frybits.starrynight.android.persistence.AppDatabase
 import com.frybits.starrynight.atproto.data.ATProtoDatabase
-import com.frybits.starrynight.atproto.data.DidDao
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.ContributesTo
-import dev.zacsweers.metro.Provides
-import dev.zacsweers.metro.SingleIn
-import retrofit2.Retrofit
-import retrofit2.create
 
 @ContributesTo(AppScope::class)
 @BindingContainer
-public object ATProtoBindings {
+public abstract class PersistenceBinding {
 
-    @Provides
-    @SingleIn(AppScope::class)
-    internal fun provideATProtoServicesApi(retrofit: Retrofit): ATProtoNetworkApi {
-        return retrofit.create()
-    }
-
-    @Provides
-    @SingleIn(AppScope::class)
-    internal fun provideDidDao(appDatabase: ATProtoDatabase): DidDao {
-        return appDatabase.didDao()
-    }
+    @Binds
+    internal abstract val AppDatabase.bind: ATProtoDatabase
 }

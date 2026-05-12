@@ -16,34 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app.di
+package com.frybits.starrynight.android.persistence.wiring
 
 import android.content.Context
 import androidx.room.Room
-import com.frybits.starrynight.android.app.persistence.StarryNightAppDatabase
-import com.frybits.starrynight.android.atproto.db.DidDao
+import com.frybits.starrynight.android.persistence.AppDatabase
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 
 @ContributesTo(AppScope::class)
 @BindingContainer
-public object PersistenceBinding {
+public object PersistenceProvider {
 
     @Provides
     @SingleIn(AppScope::class)
-    internal fun provideDatabase(context: Context): StarryNightAppDatabase {
-        return Room.databaseBuilder<StarryNightAppDatabase>(
+    internal fun provideDatabase(context: Context): AppDatabase {
+        return Room.databaseBuilder<AppDatabase>(
             context,
             "app-database"
         ).build()
-    }
-
-    @Provides
-    @SingleIn(AppScope::class)
-    internal fun provideDidDao(database: StarryNightAppDatabase): DidDao {
-        return database.didDao()
     }
 }
