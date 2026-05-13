@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth
+package com.frybits.starrynight.utils.core
 
-public interface LoginRepository {
+import dev.zacsweers.metro.Qualifier
 
-    public suspend fun login(handle: String, password: String): Result<Unit>
-}
+@Qualifier
+public annotation class AppName

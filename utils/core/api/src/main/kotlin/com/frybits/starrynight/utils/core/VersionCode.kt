@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth
+package com.frybits.starrynight.utils.core
 
-public interface LoggedInRepository {
+import dev.zacsweers.metro.Qualifier
 
-//    public suspend fun getLoggedInUserData(): LoggedInUserData
-}
+@Qualifier
+public annotation class VersionCode

@@ -19,6 +19,10 @@
 package com.frybits.starrynight.android.app.di
 
 import android.app.Application
+import com.frybits.starrynight.utils.core.AppName
+import com.frybits.starrynight.utils.core.PackageName
+import com.frybits.starrynight.utils.core.VersionCode
+import com.frybits.starrynight.utils.core.VersionName
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
@@ -30,7 +34,11 @@ internal interface StarryNightGraph: MetroAppComponentProviders {
     @DependencyGraph.Factory
     interface Factory {
         fun create(
-            @Provides application: Application
+            @Provides application: Application,
+            @Provides @AppName appName: String,
+            @Provides @PackageName packageName: String,
+            @Provides @VersionName versionName: String,
+            @Provides @VersionCode versionCode: Long
         ): StarryNightGraph
     }
 }

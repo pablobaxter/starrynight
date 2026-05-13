@@ -19,6 +19,7 @@
 package com.frybits.gradle.android.configurations.common
 
 import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.variant.BuildConfigField
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
 import com.frybits.gradle.android.enableKotlinPluginIfNeeded
@@ -29,6 +30,10 @@ import com.frybits.gradle.core.configurations.jvmProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectConfiguration
 import com.frybits.gradle.core.configurations.kotlinProjectPlugins
 import com.frybits.gradle.core.definitions.AndroidBuildFile
+import com.frybits.gradle.core.definitions.EnvironmentalProperty
+import com.frybits.gradle.core.definitions.GradleProperty
+import com.frybits.gradle.core.definitions.LiteralProperty
+import com.frybits.gradle.core.definitions.SystemProperty
 import com.frybits.gradle.utils.androidSourceCompatibility
 import com.frybits.gradle.utils.androidTargetCompatibility
 import org.gradle.api.Project
@@ -64,7 +69,10 @@ public fun Project.androidCommonConfiguration(buildFile: AndroidBuildFile, andro
             targetCompatibility(androidTargetCompatibility.get())
             sourceCompatibility(androidSourceCompatibility.get())
         }
-        buildFeatures.compose = buildFile.enableCompose
+        with(buildFeatures) {
+            compose = buildFile.enableCompose
+            buildConfig = buildFile.buildConfigs != null
+        }
     }
 }
 
@@ -79,6 +87,38 @@ public fun Project.androidVariantBuilderConfiguration(buildFile: AndroidBuildFil
  * Configures the base [Variant]
  */
 public fun Project.androidVariantConfiguration(buildFile: AndroidBuildFile, variant: Variant) {
+    with(variant) {
+        buildFile.buildConfigs?.get(variant.buildType)?.forEach { buildConfigField ->
+            when (buildConfigField.property) {
+                is LiteralProperty -> buildConfigFields?.put(
+                    buildConfigField.name,
+                    BuildConfigField(
+                        type = buildConfigField.type,
+                        value = buildConfigField.property.value,
+                        comment = null
+                    )
+                )
+                is GradleProperty -> buildConfigFields?.put(
+                    buildConfigField.name,
+                    providers.gradleProperty(buildConfigField.property.value).map {
+                        BuildConfigField(buildConfigField.type, it, null)
+                    }
+                )
+                is SystemProperty -> buildConfigFields?.put(
+                    buildConfigField.name,
+                    providers.systemProperty(buildConfigField.property.value).map {
+                        BuildConfigField(buildConfigField.type, it, null)
+                    }
+                )
+                is EnvironmentalProperty -> buildConfigFields?.put(
+                    buildConfigField.name,
+                    providers.environmentVariable(buildConfigField.property.value).map {
+                        BuildConfigField(buildConfigField.type, it, null)
+                    }
+                )
+            }
+        }
+    }
 }
 
 private val AGP_8_13_0 = AndroidPluginVersion(8, 13)

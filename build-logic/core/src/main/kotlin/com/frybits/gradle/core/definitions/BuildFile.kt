@@ -37,6 +37,7 @@ public sealed interface BuildFile {
 @Serializable
 public sealed interface AndroidBuildFile: BuildFile {
     public val namespace: String?
+    public val buildConfigs: Map<String, List<BuildConfigField>>?
 }
 
 @Serializable
@@ -51,6 +52,7 @@ public data class AndroidAppBuildFile(
     override val enableMetro: Boolean = false,
     override val enableRoom: Boolean = false,
     override val protoBuf: ProtoBuf? = null,
+    override val buildConfigs: Map<String, List<BuildConfigField>>? = null
 ): AndroidBuildFile
 
 @Serializable
@@ -62,6 +64,7 @@ public data class AndroidLibraryBuildFile(
     override val enableMetro: Boolean = false,
     override val enableRoom: Boolean = false,
     override val protoBuf: ProtoBuf? = null,
+    override val buildConfigs: Map<String, List<BuildConfigField>>? = null
 ): AndroidBuildFile
 
 @Serializable

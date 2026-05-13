@@ -20,6 +20,10 @@ package com.frybits.starrynight.android.network.wiring
 
 import android.app.Application
 import android.net.DnsResolver
+import com.frybits.starrynight.utils.core.AppName
+import com.frybits.starrynight.utils.core.PackageName
+import com.frybits.starrynight.utils.core.VersionCode
+import com.frybits.starrynight.utils.core.VersionName
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
@@ -50,8 +54,20 @@ public object CoreNetworkBindings {
 
     @Provides
     @SingleIn(AppScope::class)
-    public fun provideOkHttp(): OkHttpClient {
+    public fun provideOkHttp(
+        @AppName appName: String,
+        @PackageName packageName: String,
+        @VersionName versionName: String,
+        @VersionCode versionCode: Long
+    ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request().newBuilder()
+                        .header("User-Agent", "$packageName/$appName/$versionName($versionCode)")
+                        .build()
+                )
+            }
             .build()
     }
 

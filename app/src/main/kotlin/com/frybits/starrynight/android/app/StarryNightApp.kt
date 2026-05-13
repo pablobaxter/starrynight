@@ -19,6 +19,8 @@
 package com.frybits.starrynight.android.app
 
 import android.app.Application
+import android.content.pm.PackageManager
+import android.os.Build
 import com.frybits.starrynight.android.app.di.StarryNightGraph
 import com.google.crypto.tink.aead.AeadConfig
 import dev.zacsweers.metro.createGraphFactory
@@ -27,7 +29,18 @@ import dev.zacsweers.metrox.android.MetroApplication
 
 internal class StarryNightApp : Application(), MetroApplication {
     private val appGraph by lazy {
-        createGraphFactory<StarryNightGraph.Factory>().create(this)
+        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+        } else {
+            packageManager.getPackageInfo(packageName, 0)
+        }
+        createGraphFactory<StarryNightGraph.Factory>().create(
+            application = this,
+            appName = getString(R.string.app_name),
+            packageName = packageName,
+            versionName = packageInfo.versionName ?: "UNKNOWN",
+            versionCode = packageInfo.longVersionCode
+        )
     }
 
     override val appComponentProviders: MetroAppComponentProviders

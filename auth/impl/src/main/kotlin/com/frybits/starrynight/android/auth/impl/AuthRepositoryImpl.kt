@@ -21,7 +21,8 @@ package com.frybits.starrynight.android.auth.impl
 import androidx.core.net.toUri
 import com.frybits.starrynight.android.auth.LoggedInUserDataStore
 import com.frybits.starrynight.atproto.ATProtoRepository
-import com.frybits.starrynight.auth.LoginRepository
+import com.frybits.starrynight.auth.AuthRepository
+import com.frybits.starrynight.auth.LoggedInUserData
 import com.frybits.starrynight.auth.data.UserDao
 import com.frybits.starrynight.auth.data.models.UserRoomData
 import dev.zacsweers.metro.AppScope
@@ -31,11 +32,11 @@ import kotlin.time.Clock
 
 @ContributesBinding(AppScope::class)
 @Inject
-internal class LoginRepositoryImpl(
+internal class AuthRepositoryImpl(
     private val atProtoRepository: ATProtoRepository,
     private val userDao: UserDao,
     private val loggedInUserDataStore: LoggedInUserDataStore
-) : LoginRepository {
+) : AuthRepository {
 
     override suspend fun login(handle: String, password: String): Result<Unit> {
         return runCatching {
@@ -58,22 +59,22 @@ internal class LoginRepositoryImpl(
                 lastUpdated = Clock.System.now()
             ))
 
-//            val sessionData = atProtoRepository.createSession(pdsService.endpoint, handle, password).getOrElse {
-//                throw Exception("Error creating session", it)
-//            }
+            val sessionData = atProtoRepository.createSession(pdsService.endpoint, handle, password).getOrElse {
+                throw Exception("Error creating session", it)
+            }
 
-//            loggedInUserDataStore.storeLoggedInUserData(
-//                LoggedInUserData(
-//                    did = sessionData.id,
-//                    handle = sessionData.handle,
-//                    email = sessionData.email,
-//                    active = sessionData.active,
-//                    status = sessionData.status?.name.orEmpty(),
-//                    token = sessionData.accessJwt,
-//                    refreshToken = sessionData.refreshJwt,
-//                    emailConfirmed = sessionData.emailConfirmed
-//                )
-//            )
+            loggedInUserDataStore.storeLoggedInUserData(
+                LoggedInUserData(
+                    did = sessionData.id,
+                    handle = sessionData.handle,
+                    email = sessionData.email,
+                    active = sessionData.active,
+                    status = sessionData.status?.name.orEmpty(),
+                    token = sessionData.accessJwt,
+                    refreshToken = sessionData.refreshJwt,
+                    emailConfirmed = sessionData.emailConfirmed
+                )
+            )
         }
     }
 }

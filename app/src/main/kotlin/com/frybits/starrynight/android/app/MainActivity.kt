@@ -22,7 +22,7 @@ import android.app.Activity
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
-import com.frybits.starrynight.auth.LoginRepository
+import com.frybits.starrynight.auth.AuthRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -35,12 +35,12 @@ private val TAG = MainActivity::class.java.simpleName
 @ContributesIntoMap(AppScope::class, binding<Activity>())
 @ActivityKey
 @Inject
-internal class MainActivity(private val loginRepository: LoginRepository): ComponentActivity() {
+internal class MainActivity(private val authRepository: AuthRepository): ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch {
-            loginRepository.login("pablobaxter.com", "blah").onFailure {
+            authRepository.login("pablobaxter.com", "blah").onFailure {
                 Log.d("Blah", "Something failed", it)
             }
         }

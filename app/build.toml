@@ -8,6 +8,9 @@ targetSdk = 36
 enableCompose = true
 enableMetro = true
 
+[buildConfigs]
+
+
 # Libraries to be used (maven address or version catalog name)
 [dependencies]
 
