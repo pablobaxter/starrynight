@@ -88,10 +88,12 @@ public fun Project.androidVariantBuilderConfiguration(buildFile: AndroidBuildFil
  */
 public fun Project.androidVariantConfiguration(buildFile: AndroidBuildFile, variant: Variant) {
     with(variant) {
-        buildFile.buildConfigs?.get(variant.buildType)?.forEach { buildConfigField ->
+        val buildConfigs = buildFile.buildConfigs?.get("default").orEmpty() +
+                buildFile.buildConfigs?.get(variant.buildType).orEmpty()
+        buildConfigs.forEach { buildConfigField ->
             when (buildConfigField.property) {
                 is LiteralProperty -> buildConfigFields?.put(
-                    buildConfigField.name,
+                    buildConfigField.key,
                     BuildConfigField(
                         type = buildConfigField.type,
                         value = buildConfigField.property.value,
@@ -99,19 +101,19 @@ public fun Project.androidVariantConfiguration(buildFile: AndroidBuildFile, vari
                     )
                 )
                 is GradleProperty -> buildConfigFields?.put(
-                    buildConfigField.name,
+                    buildConfigField.key,
                     providers.gradleProperty(buildConfigField.property.value).map {
                         BuildConfigField(buildConfigField.type, it, null)
                     }
                 )
                 is SystemProperty -> buildConfigFields?.put(
-                    buildConfigField.name,
+                    buildConfigField.key,
                     providers.systemProperty(buildConfigField.property.value).map {
                         BuildConfigField(buildConfigField.type, it, null)
                     }
                 )
                 is EnvironmentalProperty -> buildConfigFields?.put(
-                    buildConfigField.name,
+                    buildConfigField.key,
                     providers.environmentVariable(buildConfigField.property.value).map {
                         BuildConfigField(buildConfigField.type, it, null)
                     }

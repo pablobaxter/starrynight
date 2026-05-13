@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class BuildConfigField(
     val type: String,
-    val name: String,
+    val key: String,
     val property: BuildConfigProperty
 )
 
