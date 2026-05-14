@@ -13,7 +13,7 @@ pluginManagement {
         id("com.android.library") version providers.gradleProperty("com.frybits.agp.version")
         id("org.jetbrains.kotlin.android") version providers.gradleProperty("com.frybits.kotlin.version")
         id("org.jetbrains.kotlin.jvm") version providers.gradleProperty("com.frybits.kotlin.version")
-        id("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
+        id("org.jetbrains.kotlin.plugin.serialization") version "2.4.0-RC"
         id("com.google.devtools.ksp") version providers.gradleProperty("com.frybits.ksp.version")
         id("org.gradle.android.cache-fix") version "3.0.3"
         id("dev.zacsweers.metro") version providers.gradleProperty("com.frybits.metro.version")

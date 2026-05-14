@@ -21,4 +21,4 @@ package com.frybits.starrynight.utils.core
 import dev.zacsweers.metro.Qualifier
 
 @Qualifier
-public annotation class PackageName
+public annotation class AppId

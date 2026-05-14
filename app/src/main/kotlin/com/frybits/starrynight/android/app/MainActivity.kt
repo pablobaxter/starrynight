@@ -40,9 +40,9 @@ internal class MainActivity(private val authRepository: AuthRepository): Compone
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch {
-            authRepository.login("pablobaxter.com", "blah").onFailure {
-                Log.d("Blah", "Something failed", it)
-            }
+//            authRepository.login("pablobaxter.com", "blah").onFailure {
+//                Log.d("Blah", "Something failed", it)
+//            }
         }
     }
 }

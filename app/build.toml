@@ -3,12 +3,15 @@ type = "androidApplication"
 
 applicationId = "com.frybits.starrynight.android"
 
-targetSdk = 36
+targetSdk = 37
 
 enableCompose = true
 enableMetro = true
 
 [buildConfigs]
+default = [
+    { type = "String", key = "APP_NAME", property = { type = "literal", value = "Starry Night" } }
+]
 
 # Libraries to be used (maven address or version catalog name)
 [dependencies]

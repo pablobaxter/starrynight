@@ -92,14 +92,16 @@ public fun Project.androidVariantConfiguration(buildFile: AndroidBuildFile, vari
                 buildFile.buildConfigs?.get(variant.buildType).orEmpty()
         buildConfigs.forEach { buildConfigField ->
             when (buildConfigField.property) {
-                is LiteralProperty -> buildConfigFields?.put(
-                    buildConfigField.key,
-                    BuildConfigField(
-                        type = buildConfigField.type,
-                        value = buildConfigField.property.value,
-                        comment = null
+                is LiteralProperty -> {
+                    buildConfigFields?.put(
+                        buildConfigField.key,
+                        BuildConfigField(
+                            type = buildConfigField.type,
+                            value = buildConfigField.property.value,
+                            comment = null
+                        )
                     )
-                )
+                }
                 is GradleProperty -> buildConfigFields?.put(
                     buildConfigField.key,
                     providers.gradleProperty(buildConfigField.property.value).map {

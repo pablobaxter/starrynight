@@ -19,9 +19,12 @@
 package com.frybits.starrynight.android.network.wiring
 
 import android.app.Application
+import android.content.Context
 import android.net.DnsResolver
+import android.os.Build
+import android.os.ext.SdkExtensions
 import com.frybits.starrynight.utils.core.AppName
-import com.frybits.starrynight.utils.core.PackageName
+import com.frybits.starrynight.utils.core.AppId
 import com.frybits.starrynight.utils.core.VersionCode
 import com.frybits.starrynight.utils.core.VersionName
 import dev.zacsweers.metro.AppScope
@@ -42,8 +45,14 @@ public object CoreNetworkBindings {
 
     @Provides
     @SingleIn(AppScope::class)
-    public fun provideDnsResolver(application: Application): DnsResolver {
-        return DnsResolver.getInstance()
+    public fun provideDnsResolver(context: Context): DnsResolver {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(
+                Build.VERSION_CODES.S) >= 22) {
+            DnsResolver(context, null)
+        } else {
+            @Suppress("DEPRECATION")
+            DnsResolver.getInstance()
+        }
     }
 
     @Provides
@@ -56,9 +65,9 @@ public object CoreNetworkBindings {
     @SingleIn(AppScope::class)
     public fun provideOkHttp(
         @AppName appName: String,
-        @PackageName packageName: String,
+        @AppId packageName: String,
         @VersionName versionName: String,
-        @VersionCode versionCode: Long
+        @VersionCode versionCode: Int
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
