@@ -31,7 +31,7 @@ public sealed interface BuildFile {
     public val enableCompose: Boolean
     public val enableMetro: Boolean
     public val enableRoom: Boolean
-    public val protoBuf: ProtoBuf?
+    public val enableWire: Boolean
 }
 
 @Serializable
@@ -51,7 +51,7 @@ public data class AndroidAppBuildFile(
     override val enableCompose: Boolean = false,
     override val enableMetro: Boolean = false,
     override val enableRoom: Boolean = false,
-    override val protoBuf: ProtoBuf? = null,
+    override val enableWire: Boolean = false,
     override val buildConfigs: Map<String, List<BuildConfigField>>? = null
 ): AndroidBuildFile
 
@@ -63,7 +63,7 @@ public data class AndroidLibraryBuildFile(
     override val enableCompose: Boolean = false,
     override val enableMetro: Boolean = false,
     override val enableRoom: Boolean = false,
-    override val protoBuf: ProtoBuf? = null,
+    override val enableWire: Boolean = false,
     override val buildConfigs: Map<String, List<BuildConfigField>>? = null
 ): AndroidBuildFile
 
@@ -74,7 +74,7 @@ public data class JavaLibraryBuildFile(
     override val enableCompose: Boolean = false,
     override val enableMetro: Boolean = false,
     override val enableRoom: Boolean = false,
-    override val protoBuf: ProtoBuf? = null,
+    override val enableWire: Boolean = false,
 ): BuildFile
 
 @Serializable
@@ -92,5 +92,5 @@ public data class ATProtoLibrary(
     override val enableRoom: Boolean = false
 
     @Transient
-    override val protoBuf: ProtoBuf? = null
+    override val enableWire: Boolean = false
 }

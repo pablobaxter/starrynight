@@ -18,7 +18,6 @@
 
 package com.frybits.starrynight.android.network.wiring
 
-import android.app.Application
 import android.content.Context
 import android.net.DnsResolver
 import android.os.Build

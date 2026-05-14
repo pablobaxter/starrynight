@@ -30,13 +30,13 @@ import com.google.crypto.tink.KeyTemplate
 import com.google.crypto.tink.RegistryConfiguration
 import com.google.crypto.tink.aead.PredefinedAeadParameters
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
-import com.google.protobuf.InvalidProtocolBufferException
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -76,16 +76,16 @@ internal class LoggedInUserDataStoreImpl(
 
     override suspend fun storeLoggedInUserData(userData: LoggedInUserData) {
         context.datastore.updateData { loggedInUser ->
-            loggedInUser.copy {
-                did = userData.did
-                handle = userData.handle
-                email = userData.email
-                active = userData.active
-                status = userData.status
-                token = userData.token
-                refreshToken = userData.refreshToken
+            loggedInUser.copy(
+                did = userData.did,
+                handle = userData.handle,
+                email = userData.email,
+                active = userData.active,
+                status = userData.status,
+                token = userData.token,
+                refreshToken = userData.refreshToken,
                 emailConfirmed = userData.emailConfirmed
-            }
+            )
         }
     }
 
@@ -104,12 +104,12 @@ internal class LoggedInUserDataStoreImpl(
 }
 
 private object LoggedInUserSerializer : Serializer<LoggedInUserProto> {
-    override val defaultValue: LoggedInUserProto = LoggedInUserProto.getDefaultInstance()
+    override val defaultValue: LoggedInUserProto = LoggedInUserProto()
 
     override suspend fun readFrom(input: InputStream): LoggedInUserProto {
         try {
-            return LoggedInUserProto.parseFrom(input)
-        } catch (exception: InvalidProtocolBufferException) {
+            return LoggedInUserProto.ADAPTER.decode(input)
+        } catch (exception: IOException) {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
@@ -118,6 +118,6 @@ private object LoggedInUserSerializer : Serializer<LoggedInUserProto> {
         t: LoggedInUserProto,
         output: OutputStream
     ) {
-        return t.writeTo(output)
+        return LoggedInUserProto.ADAPTER.encode(output, t)
     }
 }
