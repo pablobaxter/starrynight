@@ -10,7 +10,7 @@ enableMetro = true
 
 [buildConfigs]
 default = [
-    { type = "String", key = "APP_NAME", property = { type = "literal", value = "Starry Night" } }
+    { type = "String", key = "APP_NAME", property = { type = "literal", value = "\"Starry Night\"" } }
 ]
 
 # Libraries to be used (maven address or version catalog name)

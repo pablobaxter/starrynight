@@ -45,7 +45,7 @@ import com.frybits.gradle.android.configurations.common.androidVariantConfigurat
 import com.frybits.gradle.android.configurations.library.androidLibraryConfiguration
 import com.frybits.gradle.android.configurations.library.androidLibraryVariantBuilderConfiguration
 import com.frybits.gradle.android.configurations.library.androidLibraryVariantConfiguration
-import com.frybits.gradle.android.wrappers.AGP8ComponentsExtensionWrapper
+import com.frybits.gradle.android.wrappers.AGP8CommonExtensionWrapper
 import com.frybits.gradle.core.Configurer
 import com.frybits.gradle.core.definitions.AndroidBuildFile
 import com.frybits.gradle.core.definitions.BuildFile
@@ -74,7 +74,7 @@ public abstract class AGP8Configurer @Inject internal constructor(
         with(project) {
             androidBaseConfiguration(buildFile)
 
-            objects.newInstance<AGP8ComponentsExtensionWrapper>(componentsExtension).run {
+            with(componentsExtension) {
                 beforeVariants { variantBuilder ->
                     androidVariantBuilderConfiguration(buildFile, variantBuilder)
                     when(variantBuilder) {
@@ -93,7 +93,8 @@ public abstract class AGP8Configurer @Inject internal constructor(
                     }
                 }
 
-                finalizeDsl { commonExtensionWrapper ->
+                finalizeDsl { commonExtension ->
+                    val commonExtensionWrapper = objects.newInstance<AGP8CommonExtensionWrapper>(commonExtension)
                     androidCommonConfiguration(buildFile, commonExtensionWrapper)
 
                     when(val androidExtension = commonExtensionWrapper.commonExtension) {

@@ -18,6 +18,7 @@
 
 package com.frybits.gradle.android.configurations.library
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryVariant
 import com.android.build.api.variant.LibraryVariantBuilder
@@ -25,11 +26,20 @@ import com.frybits.gradle.core.definitions.AndroidBuildFile
 import com.frybits.gradle.core.definitions.AndroidLibraryBuildFile
 import org.gradle.api.Project
 
+private val AGP_9_2_1 = AndroidPluginVersion(9, 2, 1)
+
 /**
  * Configures Android Library projects
  */
 public fun Project.androidLibraryConfiguration(buildFile: AndroidBuildFile, android: LibraryExtension) {
     require(buildFile is AndroidLibraryBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
+    with (android) {
+        defaultConfig {
+            if (AndroidPluginVersion.getCurrent() < AGP_9_2_1) {
+                consumerProguardFiles(layout.projectDirectory.file("consumer-proguard-rules.pro"))
+            }
+        }
+    }
 }
 
 /**
@@ -44,6 +54,8 @@ public fun Project.androidLibraryVariantBuilderConfiguration(buildFile: AndroidB
  */
 public fun Project.androidLibraryVariantConfiguration(buildFile: AndroidBuildFile, variant: LibraryVariant) {
     require(buildFile is AndroidLibraryBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
-    @Suppress("UnstableApiUsage")
-    variant.consumerProguardFiles.add(layout.projectDirectory.file("consumer-proguard-rules.pro"))
+    if (AndroidPluginVersion.getCurrent() >= AGP_9_2_1) {
+        @Suppress("UnstableApiUsage")
+        variant.consumerProguardFiles.add(layout.projectDirectory.file("consumer-proguard-rules.pro"))
+    }
 }
