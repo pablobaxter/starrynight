@@ -59,5 +59,5 @@ private fun Project.logVersions() {
 
 // Ensure that build file does not exist
 private fun Project.checkForBuildFile() {
-    require(!layout.projectDirectory.file(buildFile.name).asFile.exists()) { "Root build file should not exist" }
+    require(!buildFile.exists()) { "Root build file should not exist" }
 }
