@@ -1,8 +1,8 @@
 :app
 :atproto:api
+:atproto:data
 :atproto:impl
 :auth:api
-:auth:data
 :auth:impl
 :network:api
 :network:impl

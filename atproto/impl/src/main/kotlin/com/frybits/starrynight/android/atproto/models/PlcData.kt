@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,17 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth.data.models
+package com.frybits.starrynight.android.atproto.models
 
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
-import kotlin.time.Instant
+import kotlinx.serialization.Serializable
 
-@Entity(indices = [Index(value = ["did"])])
-public data class UserRoomData(
-    @PrimaryKey val handle: String,
+@Serializable
+internal data class PlcData(
     val did: String,
-    val pds: String,
-    val lastUpdated: Instant
+    val rotationKeys: List<String>,
+    val verificationMethods: Map<String, String>,
+    val alsoKnownAs: List<String>,
+    val services: Map<String, Service>
+)
+
+@Serializable
+internal data class Service(
+    val type: String,
+    val endpoint: String
 )

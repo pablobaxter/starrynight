@@ -24,8 +24,11 @@ import com.frybits.starrynight.android.atproto.models.strings.Did
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
 import com.frybits.starrynight.atproto.ATProtoRepository
 import com.frybits.starrynight.atproto.models.ATProtoSession
-import com.frybits.starrynight.atproto.models.PlcData
-import com.frybits.starrynight.atproto.models.Service
+import com.frybits.starrynight.android.atproto.models.PlcData
+import com.frybits.starrynight.android.atproto.models.Service
+import com.frybits.starrynight.atproto.data.UserDao
+import com.frybits.starrynight.atproto.data.models.UserRoomData
+import com.frybits.starrynight.atproto.models.ATProtoUserData
 import com.frybits.starrynight.network.DnsRecordRepository
 import com.frybits.starrynight.network.models.TXT
 import com.frybits.starrynight.utils.core.IODispatcher
@@ -43,6 +46,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.URI
 import java.util.logging.Logger
+import kotlin.time.Clock
 
 private val LOGGER = Logger.getLogger("ATProtoRepository")
 
@@ -52,6 +56,7 @@ internal class ATProtoRepositoryImpl(
     private val atProtoServicesApi: ATProtoNetworkApi,
     private val createSessionApi: CreateSessionApi,
     private val dnsRecordRepository: DnsRecordRepository,
+    private val userDao: UserDao,
     private val json: Json,
     @param:IODispatcher private val ioDispatcher: CoroutineDispatcher
 ): ATProtoRepository {
@@ -76,7 +81,7 @@ internal class ATProtoRepositoryImpl(
         }.map { it.toString() }
     }
 
-    override suspend fun resolveDid(did: String): Result<PlcData> {
+    override suspend fun resolveDid(did: String): Result<ATProtoUserData> {
         return runCatching {
             val didSplit = did.split(':')
             require(didSplit.size >= 3) { "Did must contain at least 3 parts" }
@@ -87,7 +92,24 @@ internal class ATProtoRepositoryImpl(
                     if (response.isSuccessful) {
                         val plcData = response.body() ?: throw Exception("Empty pld data returned")
                         require(plcData.did == did) { "Did does not match plc did: plc=${plcData.did}, did=$did" }
-                        return@runCatching plcData
+                        val userData = UserRoomData(
+                            handle = plcData.alsoKnownAs.toSet(),
+                            did = plcData.did,
+                            pds = plcData.services.mapNotNull {
+                                if (it.key == "atproto_pds" && it.value.type == "AtprotoPersonalDataServer") {
+                                    return@mapNotNull it.value.endpoint
+                                }
+                                return@mapNotNull null
+                            }.firstOrNull().orEmpty(),
+                            lastUpdated = Clock.System.now()
+                        )
+                        userDao.insertUser(userData)
+                        ATProtoUserData(
+                            handle = userData.handle,
+                            did = userData.did,
+                            pds = userData.pds,
+                            lastUpdated = userData.lastUpdated
+                        )
                     } else {
                         val error = response.errorBody()?.use { errorBody ->
                             withContext(ioDispatcher) { errorBody.string() }
@@ -113,12 +135,30 @@ internal class ATProtoRepositoryImpl(
                             }
                         }
                         require(plcDid == did) { "Did does not match plc did: plc=${plcDid}, did=$did" }
-                        return@runCatching PlcData(
+                        val plcData = PlcData(
                             did = plcDid,
                             rotationKeys = emptyList(),
                             verificationMethods = emptyMap(),
                             alsoKnownAs = alsoKnownAs,
                             services = services
+                        )
+                        val userData = UserRoomData(
+                            handle = plcData.alsoKnownAs.firstOrNull().orEmpty(),
+                            did = plcData.did,
+                            pds = plcData.services.mapNotNull {
+                                if (it.key == "atproto_pds" && it.value.type == "AtprotoPersonalDataServer") {
+                                    return@mapNotNull it.value.endpoint
+                                }
+                                return@mapNotNull null
+                            }.firstOrNull().orEmpty(),
+                            lastUpdated = Clock.System.now()
+                        )
+                        userDao.insertUser(userData)
+                        ATProtoUserData(
+                            handle = userData.handle,
+                            did = userData.did,
+                            pds = userData.pds,
+                            lastUpdated = userData.lastUpdated
                         )
                     } else {
                         val error = response.errorBody()?.use { errorBody ->

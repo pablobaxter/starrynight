@@ -19,13 +19,14 @@
 package com.frybits.starrynight.atproto
 
 import com.frybits.starrynight.atproto.models.ATProtoSession
+import com.frybits.starrynight.atproto.models.ATProtoUserData
 import com.frybits.starrynight.atproto.models.PlcData
 
 public interface ATProtoRepository {
 
     public suspend fun resolveHandle(username: String): Result<String>
 
-    public suspend fun resolveDid(did: String): Result<PlcData>
+    public suspend fun resolveDid(did: String): Result<ATProtoUserData>
 
     public suspend fun createSession(pds: String, username: String, password: String): Result<ATProtoSession>
 }

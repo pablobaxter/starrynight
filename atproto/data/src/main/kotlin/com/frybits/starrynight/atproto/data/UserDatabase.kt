@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,24 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.persistence
+package com.frybits.starrynight.atproto.data
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.frybits.starrynight.android.persistence.converters.InstantTypeConverter
-import com.frybits.starrynight.atproto.data.UserDatabase
-import com.frybits.starrynight.atproto.data.models.UserRoomData
+public interface UserDatabase {
 
-@Database(
-    entities = [
-        UserRoomData::class
-    ],
-    version = 1
-)
-@TypeConverters(
-    InstantTypeConverter::class
-)
-internal abstract class AppDatabase :
-    RoomDatabase(),
-    UserDatabase
+    public fun userDao(): UserDao
+}

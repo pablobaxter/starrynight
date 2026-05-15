@@ -19,7 +19,7 @@
 package com.frybits.starrynight.android.persistence.wiring
 
 import com.frybits.starrynight.android.persistence.AppDatabase
-import com.frybits.starrynight.auth.data.UserDatabase
+import com.frybits.starrynight.atproto.data.UserDatabase
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.Binds

@@ -16,21 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.atproto.models
+package com.frybits.starrynight.atproto.data.models
 
-import kotlinx.serialization.Serializable
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
+import kotlin.time.Instant
 
-@Serializable
-public data class PlcData(
+@Entity(indices = [Index(value = ["did"])])
+public data class UserRoomData(
+    @PrimaryKey val handle: String,
     val did: String,
-    val rotationKeys: List<String>,
-    val verificationMethods: Map<String, String>,
-    val alsoKnownAs: List<String>,
-    val services: Map<String, Service>
-)
-
-@Serializable
-public data class Service(
-    val type: String,
-    val endpoint: String
+    val pds: String,
+    val lastUpdated: Instant
 )

@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth.data
+package com.frybits.starrynight.atproto.data
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.frybits.starrynight.auth.data.models.UserRoomData
+import com.frybits.starrynight.atproto.data.models.UserRoomData
 
 @Dao
 public interface UserDao {

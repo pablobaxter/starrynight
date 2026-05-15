@@ -18,7 +18,7 @@
 
 package com.frybits.starrynight.android.atproto.network
 
-import com.frybits.starrynight.atproto.models.PlcData
+import com.frybits.starrynight.android.atproto.models.PlcData
 import kotlinx.serialization.json.JsonObject
 import retrofit2.Response
 import retrofit2.http.GET

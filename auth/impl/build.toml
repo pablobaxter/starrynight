@@ -10,7 +10,6 @@ enableWire = true
 implementation = [
     { type = "project", name = ":atproto:api" },
     { type = "project", name = ":auth:api" },
-    { type = "project", name = ":auth:data" },
     { type = "project", name = ":network:api" },
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },

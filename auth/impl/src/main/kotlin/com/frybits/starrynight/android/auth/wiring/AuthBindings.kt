@@ -18,21 +18,12 @@
 
 package com.frybits.starrynight.android.auth.wiring
 
-import com.frybits.starrynight.auth.data.UserDao
-import com.frybits.starrynight.auth.data.UserDatabase
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
-import dev.zacsweers.metro.Provides
-import dev.zacsweers.metro.SingleIn
 
 @ContributesTo(AppScope::class)
 @BindingContainer
 public object AuthBindings {
 
-    @Provides
-    @SingleIn(AppScope::class)
-    internal fun provideUseDao(appDatabase: UserDatabase): UserDao {
-        return appDatabase.userDao()
-    }
 }

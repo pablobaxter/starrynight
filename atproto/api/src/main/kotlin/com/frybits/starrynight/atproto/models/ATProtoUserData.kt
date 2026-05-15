@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,9 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth.data
+package com.frybits.starrynight.atproto.models
 
-public interface UserDatabase {
+import kotlin.time.Instant
 
-    public fun userDao(): UserDao
-}
+public data class ATProtoUserData(
+    val handles: Set<String>,
+    val did: String,
+    val pds: String,
+    val lastUpdated: Instant
+)
