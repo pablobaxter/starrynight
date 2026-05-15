@@ -25,6 +25,7 @@ import com.frybits.starrynight.auth.LoggedInUserData
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.flow.Flow
 
 @ContributesBinding(AppScope::class)
 @Inject
@@ -32,6 +33,10 @@ internal class AuthRepositoryImpl(
     private val atProtoRepository: ATProtoRepository,
     private val loggedInUserDataStore: LoggedInUserDataStore
 ) : AuthRepository {
+
+    override suspend fun getCurrentUserFlow(): Flow<LoggedInUserData> {
+        return loggedInUserDataStore.loggedInUserDataFlow
+    }
 
     override suspend fun login(handle: String, password: String): Result<Unit> {
         return runCatching {

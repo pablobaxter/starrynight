@@ -18,7 +18,11 @@
 
 package com.frybits.starrynight.auth
 
+import kotlinx.coroutines.flow.Flow
+
 public interface AuthRepository {
+
+    public suspend fun getCurrentUserFlow(): Flow<LoggedInUserData>
 
     public suspend fun login(handle: String, password: String): Result<Unit>
 }

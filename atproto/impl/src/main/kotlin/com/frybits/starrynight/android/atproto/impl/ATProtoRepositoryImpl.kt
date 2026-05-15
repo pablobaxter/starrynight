@@ -189,7 +189,10 @@ internal class ATProtoRepositoryImpl(
             }
 
             val host = URI.create(resolvedDid.pds).host
-            val response = createSessionApi.createSession(host, CreateSessionRequest(password, username))
+            val response = createSessionApi.createSession(
+                host = host,
+                requestBody = CreateSessionRequest(password, username)
+            )
             if (response.isSuccessful) {
                 val sessionResponse =
                     response.body() ?: throw Exception("No sessions response found")

@@ -36,6 +36,8 @@ internal object TypeNames {
 
     val RetrofitPath = ClassName("retrofit2.http", "Path")
 
+    val RetrofitHeader = ClassName("retrofit2.http", "Header")
+
     val OkHttpResponseBody = ClassName("okhttp3", "ResponseBody")
 
     val OkHttpRequestBody = ClassName("okhttp3", "RequestBody")

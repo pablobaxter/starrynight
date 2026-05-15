@@ -3,7 +3,8 @@ type = "atprotoLibrary"
 
 # Lexicons to download and compile
 lexicons = [
-    "com.atproto.server.createSession"
+    "com.atproto.server.createSession",
+    "com.atproto.server.deleteSession"
 ]
 
 enableMetro = true

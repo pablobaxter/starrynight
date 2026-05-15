@@ -89,6 +89,13 @@ internal fun generateClass(lexiconType: HttpField, context: LexiconContext, envi
 
     val hardCodedQueryParams = hashMapOf<String, String>()
 
+    val headerParamSpec = ParameterSpec.builder("token", String::class.asTypeName().copy(nullable = true))
+        .addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitHeader).addMember("%S", "Authorization").build())
+        .defaultValue("%L", null)
+        .build()
+
+    procedureFunSpecBuilder.addParameter(headerParamSpec)
+
     val hostParamSpec = ParameterSpec.builder("host", String::class)
         .addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPath).addMember("%S", "host").build())
         .build()
