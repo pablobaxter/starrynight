@@ -18,7 +18,7 @@
 
 package com.frybits.starrynight.atproto.data
 
-public interface UserDatabase {
+public interface DidDatabase {
 
-    public fun userDao(): UserDao
+    public fun didDao(): DidDao
 }

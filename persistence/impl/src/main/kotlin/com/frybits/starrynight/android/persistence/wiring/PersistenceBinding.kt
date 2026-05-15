@@ -19,7 +19,7 @@
 package com.frybits.starrynight.android.persistence.wiring
 
 import com.frybits.starrynight.android.persistence.AppDatabase
-import com.frybits.starrynight.atproto.data.UserDatabase
+import com.frybits.starrynight.atproto.data.DidDatabase
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.Binds
@@ -30,5 +30,5 @@ import dev.zacsweers.metro.ContributesTo
 public abstract class PersistenceBinding {
 
     @Binds
-    internal abstract val AppDatabase.bind: UserDatabase
+    internal abstract val AppDatabase.bind: DidDatabase
 }

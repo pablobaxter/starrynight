@@ -24,9 +24,8 @@ import androidx.room.PrimaryKey
 import kotlin.time.Instant
 
 @Entity(indices = [Index(value = ["did"])])
-public data class UserRoomData(
+public data class HandleRoomData(
     @PrimaryKey val handle: String,
     val did: String,
-    val pds: String,
     val lastUpdated: Instant
 )

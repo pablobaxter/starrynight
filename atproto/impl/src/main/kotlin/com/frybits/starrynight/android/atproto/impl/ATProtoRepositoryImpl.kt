@@ -20,15 +20,15 @@ package com.frybits.starrynight.android.atproto.impl
 
 import com.atproto.server.createSession.CreateSessionApi
 import com.atproto.server.createSession.CreateSessionRequest
+import com.frybits.starrynight.android.atproto.models.PlcData
+import com.frybits.starrynight.android.atproto.models.Service
 import com.frybits.starrynight.android.atproto.models.strings.Did
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
 import com.frybits.starrynight.atproto.ATProtoRepository
+import com.frybits.starrynight.atproto.data.DidDao
+import com.frybits.starrynight.atproto.data.models.HandleRoomData
 import com.frybits.starrynight.atproto.models.ATProtoSession
-import com.frybits.starrynight.android.atproto.models.PlcData
-import com.frybits.starrynight.android.atproto.models.Service
-import com.frybits.starrynight.atproto.data.UserDao
-import com.frybits.starrynight.atproto.data.models.UserRoomData
-import com.frybits.starrynight.atproto.models.ATProtoUserData
+import com.frybits.starrynight.atproto.models.ResolvedDid
 import com.frybits.starrynight.network.DnsRecordRepository
 import com.frybits.starrynight.network.models.TXT
 import com.frybits.starrynight.utils.core.IODispatcher
@@ -47,8 +47,11 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.net.URI
 import java.util.logging.Logger
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 
 private val LOGGER = Logger.getLogger("ATProtoRepository")
+
+private val TTL = 5.minutes
 
 @ContributesBinding(AppScope::class)
 @Inject
@@ -56,60 +59,64 @@ internal class ATProtoRepositoryImpl(
     private val atProtoServicesApi: ATProtoNetworkApi,
     private val createSessionApi: CreateSessionApi,
     private val dnsRecordRepository: DnsRecordRepository,
-    private val userDao: UserDao,
+    private val didDao: DidDao,
     private val json: Json,
     @param:IODispatcher private val ioDispatcher: CoroutineDispatcher
 ): ATProtoRepository {
 
     override suspend fun resolveHandle(username: String): Result<String> {
-        return resolveHandleViaDNS(username).recover {
+        return runCatching {
+            val handleData = didDao.getHandleData(username)
+            require(handleData.lastUpdated + TTL > Clock.System.now()) { "Handle TTL expired" }
+            return@runCatching handleData.did
+        }.recoverCatching { dbError ->
             currentCoroutineContext().ensureActive()
-            LOGGER.warning("Failed resolution via dns: ${it.message}")
+            LOGGER.info("Cache miss: ${dbError.message}")
 
-            val response = atProtoServicesApi.resolveHandleViaWellKnown(username)
-            if (response.isSuccessful) {
-                val did = response.body() ?: throw Exception("Empty did returned")
-                return@recover Did(did)
-            } else {
-                val error = response.errorBody()?.use { errorBody ->
-                    withContext(ioDispatcher) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${response.code()}) - No error body")
+            return@recoverCatching resolveHandleViaDNS(username).getOrElse {
+                currentCoroutineContext().ensureActive()
+                LOGGER.warning("Failed resolution via dns: ${it.message}")
 
-                throw Exception("Unknown error (${response.code()}) - $error")
+                val response = atProtoServicesApi.resolveHandleViaWellKnown(username)
+                if (response.isSuccessful) {
+                    val did = response.body() ?: throw Exception("Empty did returned")
+                    return@recoverCatching Did(did)
+                } else {
+                    val error = response.errorBody()?.use { errorBody ->
+                        withContext(ioDispatcher) { errorBody.string() }
+                    } ?: throw Exception("Unknown error (${response.code()}) - No error body")
+
+                    throw Exception("Unknown error (${response.code()}) - $error")
+                }
             }
-
         }.map { it.toString() }
+            .onSuccess { didDao.insertHandleData(HandleRoomData(username, it, Clock.System.now())) }
     }
 
-    override suspend fun resolveDid(did: String): Result<ATProtoUserData> {
+    override suspend fun resolveDid(did: String): Result<ResolvedDid> {
         return runCatching {
+            val pdsData = didDao.getPdsData(did)
+            require(pdsData.lastUpdated + TTL > Clock.System.now()) { "PdsData TTL expired" }
+            val handles = didDao.getHandlesForDid(did)
+            return@runCatching ResolvedDid(
+                handles = handles.map { it.handle },
+                did = pdsData.did,
+                pds = pdsData.pds
+            )
+        }.recoverCatching { dbError ->
+            currentCoroutineContext().ensureActive()
+            LOGGER.info("Cache miss: ${dbError.message}")
+
             val didSplit = did.split(':')
             require(didSplit.size >= 3) { "Did must contain at least 3 parts" }
 
-            when (val type = didSplit[1]) {
+            val plcData = when (val type = didSplit[1]) {
                 "plc" -> {
                     val response = atProtoServicesApi.resolveDidViaPlcDirectory(did)
                     if (response.isSuccessful) {
                         val plcData = response.body() ?: throw Exception("Empty pld data returned")
                         require(plcData.did == did) { "Did does not match plc did: plc=${plcData.did}, did=$did" }
-                        val userData = UserRoomData(
-                            handle = plcData.alsoKnownAs.toSet(),
-                            did = plcData.did,
-                            pds = plcData.services.mapNotNull {
-                                if (it.key == "atproto_pds" && it.value.type == "AtprotoPersonalDataServer") {
-                                    return@mapNotNull it.value.endpoint
-                                }
-                                return@mapNotNull null
-                            }.firstOrNull().orEmpty(),
-                            lastUpdated = Clock.System.now()
-                        )
-                        userDao.insertUser(userData)
-                        ATProtoUserData(
-                            handle = userData.handle,
-                            did = userData.did,
-                            pds = userData.pds,
-                            lastUpdated = userData.lastUpdated
-                        )
+                        plcData
                     } else {
                         val error = response.errorBody()?.use { errorBody ->
                             withContext(ioDispatcher) { errorBody.string() }
@@ -135,30 +142,12 @@ internal class ATProtoRepositoryImpl(
                             }
                         }
                         require(plcDid == did) { "Did does not match plc did: plc=${plcDid}, did=$did" }
-                        val plcData = PlcData(
+                        PlcData(
                             did = plcDid,
                             rotationKeys = emptyList(),
                             verificationMethods = emptyMap(),
                             alsoKnownAs = alsoKnownAs,
                             services = services
-                        )
-                        val userData = UserRoomData(
-                            handle = plcData.alsoKnownAs.firstOrNull().orEmpty(),
-                            did = plcData.did,
-                            pds = plcData.services.mapNotNull {
-                                if (it.key == "atproto_pds" && it.value.type == "AtprotoPersonalDataServer") {
-                                    return@mapNotNull it.value.endpoint
-                                }
-                                return@mapNotNull null
-                            }.firstOrNull().orEmpty(),
-                            lastUpdated = Clock.System.now()
-                        )
-                        userDao.insertUser(userData)
-                        ATProtoUserData(
-                            handle = userData.handle,
-                            did = userData.did,
-                            pds = userData.pds,
-                            lastUpdated = userData.lastUpdated
                         )
                     } else {
                         val error = response.errorBody()?.use { errorBody ->
@@ -170,12 +159,36 @@ internal class ATProtoRepositoryImpl(
                 }
                 else -> throw Exception("Unknown type for did=$did - type: $type")
             }
+
+            val pdsService = requireNotNull(plcData.services["atproto_pds"]) { "No PDS service found for did=${plcData.did}. Services found: ${plcData.services}" }
+            require(pdsService.type == "AtprotoPersonalDataServer") { "PDS service found does not match standard type: AtprotoPersonalDataServer. Type found: ${pdsService.type}" }
+
+            val plcHandles = plcData.alsoKnownAs.map { URI.create(it).host }.toSet()
+            val plcRoomData = didDao.getPdsWithHandles(plcData.did)
+            val plcRoomHandles = plcRoomData.handles.map { it.handle }.toSet()
+
+            val verifiedHandles = plcHandles.intersect(plcRoomHandles).toList()
+            didDao.addHandleAndPdsData(plcData.did, verifiedHandles, pdsService.endpoint, Clock.System.now())
+
+            return@recoverCatching ResolvedDid(
+                handles = verifiedHandles,
+                did = plcData.did,
+                pds = pdsService.endpoint
+            )
         }
     }
 
-    override suspend fun createSession(pds: String, username: String, password: String): Result<ATProtoSession> {
+    override suspend fun createSession(username: String, password: String): Result<ATProtoSession> {
         return runCatching {
-            val host = URI.create(pds).host
+            val did = resolveHandle(username).getOrElse {
+                throw Exception("Error resolving handle", it)
+            }
+
+            val resolvedDid = resolveDid(did).getOrElse {
+                throw Exception("Error resolving did", it)
+            }
+
+            val host = URI.create(resolvedDid.pds).host
             val response = createSessionApi.createSession(host, CreateSessionRequest(password, username))
             if (response.isSuccessful) {
                 val sessionResponse =

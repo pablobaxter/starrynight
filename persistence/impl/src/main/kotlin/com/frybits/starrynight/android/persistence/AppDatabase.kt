@@ -22,12 +22,14 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.frybits.starrynight.android.persistence.converters.InstantTypeConverter
-import com.frybits.starrynight.atproto.data.UserDatabase
-import com.frybits.starrynight.atproto.data.models.UserRoomData
+import com.frybits.starrynight.atproto.data.DidDatabase
+import com.frybits.starrynight.atproto.data.models.HandleRoomData
+import com.frybits.starrynight.atproto.data.models.PdsRoomData
 
 @Database(
     entities = [
-        UserRoomData::class
+        PdsRoomData::class,
+        HandleRoomData::class
     ],
     version = 1
 )
@@ -36,4 +38,4 @@ import com.frybits.starrynight.atproto.data.models.UserRoomData
 )
 internal abstract class AppDatabase :
     RoomDatabase(),
-    UserDatabase
+    DidDatabase

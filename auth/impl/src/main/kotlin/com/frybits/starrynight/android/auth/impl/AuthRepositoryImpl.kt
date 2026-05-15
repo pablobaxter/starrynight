@@ -18,7 +18,6 @@
 
 package com.frybits.starrynight.android.auth.impl
 
-import androidx.core.net.toUri
 import com.frybits.starrynight.android.auth.LoggedInUserDataStore
 import com.frybits.starrynight.atproto.ATProtoRepository
 import com.frybits.starrynight.auth.AuthRepository
@@ -26,7 +25,6 @@ import com.frybits.starrynight.auth.LoggedInUserData
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import kotlin.time.Clock
 
 @ContributesBinding(AppScope::class)
 @Inject
@@ -37,19 +35,7 @@ internal class AuthRepositoryImpl(
 
     override suspend fun login(handle: String, password: String): Result<Unit> {
         return runCatching {
-            val did = atProtoRepository.resolveHandle(handle).getOrElse {
-                throw Exception("Error resolving handle", it)
-            }
-
-            val userData = atProtoRepository.resolveDid(did).getOrElse {
-                throw Exception("Error resolving did", it)
-            }
-
-            require(handle == userData.handle) { "Handle not listed in did doc" }
-            val pdsService = requireNotNull(plcData.services["atproto_pds"]) { "No PDS service found for $handle, did=${plcData.did}. Services found: ${plcData.services}" }
-            require(pdsService.type == "AtprotoPersonalDataServer") { "PDS service found does not match standard type: AtprotoPersonalDataServer. Type found: ${pdsService.type}" }
-
-            val sessionData = atProtoRepository.createSession(pdsService.endpoint, handle, password).getOrElse {
+            val sessionData = atProtoRepository.createSession(handle, password).getOrElse {
                 throw Exception("Error creating session", it)
             }
 

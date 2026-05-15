@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.atproto
+package com.frybits.starrynight.atproto.data.models
 
-import com.frybits.starrynight.atproto.models.ATProtoSession
-import com.frybits.starrynight.atproto.models.ResolvedDid
+import androidx.room.Embedded
+import androidx.room.Relation
 
-public interface ATProtoRepository {
-
-    public suspend fun resolveHandle(username: String): Result<String>
-
-    public suspend fun resolveDid(did: String): Result<ResolvedDid>
-
-    public suspend fun createSession(username: String, password: String): Result<ATProtoSession>
-}
+public data class PlcRoomData(
+    @Embedded val pdsRoomData: PdsRoomData,
+    @Relation(
+        parentColumn = "did",
+        entityColumn = "did"
+    )
+    val handles: List<HandleRoomData>
+)

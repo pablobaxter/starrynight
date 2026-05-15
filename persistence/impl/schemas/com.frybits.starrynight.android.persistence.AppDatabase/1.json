@@ -2,18 +2,12 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "eee9ecfc8302e491546643f6bb028016",
+    "identityHash": "cb50494eb1d18ad9339e2a1c6eb292e0",
     "entities": [
       {
-        "tableName": "UserRoomData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`handle` TEXT NOT NULL, `did` TEXT NOT NULL, `pds` TEXT NOT NULL, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`handle`))",
+        "tableName": "PdsRoomData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`did` TEXT NOT NULL, `pds` TEXT NOT NULL, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`did`))",
         "fields": [
-          {
-            "fieldPath": "handle",
-            "columnName": "handle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
           {
             "fieldPath": "did",
             "columnName": "did",
@@ -36,25 +30,55 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
+            "did"
+          ]
+        }
+      },
+      {
+        "tableName": "HandleRoomData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`handle` TEXT NOT NULL, `did` TEXT NOT NULL, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`handle`))",
+        "fields": [
+          {
+            "fieldPath": "handle",
+            "columnName": "handle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "did",
+            "columnName": "did",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "lastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
             "handle"
           ]
         },
         "indices": [
           {
-            "name": "index_UserRoomData_did",
+            "name": "index_HandleRoomData_did",
             "unique": false,
             "columnNames": [
               "did"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_UserRoomData_did` ON `${TABLE_NAME}` (`did`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_HandleRoomData_did` ON `${TABLE_NAME}` (`did`)"
           }
         ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eee9ecfc8302e491546643f6bb028016')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cb50494eb1d18ad9339e2a1c6eb292e0')"
     ]
   }
 }
