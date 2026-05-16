@@ -28,4 +28,10 @@ public interface ATProtoRepository {
     public suspend fun resolveDid(did: String): Result<ResolvedDid>
 
     public suspend fun createSession(username: String, password: String): Result<ATProtoSession>
+
+    public suspend fun getSession(session: ATProtoSession): Result<ATProtoSession>
+
+    public suspend fun refreshSession(session: ATProtoSession): Result<ATProtoSession>
+
+    public suspend fun deleteSession(session: ATProtoSession): Result<Unit>
 }

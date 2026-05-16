@@ -25,4 +25,8 @@ public interface AuthRepository {
     public suspend fun getCurrentUserFlow(): Flow<LoggedInUserData>
 
     public suspend fun login(handle: String, password: String): Result<Unit>
+
+    public suspend fun logout(): Result<Unit>
+
+    public suspend fun refreshToken(force: Boolean = false): Result<LoggedInUserData>
 }

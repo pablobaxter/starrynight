@@ -22,7 +22,6 @@ public data class ATProtoSession(
     val id: String,
     val email: String,
     val active: Boolean,
-    val alsoKnownAs: List<String>,
     val handle: String,
     val status: ATProtoSessionStatus?,
     val accessJwt: String,

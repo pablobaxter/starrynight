@@ -20,10 +20,14 @@ package com.frybits.starrynight.android.atproto.impl
 
 import com.atproto.server.createSession.CreateSessionApi
 import com.atproto.server.createSession.CreateSessionRequest
+import com.atproto.server.deleteSession.DeleteSessionApi
+import com.atproto.server.getSession.GetSessionApi
+import com.atproto.server.refreshSession.RefreshSessionApi
 import com.frybits.starrynight.android.atproto.models.PlcData
 import com.frybits.starrynight.android.atproto.models.Service
 import com.frybits.starrynight.android.atproto.models.strings.Did
 import com.frybits.starrynight.android.atproto.network.ATProtoNetworkApi
+import com.frybits.starrynight.android.atproto.utils.toATProtoSession
 import com.frybits.starrynight.atproto.ATProtoRepository
 import com.frybits.starrynight.atproto.data.DidDao
 import com.frybits.starrynight.atproto.data.models.HandleRoomData
@@ -58,6 +62,9 @@ private val TTL = 5.minutes
 internal class ATProtoRepositoryImpl(
     private val atProtoServicesApi: ATProtoNetworkApi,
     private val createSessionApi: CreateSessionApi,
+    private val getSessionApi: GetSessionApi,
+    private val refreshSessionApi: RefreshSessionApi,
+    private val deleteSessionApi: DeleteSessionApi,
     private val dnsRecordRepository: DnsRecordRepository,
     private val didDao: DidDao,
     private val json: Json,
@@ -164,8 +171,7 @@ internal class ATProtoRepositoryImpl(
             require(pdsService.type == "AtprotoPersonalDataServer") { "PDS service found does not match standard type: AtprotoPersonalDataServer. Type found: ${pdsService.type}" }
 
             val plcHandles = plcData.alsoKnownAs.map { URI.create(it).host }.toSet()
-            val plcRoomData = didDao.getPdsWithHandles(plcData.did)
-            val plcRoomHandles = plcRoomData.handles.map { it.handle }.toSet()
+            val plcRoomHandles = didDao.getHandlesForDid(plcData.did).map { it.handle }.toSet()
 
             val verifiedHandles = plcHandles.intersect(plcRoomHandles).toList()
             didDao.addHandleAndPdsData(plcData.did, verifiedHandles, pdsService.endpoint, Clock.System.now())
@@ -196,19 +202,7 @@ internal class ATProtoRepositoryImpl(
             if (response.isSuccessful) {
                 val sessionResponse =
                     response.body() ?: throw Exception("No sessions response found")
-                val alsoKnownAsList = emptyList<String>()
-                return@runCatching ATProtoSession(
-                    id = sessionResponse.did.toString(),
-                    email = sessionResponse.email,
-                    active = sessionResponse.active,
-                    alsoKnownAs = alsoKnownAsList,
-                    handle = sessionResponse.handle.toString(),
-                    status = null,
-                    accessJwt = sessionResponse.accessJwt,
-                    refreshJwt = sessionResponse.refreshJwt,
-                    emailConfirmed = sessionResponse.emailConfirmed,
-                    emailAuthFactor = sessionResponse.emailAuthFactor
-                )
+                return@runCatching sessionResponse.toATProtoSession()
             } else {
                 val error = response.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
@@ -223,6 +217,86 @@ internal class ATProtoRepositoryImpl(
                 }
 
                 throw Exception("Unknown error (${response.code()}) - $error")
+            }
+        }
+    }
+
+    override suspend fun getSession(session: ATProtoSession): Result<ATProtoSession> {
+        return runCatching {
+            val resolvedDid = resolveDid(session.id).getOrThrow()
+            val host = URI.create(resolvedDid.pds).host
+            val sessionResponse = getSessionApi.getSession("Bearer ${session.accessJwt}", host)
+            if (sessionResponse.isSuccessful) {
+                return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw Exception("No sessions response found")
+            } else {
+                val error = sessionResponse.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                } ?: throw Exception("Unknown error (${sessionResponse.code()}) - No error body")
+
+                if (sessionResponse.code() == 400) {
+                    val errorJson = json.decodeFromString<JsonObject>(error)
+                    if (errorJson["error"]?.jsonPrimitive?.content == "ExpiredToken") {
+                        LOGGER.warning("Access token expired, refreshing")
+                        return@runCatching refreshSession(session).getOrThrow()
+                    } else {
+                        throw Exception("Bad request (400) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
+                    }
+                } else if (sessionResponse.code() == 401) {
+                    val errorJson = json.decodeFromString<JsonObject>(error)
+                    throw Exception("Unauthorized (401) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
+                }
+
+                throw Exception("Unknown error (${sessionResponse.code()}) - $error")
+            }
+        }
+    }
+
+    override suspend fun refreshSession(session: ATProtoSession): Result<ATProtoSession> {
+        return runCatching {
+            val resolvedDid = resolveDid(session.id).getOrThrow()
+            val host = URI.create(resolvedDid.pds).host
+            val sessionResponse = refreshSessionApi.refreshSession("Bearer ${session.refreshJwt}", host)
+            if (sessionResponse.isSuccessful) {
+                return@runCatching sessionResponse.body()?.toATProtoSession() ?: throw Exception("No sessions response found")
+            } else {
+                val error = sessionResponse.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                } ?: throw Exception("Unknown error (${sessionResponse.code()}) - No error body")
+
+                if (sessionResponse.code() == 400) {
+                    val errorJson = json.decodeFromString<JsonObject>(error)
+                    throw Exception("Bad request (400) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
+                } else if (sessionResponse.code() == 401) {
+                    val errorJson = json.decodeFromString<JsonObject>(error)
+                    throw Exception("Unauthorized (401) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
+                }
+
+                throw Exception("Unknown error (${sessionResponse.code()}) - $error")
+            }
+        }
+    }
+
+    override suspend fun deleteSession(session: ATProtoSession): Result<Unit> {
+        return runCatching {
+            val resolvedDid = resolveDid(session.id).getOrThrow()
+            val host = URI.create(resolvedDid.pds).host
+            val sessionResponse = deleteSessionApi.deleteSession("Bearer ${session.refreshJwt}", host)
+            if (sessionResponse.isSuccessful) {
+                return@runCatching
+            } else {
+                val error = sessionResponse.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                } ?: throw Exception("Unknown error (${sessionResponse.code()}) - No error body")
+
+                if (sessionResponse.code() == 400) {
+                    val errorJson = json.decodeFromString<JsonObject>(error)
+                    throw Exception("Bad request (400) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
+                } else if (sessionResponse.code() == 401) {
+                    val errorJson = json.decodeFromString<JsonObject>(error)
+                    throw Exception("Unauthorized (401) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
+                }
+
+                throw Exception("Unknown error (${sessionResponse.code()}) - $error")
             }
         }
     }

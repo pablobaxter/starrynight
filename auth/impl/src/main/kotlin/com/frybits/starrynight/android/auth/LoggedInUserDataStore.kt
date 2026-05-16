@@ -44,6 +44,8 @@ internal interface LoggedInUserDataStore {
 
     suspend fun storeLoggedInUserData(userData: LoggedInUserData)
 
+    suspend fun clearLoggedInUserData()
+
     val loggedInUserDataFlow: Flow<LoggedInUserData>
 }
 
@@ -76,7 +78,7 @@ internal class LoggedInUserDataStoreImpl(
 
     override suspend fun storeLoggedInUserData(userData: LoggedInUserData) {
         context.datastore.updateData { loggedInUser ->
-            loggedInUser.copy(
+            return@updateData loggedInUser.copy(
                 did = userData.did,
                 handle = userData.handle,
                 email = userData.email,
@@ -100,6 +102,12 @@ internal class LoggedInUserDataStoreImpl(
             refreshToken = it.refreshToken,
             emailConfirmed = it.emailConfirmed
         )
+    }
+
+    override suspend fun clearLoggedInUserData() {
+        context.datastore.updateData {
+            return@updateData LoggedInUserProto()
+        }
     }
 }
 
