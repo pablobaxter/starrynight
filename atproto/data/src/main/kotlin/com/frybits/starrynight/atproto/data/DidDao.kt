@@ -68,6 +68,7 @@ public interface DidDao {
     @Query("DELETE FROM HandleRoomData")
     public suspend fun clearHandleData()
 
+    @Transaction
     @Query("SELECT * FROM PdsRoomData WHERE did = :did")
     public suspend fun getPdsWithHandles(did: String): PlcRoomData
 

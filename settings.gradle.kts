@@ -19,7 +19,7 @@ pluginManagement {
         id("dev.zacsweers.metro") version providers.gradleProperty("com.frybits.metro.version")
         id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
         id("androidx.room") version "2.8.4"
-        id("com.squareup.wire") version "6.3.0"
+        id("com.squareup.wire") version "6.4.0"
     }
 
     includeBuild("build-logic")
