@@ -58,6 +58,11 @@ internal class MainActivity(
                     atProtoRepository.resolveHandle("pablobaxter.com").onSuccess {
                         atProtoRepository.resolveDid(it).onSuccess {
                             Log.d("Blah", "Got resolved data: $it")
+                            atProtoRepository.getAuthServerMetaData(it).onSuccess {
+                                Log.d("Blah", "Got auth server meta data: $it")
+                            }.onFailure {
+                                Log.d("Blah", "Failed to get auth metadata", it)
+                            }
                         }.onFailure {
                             Log.d("Blah", "Failed to resolve did", it)
                         }

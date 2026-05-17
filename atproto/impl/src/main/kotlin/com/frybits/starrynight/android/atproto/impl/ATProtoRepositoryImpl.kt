@@ -194,9 +194,8 @@ internal class ATProtoRepositoryImpl(
                 throw Exception("Error resolving did", it)
             }
 
-            val host = URI.create(resolvedDid.pds).host
             val response = createSessionApi.createSession(
-                host = host,
+                host = URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"),
                 requestBody = CreateSessionRequest(password, username)
             )
             if (response.isSuccessful) {
@@ -224,8 +223,7 @@ internal class ATProtoRepositoryImpl(
     override suspend fun getSession(session: ATProtoSession): Result<ATProtoSession> {
         return runCatching {
             val resolvedDid = resolveDid(session.id).getOrThrow()
-            val host = URI.create(resolvedDid.pds).host
-            val sessionResponse = getSessionApi.getSession("Bearer ${session.accessJwt}", host)
+            val sessionResponse = getSessionApi.getSession("Bearer ${session.accessJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
                 return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw Exception("No sessions response found")
             } else {
@@ -254,8 +252,7 @@ internal class ATProtoRepositoryImpl(
     override suspend fun refreshSession(session: ATProtoSession): Result<ATProtoSession> {
         return runCatching {
             val resolvedDid = resolveDid(session.id).getOrThrow()
-            val host = URI.create(resolvedDid.pds).host
-            val sessionResponse = refreshSessionApi.refreshSession("Bearer ${session.refreshJwt}", host)
+            val sessionResponse = refreshSessionApi.refreshSession("Bearer ${session.refreshJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
                 return@runCatching sessionResponse.body()?.toATProtoSession() ?: throw Exception("No sessions response found")
             } else {
@@ -279,8 +276,7 @@ internal class ATProtoRepositoryImpl(
     override suspend fun deleteSession(session: ATProtoSession): Result<Unit> {
         return runCatching {
             val resolvedDid = resolveDid(session.id).getOrThrow()
-            val host = URI.create(resolvedDid.pds).host
-            val sessionResponse = deleteSessionApi.deleteSession("Bearer ${session.refreshJwt}", host)
+            val sessionResponse = deleteSessionApi.deleteSession("Bearer ${session.refreshJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
                 return@runCatching
             } else {
@@ -297,6 +293,39 @@ internal class ATProtoRepositoryImpl(
                 }
 
                 throw Exception("Unknown error (${sessionResponse.code()}) - $error")
+            }
+        }
+    }
+
+    override suspend fun getAuthServerMetaData(resolvedDid: ResolvedDid): Result<JsonObject> {
+        return runCatching {
+            val pdsMetaDataResponse = atProtoServicesApi.getServerMetaData(URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
+            val authServer = if (pdsMetaDataResponse.isSuccessful) {
+                val json = pdsMetaDataResponse.body() ?: throw Exception("No auth server response found")
+                requireNotNull(
+                    json["authorization_servers"]
+                        ?.jsonArray
+                        ?.firstOrNull()
+                        ?.jsonPrimitive
+                        ?.content
+                ) { "No auth server found" }
+            } else {
+                val error = pdsMetaDataResponse.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                } ?: throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - No error body")
+
+                throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - $error")
+            }
+
+            val authServerMetaDataResponse = atProtoServicesApi.getAuthServerMetaData(URI.create(authServer).schemeSpecificPart.removePrefix("//"))
+            if (authServerMetaDataResponse.isSuccessful) {
+                return@runCatching authServerMetaDataResponse.body() ?: throw Exception("No auth server response found")
+            } else {
+                val error = pdsMetaDataResponse.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                } ?: throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - No error body")
+
+                throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - $error")
             }
         }
     }

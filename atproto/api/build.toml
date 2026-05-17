@@ -7,4 +7,5 @@ type = "javaLibrary"
 # Used to add libraries into the "implementation" configuration
 implementation = [
     { type = "library", name = "kotlinx.serialization" },
+    { type = "library", name = "kotlinx.serialization.json" },
 ]

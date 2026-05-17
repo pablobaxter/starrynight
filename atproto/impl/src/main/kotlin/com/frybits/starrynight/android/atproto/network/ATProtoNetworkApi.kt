@@ -34,4 +34,10 @@ internal interface ATProtoNetworkApi {
 
     @GET("https://{host}/{user}/did.json")
     suspend fun resolveDidViaHost(@Path("host") host: String, @Path("user", encoded = true) user: String): Response<JsonObject>
+
+    @GET("https://{host}/.well-known/oauth-protected-resource")
+    suspend fun getServerMetaData(@Path("host") host: String): Response<JsonObject>
+
+    @GET("https://{host}/.well-known/oauth-authorization-server")
+    suspend fun getAuthServerMetaData(@Path("host") host: String): Response<JsonObject>
 }

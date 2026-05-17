@@ -20,6 +20,7 @@ package com.frybits.starrynight.atproto
 
 import com.frybits.starrynight.atproto.models.ATProtoSession
 import com.frybits.starrynight.atproto.models.ResolvedDid
+import kotlinx.serialization.json.JsonObject
 
 public interface ATProtoRepository {
 
@@ -34,4 +35,6 @@ public interface ATProtoRepository {
     public suspend fun refreshSession(session: ATProtoSession): Result<ATProtoSession>
 
     public suspend fun deleteSession(session: ATProtoSession): Result<Unit>
+
+    public suspend fun getAuthServerMetaData(resolvedDid: ResolvedDid): Result<JsonObject>
 }
