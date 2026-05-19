@@ -18,6 +18,7 @@
 
 package com.frybits.starrynight.android.auth.impl
 
+import android.security.keystore.KeyProperties
 import android.util.Log
 import com.frybits.starrynight.android.auth.LoggedInUserDataStore
 import com.frybits.starrynight.atproto.ATProtoRepository
@@ -30,6 +31,12 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.json.jsonPrimitive
+import java.security.KeyPairGenerator
+import java.security.MessageDigest
+import java.security.SecureRandom
+import kotlin.io.encoding.Base64
+import kotlin.uuid.Uuid
 
 private val LOG_TAG = AuthRepository::class.java.simpleName
 
@@ -39,6 +46,13 @@ internal class AuthRepositoryImpl(
     private val atProtoRepository: ATProtoRepository,
     private val loggedInUserDataStore: LoggedInUserDataStore
 ) : AuthRepository {
+
+    private val base64Encoder = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT)
+    private val secureRandom = SecureRandom.getInstanceStrong()
+
+    private lateinit var currState: String
+
+    private lateinit var verifier: String
 
     override suspend fun getCurrentUserFlow(): Flow<LoggedInUserData> {
         return loggedInUserDataStore.loggedInUserDataFlow
@@ -62,6 +76,26 @@ internal class AuthRepositoryImpl(
                     emailConfirmed = sessionData.emailConfirmed
                 )
             )
+        }
+    }
+
+    override suspend fun loginWithOAuth(handle: String): Result<Unit> {
+        return runCatching {
+            val did = atProtoRepository.resolveHandle(handle).getOrThrow()
+            val resolvedDid = atProtoRepository.resolveDid(did).getOrThrow()
+            val serverMetaData = atProtoRepository.getAuthServerMetaData(resolvedDid).getOrThrow()
+
+            currState = Uuid.random().toString()
+
+            val tokenEndpoint = requireNotNull(serverMetaData["token_endpoint"]?.jsonPrimitive?.content) { "No token endpoint found" }
+            verifier = base64Encoder.encode(ByteArray(32).also { secureRandom.nextBytes(it) })
+            val challenge = base64Encoder.encode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray()))
+
+            val parEndpoint = requireNotNull(serverMetaData["pushed_authorization_request_endpoint"]?.jsonPrimitive?.content) { "No pushed authorization token endpoint found" }
+            val authorizationEndpoint = requireNotNull(serverMetaData["authorization_endpoint"]?.jsonPrimitive?.content) { "No authorization endpoint found" }
+
+            KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore")
+
         }
     }
 

@@ -17,4 +17,5 @@ implementation = [
     { type = "library", name = "androidx.core" },
     { type = "library", name = "androidx.datastore" },
     { type = "library", name = "androidx.datastore.tink" },
+    { type = "library", name = "auth0.java" }
 ]
