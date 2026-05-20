@@ -100,7 +100,8 @@ internal class LoggedInUserDataStoreImpl(
             status = it.status,
             token = it.token,
             refreshToken = it.refreshToken,
-            emailConfirmed = it.emailConfirmed
+            emailConfirmed = it.emailConfirmed,
+            dpopNonce = it.dpopNonce
         )
     }
 

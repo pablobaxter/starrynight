@@ -18,12 +18,29 @@
 
 package com.frybits.starrynight.android.auth.wiring
 
+import com.frybits.starrynight.android.auth.network.AuthApi
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
+import retrofit2.Retrofit
+import retrofit2.create
+import kotlin.io.encoding.Base64
 
 @ContributesTo(AppScope::class)
 @BindingContainer
 public object AuthBindings {
 
+    @Provides
+    @SingleIn(AppScope::class)
+    public fun provideBase64Encoder(): Base64 {
+        return Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+    }
+
+    @Provides
+    @SingleIn(AppScope::class)
+    internal fun provideAuthApi(retrofit: Retrofit): AuthApi {
+        return retrofit.create()
+    }
 }

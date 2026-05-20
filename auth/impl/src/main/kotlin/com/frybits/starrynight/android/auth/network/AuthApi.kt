@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth
+package com.frybits.starrynight.android.auth.network
 
-public data class LoggedInUserData(
-    val did: String,
-    val handle: String,
-    val email: String,
-    val active: Boolean,
-    val status: String,
-    val token: String,
-    val refreshToken: String,
-    val emailConfirmed: Boolean,
-    val dpopNonce: String? = null
-)
+import kotlinx.serialization.json.JsonObject
+import okhttp3.RequestBody
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.Header
+import retrofit2.http.Url
+
+internal interface AuthApi {
+
+    suspend fun doPar(@Url url: String, @Header("DPoP") dpop: String, @Body requestBody: RequestBody): Response<JsonObject>
+}

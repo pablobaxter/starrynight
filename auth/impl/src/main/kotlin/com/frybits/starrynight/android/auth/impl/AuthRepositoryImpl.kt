@@ -21,6 +21,9 @@ package com.frybits.starrynight.android.auth.impl
 import android.security.keystore.KeyProperties
 import android.util.Log
 import com.frybits.starrynight.android.auth.LoggedInUserDataStore
+import com.frybits.starrynight.android.auth.network.AuthApi
+import com.frybits.starrynight.android.auth.utils.DpopKeyManager
+import com.frybits.starrynight.android.auth.utils.DpopProofBuilder
 import com.frybits.starrynight.atproto.ATProtoRepository
 import com.frybits.starrynight.atproto.models.ATProtoSession
 import com.frybits.starrynight.atproto.models.ATProtoSessionStatus
@@ -31,11 +34,14 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
+import okhttp3.FormBody
 import java.security.KeyPairGenerator
 import java.security.MessageDigest
 import java.security.SecureRandom
 import kotlin.io.encoding.Base64
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private val LOG_TAG = AuthRepository::class.java.simpleName
@@ -44,10 +50,12 @@ private val LOG_TAG = AuthRepository::class.java.simpleName
 @Inject
 internal class AuthRepositoryImpl(
     private val atProtoRepository: ATProtoRepository,
-    private val loggedInUserDataStore: LoggedInUserDataStore
+    private val loggedInUserDataStore: LoggedInUserDataStore,
+    private val encoder: Base64,
+    private val keyManager: DpopKeyManager,
+    private val proofBuilder: DpopProofBuilder,
+    private val authApi: AuthApi
 ) : AuthRepository {
-
-    private val base64Encoder = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT)
     private val secureRandom = SecureRandom.getInstanceStrong()
 
     private lateinit var currState: String
@@ -79,23 +87,58 @@ internal class AuthRepositoryImpl(
         }
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     override suspend fun loginWithOAuth(handle: String): Result<Unit> {
         return runCatching {
             val did = atProtoRepository.resolveHandle(handle).getOrThrow()
             val resolvedDid = atProtoRepository.resolveDid(did).getOrThrow()
             val serverMetaData = atProtoRepository.getAuthServerMetaData(resolvedDid).getOrThrow()
 
-            currState = Uuid.random().toString()
+            currState = Uuid.generateV7().toString()
 
             val tokenEndpoint = requireNotNull(serverMetaData["token_endpoint"]?.jsonPrimitive?.content) { "No token endpoint found" }
-            verifier = base64Encoder.encode(ByteArray(32).also { secureRandom.nextBytes(it) })
-            val challenge = base64Encoder.encode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray()))
+            verifier = encoder.encode(ByteArray(32).also { secureRandom.nextBytes(it) })
+            val challenge = encoder.encode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray()))
 
             val parEndpoint = requireNotNull(serverMetaData["pushed_authorization_request_endpoint"]?.jsonPrimitive?.content) { "No pushed authorization token endpoint found" }
             val authorizationEndpoint = requireNotNull(serverMetaData["authorization_endpoint"]?.jsonPrimitive?.content) { "No authorization endpoint found" }
 
-            KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore")
+            var nonce: String? = null
+            repeat(2) { attempt ->
+                val dpop = proofBuilder.create(
+                    keyPair = keyManager.getOrCreate(),
+                    method = "POST",
+                    url = parEndpoint,
+                    nonce = nonce
+                )
 
+                val request = FormBody.Builder()
+                    .add("client_id", "https://starrynight.frybits.com/.well-known/client-metadata.json")
+                    .add("response_type", "code")
+                    .add("code_challenge", challenge)
+                    .add("state", currState)
+                    .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
+                    .add("scope", "atproto transition:generic")
+                    .add("application_type", "native")
+                    .add("grant_types", "[authorization_code,refresh_token]")
+                    .add("scope", "atproto")
+                    .add("login_hint", handle)
+                    .build()
+
+                val response = authApi.doPar(parEndpoint, dpop, request)
+
+                response.headers()["DPoP-Nonce"]?.let {
+                    nonce = it
+                    loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(dpopNonce = it))
+                }
+
+                if (response.isSuccessful) {
+                    Log.d("Blah", response.body().toString())
+                }
+
+                if (attempt == 0 && nonce != null) return@repeat // retry with nonce
+                error("PAR failed after nonce retry")
+            }
         }
     }
 

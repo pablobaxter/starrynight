@@ -31,21 +31,21 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.io.encoding.Base64
-import kotlin.text.get
 
 internal object ATBytesSerializer : KSerializer<ByteArray> {
+    private val encoder = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ByteArray", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): ByteArray {
         val jsonDecoder = decoder as JsonDecoder
         val element = jsonDecoder.decodeJsonElement()
         val result = element.jsonObject[$$"$bytes"]?.jsonPrimitive?.content.orEmpty()
-        return Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).decode(result)
+        return encoder.decode(result)
     }
 
     override fun serialize(encoder: Encoder, value: ByteArray) {
         val jsonEncoder = encoder as JsonEncoder
-        val primitive = jsonEncoder.json.encodeToJsonElement(Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(value))
+        val primitive = jsonEncoder.json.encodeToJsonElement(this.encoder.encode(value))
         jsonEncoder.encodeJsonElement(JsonObject(mapOf($$"$bytes" to primitive)))
     }
 }

@@ -16,16 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth
+package com.frybits.starrynight.android.auth.utils
 
-public data class LoggedInUserData(
-    val did: String,
-    val handle: String,
-    val email: String,
-    val active: Boolean,
-    val status: String,
-    val token: String,
-    val refreshToken: String,
-    val emailConfirmed: Boolean,
-    val dpopNonce: String? = null
-)
+import java.math.BigInteger
+import java.security.interfaces.ECPublicKey
+import kotlin.io.encoding.Base64
+
+internal fun ECPublicKey.toJwkMap(encoder: Base64): Map<String, String> {
+    fun BigInteger.toP256Bytes(): ByteArray {
+        val raw = toByteArray()
+        return when {
+            raw.size == 33 && raw[0] == 0.toByte() -> raw.copyOfRange(1, 33)
+            raw.size < 32 -> ByteArray(32 - raw.size) + raw
+            else -> raw
+        }
+    }
+
+    return mapOf(
+        "kty" to "EC",
+        "crv" to "P-256",
+        "x" to encoder.encode(w.affineX.toP256Bytes()),
+        "y" to encoder.encode(w.affineY.toP256Bytes())
+    )
+}

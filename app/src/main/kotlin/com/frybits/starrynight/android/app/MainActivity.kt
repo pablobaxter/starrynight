@@ -51,24 +51,27 @@ internal class MainActivity(
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 lifecycleScope.launch {
-                    authRepository.getCurrentUserFlow().onEach {
-                        Log.d("Blah", "got new user: $it")
-                    }.launchIn(this)
-
-                    atProtoRepository.resolveHandle("pablobaxter.com").onSuccess {
-                        atProtoRepository.resolveDid(it).onSuccess {
-                            Log.d("Blah", "Got resolved data: $it")
-                            atProtoRepository.getAuthServerMetaData(it).onSuccess {
-                                Log.d("Blah", "Got auth server meta data: $it")
-                            }.onFailure {
-                                Log.d("Blah", "Failed to get auth metadata", it)
-                            }
-                        }.onFailure {
-                            Log.d("Blah", "Failed to resolve did", it)
-                        }
-                    }.onFailure {
-                        Log.d("Blah", "Failed to resolve handle", it)
+                    authRepository.loginWithOAuth("pablobaxter.com").onFailure {
+                        Log.d("Blah", "Something went wrong", it)
                     }
+//                    authRepository.getCurrentUserFlow().onEach {
+//                        Log.d("Blah", "got new user: $it")
+//                    }.launchIn(this)
+//
+//                    atProtoRepository.resolveHandle("pablobaxter.com").onSuccess {
+//                        atProtoRepository.resolveDid(it).onSuccess {
+//                            Log.d("Blah", "Got resolved data: $it")
+//                            atProtoRepository.getAuthServerMetaData(it).onSuccess {
+//                                Log.d("Blah", "Got auth server meta data: $it")
+//                            }.onFailure {
+//                                Log.d("Blah", "Failed to get auth metadata", it)
+//                            }
+//                        }.onFailure {
+//                            Log.d("Blah", "Failed to resolve did", it)
+//                        }
+//                    }.onFailure {
+//                        Log.d("Blah", "Failed to resolve handle", it)
+//                    }
                 }
             }
         }
