@@ -20,10 +20,13 @@ package com.frybits.starrynight.android.auth.utils
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import com.frybits.starrynight.utils.core.DefaultDispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
@@ -31,7 +34,7 @@ import java.security.spec.ECGenParameterSpec
 
 internal interface DpopKeyManager {
 
-    fun getOrCreate(): KeyPair
+    suspend fun getOrCreate(): KeyPair
 }
 
 private const val ALIAS = "atproto_dpop_key"
@@ -40,9 +43,11 @@ private const val ANDROID_KEY_STORE = "AndroidKeyStore"
 @ContributesBinding(AppScope::class)
 @SingleIn(AppScope::class)
 @Inject
-internal class DpopKeyManagerImpl : DpopKeyManager {
+internal class DpopKeyManagerImpl(
+    @param:DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) : DpopKeyManager {
 
-    override fun getOrCreate(): KeyPair {
+    override suspend fun getOrCreate(): KeyPair = withContext(defaultDispatcher) {
         val keystore = KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
 
         if (!keystore.containsAlias(ALIAS)) {
@@ -61,6 +66,6 @@ internal class DpopKeyManagerImpl : DpopKeyManager {
         }
 
         val entry = keystore.getEntry(ALIAS, null) as KeyStore.PrivateKeyEntry
-        return KeyPair(entry.certificate.publicKey, entry.privateKey)
+        return@withContext KeyPair(entry.certificate.publicKey, entry.privateKey)
     }
 }

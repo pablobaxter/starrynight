@@ -18,8 +18,8 @@
 
 package com.frybits.starrynight.android.auth.impl
 
-import android.security.keystore.KeyProperties
 import android.util.Log
+import androidx.core.text.htmlEncode
 import com.frybits.starrynight.android.auth.LoggedInUserDataStore
 import com.frybits.starrynight.android.auth.network.AuthApi
 import com.frybits.starrynight.android.auth.utils.DpopKeyManager
@@ -34,10 +34,10 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.FormBody
-import java.security.KeyPairGenerator
 import java.security.MessageDigest
 import java.security.SecureRandom
 import kotlin.io.encoding.Base64
@@ -103,42 +103,15 @@ internal class AuthRepositoryImpl(
             val parEndpoint = requireNotNull(serverMetaData["pushed_authorization_request_endpoint"]?.jsonPrimitive?.content) { "No pushed authorization token endpoint found" }
             val authorizationEndpoint = requireNotNull(serverMetaData["authorization_endpoint"]?.jsonPrimitive?.content) { "No authorization endpoint found" }
 
-            var nonce: String? = null
-            repeat(2) { attempt ->
-                val dpop = proofBuilder.create(
-                    keyPair = keyManager.getOrCreate(),
-                    method = "POST",
-                    url = parEndpoint,
-                    nonce = nonce
-                )
+            val requestUri = doPar(parEndpoint, challenge, handle)
 
-                val request = FormBody.Builder()
-                    .add("client_id", "https://starrynight.frybits.com/.well-known/client-metadata.json")
-                    .add("response_type", "code")
-                    .add("code_challenge", challenge)
-                    .add("state", currState)
-                    .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
-                    .add("scope", "atproto transition:generic")
-                    .add("application_type", "native")
-                    .add("grant_types", "[authorization_code,refresh_token]")
-                    .add("scope", "atproto")
-                    .add("login_hint", handle)
-                    .build()
-
-                val response = authApi.doPar(parEndpoint, dpop, request)
-
-                response.headers()["DPoP-Nonce"]?.let {
-                    nonce = it
-                    loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(dpopNonce = it))
-                }
-
-                if (response.isSuccessful) {
-                    Log.d("Blah", response.body().toString())
-                }
-
-                if (attempt == 0 && nonce != null) return@repeat // retry with nonce
-                error("PAR failed after nonce retry")
+            val authUrl = buildString {
+                append("${serverMetaData["authorization_endpoint"]?.jsonPrimitive?.content}?")
+                append("client_id=${"https://starrynight.frybits.com/.well-known/client-metadata.json".htmlEncode()}")
+                append("&request_uri=${requestUri.htmlEncode()}")
             }
+
+            Log.d("Blah", "authUrl = $authUrl")
         }
     }
 
@@ -202,5 +175,54 @@ internal class AuthRepositoryImpl(
                 return@map loggedInUserData
             }
         }
+    }
+
+    private suspend fun doPar(
+        parEndpoint: String,
+        challenge: String,
+        handle: String,
+    ): String = supervisorScope {
+        var nonce: String? = null
+        repeat(2) { attempt ->
+            val dpop = proofBuilder.create(
+                keyPair = keyManager.getOrCreate(),
+                method = "POST",
+                url = parEndpoint,
+                nonce = nonce
+            )
+
+            val request = FormBody.Builder()
+                .add("client_id", "https://starrynight.frybits.com/.well-known/client-metadata.json")
+                .add("response_type", "code")
+                .add("code_challenge", challenge)
+                .add("code_challenge_method", "S256")
+                .add("state", currState)
+                .add("redirect_uri", "https://starrynight.frybits.com/android_login")
+                .add("scope", "atproto transition:generic")
+                .add("application_type", "native")
+                .add("grant_types", "[authorization_code,refresh_token]")
+                .add("scope", "atproto")
+                .add("login_hint", handle)
+                .build()
+
+            val response = authApi.doPar(parEndpoint, dpop, request)
+
+            response.headers()["DPoP-Nonce"]?.let {
+                nonce = it
+                launch { loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(dpopNonce = it)) }
+            }
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                Log.d("Blah", body.toString())
+                return@supervisorScope body?.get("request_uri")?.jsonPrimitive?.content ?: return@repeat
+            } else {
+                Log.d("Blah", response.toString())
+                Log.d("Blah", response.errorBody()?.string().orEmpty())
+            }
+
+            if (attempt == 0 && nonce != null) return@repeat // retry with nonce
+        }
+        error("PAR failed after nonce retry")
     }
 }

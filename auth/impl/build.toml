@@ -11,11 +11,11 @@ implementation = [
     { type = "project", name = ":atproto:api" },
     { type = "project", name = ":auth:api" },
     { type = "project", name = ":network:api" },
+    { type = "project", name = ":utils:core:api" },
     { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "kotlinx.serialization.json" },
     { type = "library", name = "retrofit" },
     { type = "library", name = "androidx.core" },
     { type = "library", name = "androidx.datastore" },
-    { type = "library", name = "androidx.datastore.tink" },
-    { type = "library", name = "auth0.java" }
+    { type = "library", name = "androidx.datastore.tink" }
 ]

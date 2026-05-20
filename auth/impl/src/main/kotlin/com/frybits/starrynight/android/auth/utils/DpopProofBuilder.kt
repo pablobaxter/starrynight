@@ -18,29 +18,28 @@
 
 package com.frybits.starrynight.android.auth.utils
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
+import com.frybits.starrynight.utils.core.DefaultDispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import java.security.KeyPair
 import java.security.MessageDigest
-import java.security.PrivateKey
-import java.security.PublicKey
 import java.security.Signature
-import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
-import java.util.Locale
 import kotlin.io.encoding.Base64
 import kotlin.time.Clock
-import kotlin.time.toJavaInstant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 internal interface DpopProofBuilder {
 
-    fun create(
+    suspend fun create(
         keyPair: KeyPair,
         method: String,
         url: String,
@@ -53,43 +52,69 @@ internal interface DpopProofBuilder {
 @SingleIn(AppScope::class)
 @Inject
 internal class DpopProofBuilderImpl(
-    private val encoder: Base64
+    private val encoder: Base64,
+    @param:DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ): DpopProofBuilder {
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun create(
+    override suspend fun create(
         keyPair: KeyPair,
         method: String,
         url: String,
         accessToken: String?,
         nonce: String?
-    ): String {
+    ): String = withContext(defaultDispatcher) {
         val publicKey = keyPair.public as ECPublicKey
-        val privateKey = keyPair.private as ECPrivateKey
+        val privateKey = keyPair.private
 
-        val jwt = JWT.create()
-            .withHeader(
-                mapOf(
-                    "typ" to "dpop+jwt",
-                    "alg" to "ES256",
-                    "jwk" to publicKey.toJwkMap(encoder)
-                )
-            )
-            .withJWTId(Uuid.generateV7().toString())
-            .withIssuedAt(Clock.System.now().toJavaInstant())
-            .withClaim("htm", method.uppercase(Locale.US))
-            .withClaim("htu", url.substringBefore('?'))
-
-        nonce?.let { jwt.withClaim("nonce", it) }
-        accessToken?.let {
-            val hash = MessageDigest.getInstance("SHA-256").digest(it.toByteArray())
-            jwt.withClaim("ath", encoder.encode(hash))
+        val header = buildJsonObject {
+            put("typ", "dpop+jwt")
+            put("alg", "ES256")
+            putJsonObject("jwk") {
+                publicKey.toJwkMap(encoder).forEach { (key, value) ->
+                    put(key, value)
+                }
+            }
         }
 
-        Signature.getInstance("SHA256withECDSA").apply {
-            initSign(keyPair.private)
+        val payload = buildJsonObject {
+            put("jti", Uuid.generateV7().toString())
+            put("iat", Clock.System.now().epochSeconds)
+            put("htm", method.uppercase())
+            put("htu", url.substringBefore('?'))
+
+            nonce?.let { put("nonce", it) }
+            accessToken?.let {
+                val hash = MessageDigest.getInstance("SHA-256").digest(it.toByteArray())
+                put("ath", encoder.encode(hash))
+            }
         }
 
-        return jwt.sign(Algorithm.ECDSA256(publicKey, privateKey))
+        val signingInput = "${encoder.encode(header.toString().toByteArray())}.${encoder.encode(payload.toString().toByteArray())}"
+
+        val signature = Signature.getInstance("SHA256withECDSA").run {
+            initSign(privateKey)
+            update(signingInput.toByteArray())
+            sign()
+        }
+
+        val signed = encoder.encode(signature.derToP1363())
+
+        return@withContext "${signingInput}.${signed}"
+    }
+
+    private fun ByteArray.derToP1363(): ByteArray {
+        var offset = 2
+
+        require(this[offset++].toInt() == 0x02)
+        val rLen = this[offset++].toInt()
+        val r = copyOfRange(offset, offset + rLen)
+        offset += rLen
+
+        require(this[offset++].toInt() == 0x02)
+        val sLen = this[offset++].toInt()
+        val s = copyOfRange(offset, offset + sLen)
+
+        return r.toFixed32() + s.toFixed32()
     }
 }

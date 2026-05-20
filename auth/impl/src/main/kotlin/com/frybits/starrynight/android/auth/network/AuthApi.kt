@@ -23,9 +23,11 @@ import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Url
 
 internal interface AuthApi {
 
+    @POST
     suspend fun doPar(@Url url: String, @Header("DPoP") dpop: String, @Body requestBody: RequestBody): Response<JsonObject>
 }

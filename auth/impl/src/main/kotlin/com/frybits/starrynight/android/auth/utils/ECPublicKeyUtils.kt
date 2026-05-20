@@ -23,19 +23,22 @@ import java.security.interfaces.ECPublicKey
 import kotlin.io.encoding.Base64
 
 internal fun ECPublicKey.toJwkMap(encoder: Base64): Map<String, String> {
-    fun BigInteger.toP256Bytes(): ByteArray {
-        val raw = toByteArray()
-        return when {
-            raw.size == 33 && raw[0] == 0.toByte() -> raw.copyOfRange(1, 33)
-            raw.size < 32 -> ByteArray(32 - raw.size) + raw
-            else -> raw
-        }
-    }
-
     return mapOf(
         "kty" to "EC",
         "crv" to "P-256",
-        "x" to encoder.encode(w.affineX.toP256Bytes()),
-        "y" to encoder.encode(w.affineY.toP256Bytes())
+        "x" to encoder.encode(w.affineX.toFixed32()),
+        "y" to encoder.encode(w.affineY.toFixed32())
     )
+}
+
+internal fun BigInteger.toFixed32(): ByteArray {
+    return toByteArray().toFixed32()
+}
+
+internal fun ByteArray.toFixed32(): ByteArray {
+    return when {
+        size == 33 && this[0] == 0.toByte() -> copyOfRange(1, 33)
+        size < 32 -> ByteArray(32 - size) + this
+        else -> this
+    }
 }
