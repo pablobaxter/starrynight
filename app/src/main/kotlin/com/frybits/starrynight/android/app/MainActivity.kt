@@ -51,9 +51,12 @@ internal class MainActivity(
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 lifecycleScope.launch {
-                    authRepository.loginWithOAuth("pablobaxter.com").onFailure {
-                        Log.d("Blah", "Something went wrong", it)
-                    }
+                    authRepository.loginWithOAuth("pablobaxter.com")
+                        .onSuccess {
+                            Log.d("Blah", it)
+                        }.onFailure {
+                            Log.d("Blah", "Something went wrong", it)
+                        }
 //                    authRepository.getCurrentUserFlow().onEach {
 //                        Log.d("Blah", "got new user: $it")
 //                    }.launchIn(this)

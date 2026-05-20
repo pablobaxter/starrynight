@@ -12,5 +12,6 @@ message LoggedInUserProto {
     string token = 6;
     string refreshToken = 7;
     bool emailConfirmed = 8;
-    optional string dpopNonce = 9;
+    optional string nonce = 9;
+    optional string tokenEndpoint = 10;
 }

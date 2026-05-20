@@ -27,5 +27,6 @@ public data class LoggedInUserData(
     val token: String,
     val refreshToken: String,
     val emailConfirmed: Boolean,
-    val dpopNonce: String? = null
+    val nonce: String? = null,
+    val tokenEndpoint: String? = null
 )

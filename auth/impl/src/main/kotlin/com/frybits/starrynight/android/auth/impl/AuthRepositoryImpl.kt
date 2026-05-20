@@ -19,7 +19,7 @@
 package com.frybits.starrynight.android.auth.impl
 
 import android.util.Log
-import androidx.core.text.htmlEncode
+import androidx.core.net.toUri
 import com.frybits.starrynight.android.auth.LoggedInUserDataStore
 import com.frybits.starrynight.android.auth.network.AuthApi
 import com.frybits.starrynight.android.auth.utils.DpopKeyManager
@@ -29,13 +29,15 @@ import com.frybits.starrynight.atproto.models.ATProtoSession
 import com.frybits.starrynight.atproto.models.ATProtoSessionStatus
 import com.frybits.starrynight.auth.AuthRepository
 import com.frybits.starrynight.auth.LoggedInUserData
+import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.FormBody
 import java.security.MessageDigest
@@ -54,7 +56,8 @@ internal class AuthRepositoryImpl(
     private val encoder: Base64,
     private val keyManager: DpopKeyManager,
     private val proofBuilder: DpopProofBuilder,
-    private val authApi: AuthApi
+    private val authApi: AuthApi,
+    @param:IODispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : AuthRepository {
     private val secureRandom = SecureRandom.getInstanceStrong()
 
@@ -81,14 +84,16 @@ internal class AuthRepositoryImpl(
                     status = sessionData.status?.name.orEmpty(),
                     token = sessionData.accessJwt,
                     refreshToken = sessionData.refreshJwt,
-                    emailConfirmed = sessionData.emailConfirmed
+                    emailConfirmed = sessionData.emailConfirmed,
+                    nonce = sessionData.nonce,
+                    tokenEndpoint = sessionData.tokenEndpoint
                 )
             )
         }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun loginWithOAuth(handle: String): Result<Unit> {
+    override suspend fun loginWithOAuth(handle: String): Result<String> {
         return runCatching {
             val did = atProtoRepository.resolveHandle(handle).getOrThrow()
             val resolvedDid = atProtoRepository.resolveDid(did).getOrThrow()
@@ -97,6 +102,8 @@ internal class AuthRepositoryImpl(
             currState = Uuid.generateV7().toString()
 
             val tokenEndpoint = requireNotNull(serverMetaData["token_endpoint"]?.jsonPrimitive?.content) { "No token endpoint found" }
+            loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(tokenEndpoint = tokenEndpoint))
+
             verifier = encoder.encode(ByteArray(32).also { secureRandom.nextBytes(it) })
             val challenge = encoder.encode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray()))
 
@@ -105,13 +112,13 @@ internal class AuthRepositoryImpl(
 
             val requestUri = doPar(parEndpoint, challenge, handle)
 
-            val authUrl = buildString {
-                append("${serverMetaData["authorization_endpoint"]?.jsonPrimitive?.content}?")
-                append("client_id=${"https://starrynight.frybits.com/.well-known/client-metadata.json".htmlEncode()}")
-                append("&request_uri=${requestUri.htmlEncode()}")
-            }
+            val authUrl = authorizationEndpoint.toUri()
+                .buildUpon()
+                .appendQueryParameter("client_id", "https://starrynight.frybits.com/.well-known/client-metadata.json")
+                .appendQueryParameter("request_uri", requestUri)
+                .build()
 
-            Log.d("Blah", "authUrl = $authUrl")
+            return@runCatching authUrl.toString()
         }
     }
 
@@ -129,7 +136,9 @@ internal class AuthRepositoryImpl(
                 accessJwt = currentUser.token,
                 refreshJwt = currentUser.refreshToken,
                 emailConfirmed = currentUser.emailConfirmed,
-                emailAuthFactor = false
+                emailAuthFactor = false,
+                nonce = currentUser.nonce,
+                tokenEndpoint = currentUser.tokenEndpoint
             )
             atProtoRepository.deleteSession(sessionData)
                 .onFailure { Log.w(LOG_TAG, "Failure deleting session remotely", it) }
@@ -169,7 +178,9 @@ internal class AuthRepositoryImpl(
                     status = sessionData.status?.name.orEmpty(),
                     token = sessionData.accessJwt,
                     refreshToken = sessionData.refreshJwt,
-                    emailConfirmed = sessionData.emailConfirmed
+                    emailConfirmed = sessionData.emailConfirmed,
+                    nonce = sessionData.nonce,
+                    tokenEndpoint = sessionData.tokenEndpoint
                 )
                 loggedInUserDataStore.storeLoggedInUserData(loggedInUserData)
                 return@map loggedInUserData
@@ -209,16 +220,18 @@ internal class AuthRepositoryImpl(
 
             response.headers()["DPoP-Nonce"]?.let {
                 nonce = it
-                launch { loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(dpopNonce = it)) }
+                loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(nonce = it))
             }
 
             if (response.isSuccessful) {
                 val body = response.body()
-                Log.d("Blah", body.toString())
                 return@supervisorScope body?.get("request_uri")?.jsonPrimitive?.content ?: return@repeat
             } else {
-                Log.d("Blah", response.toString())
-                Log.d("Blah", response.errorBody()?.string().orEmpty())
+                val error = response.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                }
+
+                Log.w(LOG_TAG, "Error during doPar:", Exception("Unknown error (${response.code()}) - ${error ?: "No error body"}"))
             }
 
             if (attempt == 0 && nonce != null) return@repeat // retry with nonce

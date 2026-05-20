@@ -26,7 +26,7 @@ public interface AuthRepository {
 
     public suspend fun login(handle: String, password: String): Result<Unit>
 
-    public suspend fun loginWithOAuth(handle: String): Result<Unit>
+    public suspend fun loginWithOAuth(handle: String): Result<String>
 
     public suspend fun logout(): Result<Unit>
 
