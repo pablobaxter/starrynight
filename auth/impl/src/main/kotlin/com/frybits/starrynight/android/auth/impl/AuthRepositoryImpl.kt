@@ -29,6 +29,7 @@ import com.frybits.starrynight.atproto.models.ATProtoSession
 import com.frybits.starrynight.atproto.models.ATProtoSessionStatus
 import com.frybits.starrynight.auth.AuthRepository
 import com.frybits.starrynight.auth.LoggedInUserData
+import com.frybits.starrynight.utils.core.ClientId
 import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -58,6 +59,7 @@ internal class AuthRepositoryImpl(
     private val proofBuilder: DpopProofBuilder,
     private val authApi: AuthApi,
     @param:IODispatcher private val ioDispatcher: CoroutineDispatcher,
+    @param:ClientId private val clientId: String
 ) : AuthRepository {
     private val secureRandom = SecureRandom.getInstanceStrong()
 
@@ -114,7 +116,7 @@ internal class AuthRepositoryImpl(
 
             val authUrl = authorizationEndpoint.toUri()
                 .buildUpon()
-                .appendQueryParameter("client_id", "https://starrynight.frybits.com/.well-known/client-metadata.json")
+                .appendQueryParameter("client_id", clientId)
                 .appendQueryParameter("request_uri", requestUri)
                 .build()
 
@@ -203,16 +205,15 @@ internal class AuthRepositoryImpl(
             )
 
             val request = FormBody.Builder()
-                .add("client_id", "https://starrynight.frybits.com/.well-known/client-metadata.json")
+                .add("client_id", clientId)
                 .add("response_type", "code")
                 .add("code_challenge", challenge)
                 .add("code_challenge_method", "S256")
                 .add("state", currState)
-                .add("redirect_uri", "https://starrynight.frybits.com/android_login")
+                .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
                 .add("scope", "atproto transition:generic")
                 .add("application_type", "native")
                 .add("grant_types", "[authorization_code,refresh_token]")
-                .add("scope", "atproto")
                 .add("login_hint", handle)
                 .build()
 
