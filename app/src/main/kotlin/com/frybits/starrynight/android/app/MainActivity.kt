@@ -20,61 +20,37 @@ package com.frybits.starrynight.android.app
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import com.frybits.starrynight.atproto.ATProtoRepository
-import com.frybits.starrynight.auth.AuthRepository
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import com.frybits.starrynight.android.app.ui.entry.StarryNight
+import com.frybits.starrynight.android.theme.StarryNightTheme
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.android.ActivityKey
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-
-private val TAG = MainActivity::class.java.simpleName
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 
 @ContributesIntoMap(AppScope::class, binding<Activity>())
 @ActivityKey
 @Inject
 internal class MainActivity(
-    private val authRepository: AuthRepository,
-    private val atProtoRepository: ATProtoRepository
+    private val metroVmf: MetroViewModelFactory,
+    private val entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
 ) : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                lifecycleScope.launch {
-                    authRepository.loginWithOAuth("pablobaxter.com")
-                        .onSuccess {
-                            Log.d("Blah", it)
-                        }.onFailure {
-                            Log.d("Blah", "Something went wrong", it)
-                        }
-//                    authRepository.getCurrentUserFlow().onEach {
-//                        Log.d("Blah", "got new user: $it")
-//                    }.launchIn(this)
-//
-//                    atProtoRepository.resolveHandle("pablobaxter.com").onSuccess {
-//                        atProtoRepository.resolveDid(it).onSuccess {
-//                            Log.d("Blah", "Got resolved data: $it")
-//                            atProtoRepository.getAuthServerMetaData(it).onSuccess {
-//                                Log.d("Blah", "Got auth server meta data: $it")
-//                            }.onFailure {
-//                                Log.d("Blah", "Failed to get auth metadata", it)
-//                            }
-//                        }.onFailure {
-//                            Log.d("Blah", "Failed to resolve did", it)
-//                        }
-//                    }.onFailure {
-//                        Log.d("Blah", "Failed to resolve handle", it)
-//                    }
+        enableEdgeToEdge()
+        setContent {
+            CompositionLocalProvider(LocalMetroViewModelFactory provides metroVmf) {
+                StarryNightTheme {
+                    StarryNight(entryBuilders = entryBuilders)
                 }
             }
         }

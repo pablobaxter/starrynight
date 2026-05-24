@@ -1,0 +1,17 @@
+# Project type
+type = "androidLibrary"
+
+enableCompose = true
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+implementation = [
+    { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
+    { type = "library", name = "androidx.compose.material3" },
+    { type = "library", name = "androidx.compose.ui.text" },
+    { type = "library", name = "androidx.compose.ui.tooling.preview" },
+]
+
+debugImplementation = [
+    { type = "library", name = "androidx.compose.ui.tooling" },
+]

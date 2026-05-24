@@ -21,17 +21,23 @@ default = [
 implementation = [
     { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
     { type = "library", name = "androidx.activity.compose" },
-    { type = "library", name = "androidx.core" },
+    { type = "library", name = "androidx.compose.material3" },
+    { type = "library", name = "androidx.compose.material3.adaptive" },
+    { type = "library", name = "androidx.compose.viewmodel.navigation3" },
+    { type = "library", name = "androidx.navigation3.runtime" },
+    { type = "library", name = "androidx.navigation3.ui" },
     { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },
+    { type = "library", name = "metrox.viewmodel" },
+    { type = "library", name = "metrox.viewmodel.compose" },
     { type = "library", name = "kotlinx.coroutines.core" },
     { type = "library", name = "tink.android" },
-    { type = "library", name = "kotlinx.serialization" },
-    { type = "library", name = "kotlinx.serialization.json" },
 
     # Api modules
     { type = "project", name = ":atproto:api" },
     { type = "project", name = ":auth:api" },
+    { type = "project", name = ":home:api" },
+    { type = "project", name = ":login:api" },
     { type = "project", name = ":network:api" },
     { type = "project", name = ":persistence:api" },
     { type = "project", name = ":utils:core:api" },
@@ -42,7 +48,12 @@ implementation = [
     # Impl modules
     { type = "project", name = ":atproto:impl" },
     { type = "project", name = ":auth:impl" },
+    { type = "project", name = ":home:impl" },
+    { type = "project", name = ":login:impl" },
     { type = "project", name = ":network:impl" },
     { type = "project", name = ":persistence:impl" },
     { type = "project", name = ":utils:core:impl" },
+
+    # UI
+    { type = "project", name = ":theme" },
 ]

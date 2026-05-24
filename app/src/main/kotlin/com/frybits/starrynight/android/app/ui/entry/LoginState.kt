@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 pablo
+ * Copyright (C) 2026 Pablo Baxter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,19 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.auth
+package com.frybits.starrynight.android.app.ui.entry
 
-import kotlinx.coroutines.flow.Flow
+internal sealed interface LoginState {
 
-public interface AuthRepository {
-
-    public fun getCurrentUserFlow(): Flow<LoggedInUserData>
-
-    public suspend fun login(handle: String, password: String): Result<Unit>
-
-    public suspend fun loginWithOAuth(handle: String): Result<String>
-
-    public suspend fun logout(): Result<Unit>
-
-    public suspend fun refreshToken(force: Boolean = false): Result<LoggedInUserData>
+    data object Unknown: LoginState
+    data object LoggedIn: LoginState
+    data object LoggedOut: LoginState
 }

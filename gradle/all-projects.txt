@@ -4,9 +4,14 @@
 :atproto:impl
 :auth:api
 :auth:impl
+:home:api
+:home:impl
+:login:api
+:login:impl
 :network:api
 :network:impl
 :persistence:api
 :persistence:impl
+:theme
 :utils:core:api
 :utils:core:impl

@@ -67,7 +67,7 @@ internal class AuthRepositoryImpl(
 
     private lateinit var verifier: String
 
-    override suspend fun getCurrentUserFlow(): Flow<LoggedInUserData> {
+    override fun getCurrentUserFlow(): Flow<LoggedInUserData> {
         return loggedInUserDataStore.loggedInUserDataFlow
     }
 

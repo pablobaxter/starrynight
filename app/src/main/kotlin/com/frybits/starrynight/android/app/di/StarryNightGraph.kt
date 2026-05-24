@@ -28,9 +28,10 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.android.MetroAppComponentProviders
+import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 
 @DependencyGraph(AppScope::class)
-internal interface StarryNightGraph: MetroAppComponentProviders {
+internal interface StarryNightGraph: MetroAppComponentProviders, ViewModelGraph {
 
     @DependencyGraph.Factory
     interface Factory {
