@@ -8,6 +8,7 @@ enableCompose = true
 [dependencies]
 implementation = [
     { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
+    { type = "library", name = "androidx.browser" },
     { type = "library", name = "androidx.compose.material3" },
     { type = "library", name = "androidx.compose.viewmodel" },
     { type = "library", name = "androidx.navigation3.runtime" },
@@ -15,7 +16,9 @@ implementation = [
     { type = "library", name = "androidx.compose.ui.tooling.preview" },
     { type = "library", name = "metrox.viewmodel.compose" },
 
+    { type = "project", name = ":auth:api" },
     { type = "project", name = ":login:api" },
+    { type = "project", name = ":navigation:api" },
     { type = "project", name = ":theme" },
 ]
 

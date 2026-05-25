@@ -27,6 +27,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -42,13 +43,12 @@ internal class StarryNightViewModel(
 
     init {
         viewModelScope.launch {
-            authRepository.getCurrentUserFlow().collect { loggedInUserData ->
-                _currentState.update {
-                    if (loggedInUserData.token.isNotBlank()) {
-                        LoginState.LoggedIn
-                    } else {
-                        LoginState.LoggedOut
-                    }
+            val loggedInUserData = authRepository.getCurrentUserFlow().first()
+            _currentState.update {
+                if (loggedInUserData.token.isNotBlank()) {
+                    LoginState.LoggedIn
+                } else {
+                    LoginState.LoggedOut
                 }
             }
         }

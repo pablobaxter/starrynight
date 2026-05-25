@@ -23,41 +23,42 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.frybits.starrynight.android.app.ui.splash.SplashKey
 import com.frybits.starrynight.home.HomeNavigation
 import com.frybits.starrynight.login.LoginNavigation
+import com.frybits.starrynight.navigation.LocalNavigator
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
 internal fun StarryNight(
     viewModel: StarryNightViewModel = metroViewModel(),
-    entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
+    entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>,
+    backStack: NavBackStack<NavKey>
 ) {
-    val backStack = rememberNavBackStack(SplashKey)
-
     val currentState by viewModel.currentState.collectAsStateWithLifecycle()
+
+    val nav = LocalNavigator.current
 
     LaunchedEffect(currentState) {
         when (currentState) {
             is LoginState.Unknown -> Unit
             is LoginState.LoggedOut -> {
-                backStack.clear()
-                backStack.add(LoginNavigation.LoginKey)
+                nav.clearBackStack()
+                nav.navigateTo(LoginNavigation.LoginKey)
             }
             is LoginState.LoggedIn -> {
-                backStack.clear()
-                backStack.add(HomeNavigation.HomeKey)
+                nav.clearBackStack()
+                nav.navigateTo(HomeNavigation.HomeKey)
             }
         }
     }
 
     NavDisplay(
         backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
+        onBack = { nav.goBack() },
         entryProvider = entryProvider {
             entryBuilders.forEach { builder -> builder() }
         }

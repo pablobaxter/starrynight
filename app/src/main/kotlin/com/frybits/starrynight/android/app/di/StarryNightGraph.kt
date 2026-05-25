@@ -19,8 +19,8 @@
 package com.frybits.starrynight.android.app.di
 
 import android.app.Application
-import com.frybits.starrynight.utils.core.AppName
 import com.frybits.starrynight.utils.core.AppId
+import com.frybits.starrynight.utils.core.AppName
 import com.frybits.starrynight.utils.core.ClientId
 import com.frybits.starrynight.utils.core.VersionCode
 import com.frybits.starrynight.utils.core.VersionName
@@ -41,7 +41,7 @@ internal interface StarryNightGraph: MetroAppComponentProviders, ViewModelGraph 
             @Provides @AppId appId: String,
             @Provides @VersionName versionName: String,
             @Provides @VersionCode versionCode: Int,
-            @Provides @ClientId clientId: String
+            @Provides @ClientId clientId: String,
         ): StarryNightGraph
     }
 }

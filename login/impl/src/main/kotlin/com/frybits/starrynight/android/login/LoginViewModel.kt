@@ -18,15 +18,59 @@
 
 package com.frybits.starrynight.android.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.frybits.starrynight.auth.AuthRepository
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
-internal class LoginViewModel: ViewModel() {
+internal class LoginViewModel(
+    private val authRepository: AuthRepository
+): ViewModel() {
 
+    init {
+        Log.d("Foobar", "New viewmodel!")
+    }
+
+    private val _currentState = MutableStateFlow<LoginCurrentState>(LoginCurrentState.None)
+
+    internal val currentState = _currentState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            authRepository.getCurrentUserFlow().collect { loggedInUserData ->
+                if (loggedInUserData.token.isNotBlank()) {
+                    _currentState.update {
+                        LoginCurrentState.LoggedIn
+                    }
+                }
+            }
+        }
+    }
+
+    fun onLogin(userName: String) {
+        viewModelScope.launch {
+            _currentState.update { LoginCurrentState.InProgress }
+            authRepository.loginWithOAuth(userName).onSuccess { uri ->
+                Log.d("Foobar", "From viewmodel")
+                _currentState.update {
+                    LoginCurrentState.OAuth(uri)
+                }
+            }.onFailure {
+                _currentState.update {
+                    LoginCurrentState.Password
+                }
+            }
+        }
+    }
 }

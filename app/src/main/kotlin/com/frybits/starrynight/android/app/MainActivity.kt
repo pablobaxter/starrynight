@@ -24,10 +24,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
+import com.frybits.starrynight.android.app.ui.StarryNightAppNav
 import com.frybits.starrynight.android.app.ui.entry.StarryNight
+import com.frybits.starrynight.android.app.ui.splash.SplashKey
 import com.frybits.starrynight.android.theme.StarryNightTheme
+import com.frybits.starrynight.navigation.LocalNavigator
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -41,16 +46,21 @@ import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 @Inject
 internal class MainActivity(
     private val metroVmf: MetroViewModelFactory,
-    private val entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
+    private val entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>,
 ) : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CompositionLocalProvider(LocalMetroViewModelFactory provides metroVmf) {
+            val backStack = rememberNavBackStack(SplashKey)
+            val starryNightNav = remember(backStack) { StarryNightAppNav(backStack) }
+            CompositionLocalProvider(LocalMetroViewModelFactory provides metroVmf, LocalNavigator provides starryNightNav) {
                 StarryNightTheme {
-                    StarryNight(entryBuilders = entryBuilders)
+                    StarryNight(
+                        entryBuilders = entryBuilders,
+                        backStack = backStack
+                    )
                 }
             }
         }

@@ -8,6 +8,7 @@
 :home:impl
 :login:api
 :login:impl
+:navigation:api
 :network:api
 :network:impl
 :persistence:api

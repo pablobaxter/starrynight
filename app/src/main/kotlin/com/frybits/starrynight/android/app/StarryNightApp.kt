@@ -33,7 +33,7 @@ internal class StarryNightApp : Application(), MetroApplication {
             appId = BuildConfig.APPLICATION_ID,
             versionName = BuildConfig.VERSION_NAME,
             versionCode = BuildConfig.VERSION_CODE,
-            clientId = BuildConfig.CLIENT_ID
+            clientId = BuildConfig.CLIENT_ID,
         )
     }
 
