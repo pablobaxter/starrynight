@@ -18,7 +18,10 @@
 
 package com.frybits.starrynight.android.login
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.frybits.starrynight.auth.AuthRepository
@@ -37,10 +40,6 @@ import kotlinx.coroutines.launch
 internal class LoginViewModel(
     private val authRepository: AuthRepository
 ): ViewModel() {
-
-    init {
-        Log.d("Foobar", "New viewmodel!")
-    }
 
     private val _currentState = MutableStateFlow<LoginCurrentState>(LoginCurrentState.None)
 
@@ -62,13 +61,35 @@ internal class LoginViewModel(
         viewModelScope.launch {
             _currentState.update { LoginCurrentState.InProgress }
             authRepository.loginWithOAuth(userName).onSuccess { uri ->
-                Log.d("Foobar", "From viewmodel")
                 _currentState.update {
                     LoginCurrentState.OAuth(uri)
                 }
             }.onFailure {
                 _currentState.update {
-                    LoginCurrentState.Password
+                    LoginCurrentState.None
+                }
+            }
+        }
+    }
+
+    fun onLaunchUri(context: Context, uri: Uri) {
+        runCatching {
+            val tabIntent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setUrlBarHidingEnabled(true)
+                .build()
+            tabIntent.launchUrl(context, uri)
+        }
+    }
+
+    fun handleOAuthUri(oAuthUri: Uri?) {
+        if (oAuthUri != null) {
+            viewModelScope.launch {
+                _currentState.update { LoginCurrentState.InProgress }
+                authRepository.handleOAuth(oAuthUri.toString()).onSuccess {
+
+                }.onFailure {
+                    Log.d("Foobar", "Got a failure: $it")
                 }
             }
         }

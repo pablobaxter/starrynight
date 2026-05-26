@@ -19,6 +19,11 @@
 package com.frybits.starrynight.android.persistence.wiring
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.frybits.starrynight.android.persistence.AppDatabase
 import dev.zacsweers.metro.AppScope
@@ -26,6 +31,9 @@ import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 @ContributesTo(AppScope::class)
 @BindingContainer
@@ -38,5 +46,17 @@ public object PersistenceProvider {
             context,
             "app-database"
         ).build()
+    }
+
+    @Provides
+    @SingleIn(AppScope::class)
+    internal fun providePreferenceDatastore(context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create(
+            corruptionHandler = null,
+            migrations = listOf(),
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+        ) {
+            context.preferencesDataStoreFile("app-prefs")
+        }
     }
 }

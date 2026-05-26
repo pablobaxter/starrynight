@@ -18,6 +18,7 @@
 
 package com.frybits.starrynight.android.login.wiring
 
+import androidx.core.net.toUri
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.frybits.starrynight.android.login.LoginScreen
@@ -27,6 +28,7 @@ import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.IntoSet
 import dev.zacsweers.metro.Provides
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @ContributesTo(AppScope::class)
 @BindingContainer
@@ -36,7 +38,7 @@ public class LoginBindings {
     @Provides
     public fun provideLoginEntryBuilder(): EntryProviderScope<NavKey>.() -> Unit = {
         entry<LoginNavigation.LoginKey> {
-            LoginScreen()
+            LoginScreen(metroViewModel(), it.oAuthUri?.toUri())
         }
     }
 }

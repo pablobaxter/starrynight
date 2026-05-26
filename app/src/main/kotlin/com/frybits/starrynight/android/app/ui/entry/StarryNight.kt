@@ -27,6 +27,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.frybits.starrynight.android.app.ui.splash.SplashKey
 import com.frybits.starrynight.home.HomeNavigation
 import com.frybits.starrynight.login.LoginNavigation
 import com.frybits.starrynight.navigation.LocalNavigator
@@ -41,17 +42,19 @@ internal fun StarryNight(
     val currentState by viewModel.currentState.collectAsStateWithLifecycle()
 
     val nav = LocalNavigator.current
-
     LaunchedEffect(currentState) {
-        when (currentState) {
-            is LoginState.Unknown -> Unit
-            is LoginState.LoggedOut -> {
-                nav.clearBackStack()
-                nav.navigateTo(LoginNavigation.LoginKey)
-            }
-            is LoginState.LoggedIn -> {
-                nav.clearBackStack()
-                nav.navigateTo(HomeNavigation.HomeKey)
+        if (backStack.lastOrNull() is SplashKey) {
+            when (currentState) {
+                is LoginState.Unknown -> Unit
+                is LoginState.LoggedOut -> {
+                    nav.clearBackStack()
+                    nav.navigateTo(LoginNavigation.LoginKey())
+                }
+
+                is LoginState.LoggedIn -> {
+                    nav.clearBackStack()
+                    nav.navigateTo(HomeNavigation.HomeKey)
+                }
             }
         }
     }

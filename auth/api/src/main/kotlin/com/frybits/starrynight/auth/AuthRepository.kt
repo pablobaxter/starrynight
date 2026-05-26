@@ -31,4 +31,6 @@ public interface AuthRepository {
     public suspend fun logout(): Result<Unit>
 
     public suspend fun refreshToken(force: Boolean = false): Result<LoggedInUserData>
+
+    public suspend fun handleOAuth(oAuthUri: String): Result<LoggedInUserData>
 }

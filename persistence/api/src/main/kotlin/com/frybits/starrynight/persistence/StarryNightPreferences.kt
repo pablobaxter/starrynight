@@ -16,15 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.login
+package com.frybits.starrynight.persistence
 
-internal sealed interface LoginCurrentState {
+public class StarryNightPreferences {
 
-    data object None: LoginCurrentState
 
-    data object InProgress: LoginCurrentState
-
-    data class OAuth(val uri: String): LoginCurrentState
-
-    data object LoggedIn: LoginCurrentState
 }

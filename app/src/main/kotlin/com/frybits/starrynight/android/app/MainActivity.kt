@@ -19,6 +19,7 @@
 package com.frybits.starrynight.android.app
 
 import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,6 +33,7 @@ import com.frybits.starrynight.android.app.ui.StarryNightAppNav
 import com.frybits.starrynight.android.app.ui.entry.StarryNight
 import com.frybits.starrynight.android.app.ui.splash.SplashKey
 import com.frybits.starrynight.android.theme.StarryNightTheme
+import com.frybits.starrynight.login.LoginNavigation
 import com.frybits.starrynight.navigation.LocalNavigator
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
@@ -51,9 +53,11 @@ internal class MainActivity(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val uri = intent.data
+        val startKey = parseUri(uri)
         enableEdgeToEdge()
         setContent {
-            val backStack = rememberNavBackStack(SplashKey)
+            val backStack = rememberNavBackStack(startKey)
             val starryNightNav = remember(backStack) { StarryNightAppNav(backStack) }
             CompositionLocalProvider(LocalMetroViewModelFactory provides metroVmf, LocalNavigator provides starryNightNav) {
                 StarryNightTheme {
@@ -63,6 +67,14 @@ internal class MainActivity(
                     )
                 }
             }
+        }
+    }
+
+    private fun parseUri(uri: Uri?): NavKey {
+        val path = uri?.path ?: return SplashKey
+        return when {
+            path.endsWith("login") -> LoginNavigation.LoginKey(uri.toString())
+            else -> SplashKey
         }
     }
 }

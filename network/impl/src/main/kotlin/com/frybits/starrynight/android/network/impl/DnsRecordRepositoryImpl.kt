@@ -28,6 +28,7 @@ import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -35,6 +36,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @ContributesBinding(AppScope::class)
+@SingleIn(AppScope::class)
 @Inject
 internal class DnsRecordRepositoryImpl(
     private val dnsResolver: DnsResolver,

@@ -39,6 +39,7 @@ import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -58,6 +59,7 @@ private val LOGGER = Logger.getLogger("ATProtoRepository")
 private val TTL = 5.minutes
 
 @ContributesBinding(AppScope::class)
+@SingleIn(AppScope::class)
 @Inject
 internal class ATProtoRepositoryImpl(
     private val atProtoServicesApi: ATProtoNetworkApi,

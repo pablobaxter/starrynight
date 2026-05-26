@@ -18,7 +18,9 @@
 
 package com.frybits.starrynight.android.auth.network
 
+import com.frybits.starrynight.android.auth.models.TokenResponse
 import kotlinx.serialization.json.JsonObject
+import okhttp3.HttpUrl
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -30,4 +32,7 @@ internal interface AuthApi {
 
     @POST
     suspend fun doPar(@Url url: String, @Header("DPoP") dpop: String, @Body requestBody: RequestBody): Response<JsonObject>
+
+    @POST
+    suspend fun exchangeCode(@Url url: String, @Header("DPoP") dpop: String, @Body requestBody: RequestBody): Response<TokenResponse>
 }

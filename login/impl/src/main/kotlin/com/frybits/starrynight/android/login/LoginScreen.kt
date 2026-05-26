@@ -18,7 +18,7 @@
 
 package com.frybits.starrynight.android.login
 
-import androidx.browser.customtabs.CustomTabsIntent
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -48,25 +48,30 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.frybits.starrynight.android.theme.StarryNightTheme
-import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
-internal fun LoginScreen(viewModel: LoginViewModel = metroViewModel()) {
+internal fun LoginScreen(
+    viewModel: LoginViewModel,
+    oAuthUri: Uri? = null
+) {
+    viewModel.handleOAuthUri(oAuthUri)
+    val context = LocalContext.current
     val currentState by viewModel.currentState.collectAsStateWithLifecycle()
     LoginScreenImpl(
         currentState = currentState,
-        onLogin = viewModel::onLogin
+        onLogin = viewModel::onLogin,
+        onLaunchUri = { viewModel.onLaunchUri(context, it) }
     )
 }
 
 @Composable
 private fun LoginScreenImpl(
     currentState: LoginCurrentState,
-    onLogin: (username: String) -> Unit = {}
+    onLogin: (username: String) -> Unit = {},
+    onLaunchUri: (uri: Uri) -> Unit = {}
 ) {
     Scaffold(
         content = { paddingValues ->
-            val context = LocalContext.current
             var inProgress by remember { mutableStateOf(false) }
 
             LaunchedEffect(currentState) {
@@ -75,13 +80,7 @@ private fun LoginScreenImpl(
                         inProgress = false
                     }
                     is LoginCurrentState.OAuth -> {
-                        val tabIntent = CustomTabsIntent.Builder()
-                            .setShowTitle(true)
-                            .build()
-                        tabIntent.launchUrl(context, currentState.uri.toUri())
-                        inProgress = false
-                    }
-                    is LoginCurrentState.Password -> {
+                        onLaunchUri(currentState.uri.toUri())
                         inProgress = false
                     }
                     is LoginCurrentState.InProgress -> {

@@ -20,7 +20,12 @@ package com.frybits.starrynight.android.auth.impl
 
 import android.util.Log
 import androidx.core.net.toUri
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.frybits.starrynight.android.auth.LoggedInUserDataStore
+import com.frybits.starrynight.android.auth.models.TokenResponse
 import com.frybits.starrynight.android.auth.network.AuthApi
 import com.frybits.starrynight.android.auth.utils.DpopKeyManager
 import com.frybits.starrynight.android.auth.utils.DpopProofBuilder
@@ -34,9 +39,13 @@ import com.frybits.starrynight.utils.core.IODispatcher
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.jsonPrimitive
@@ -50,6 +59,7 @@ import kotlin.uuid.Uuid
 private val LOG_TAG = AuthRepository::class.java.simpleName
 
 @ContributesBinding(AppScope::class)
+@SingleIn(AppScope::class)
 @Inject
 internal class AuthRepositoryImpl(
     private val atProtoRepository: ATProtoRepository,
@@ -59,13 +69,14 @@ internal class AuthRepositoryImpl(
     private val proofBuilder: DpopProofBuilder,
     private val authApi: AuthApi,
     @param:IODispatcher private val ioDispatcher: CoroutineDispatcher,
-    @param:ClientId private val clientId: String
+    @param:ClientId private val clientId: String,
+    private val appPreferences: DataStore<Preferences>
 ) : AuthRepository {
     private val secureRandom = SecureRandom.getInstanceStrong()
 
-    private lateinit var currState: String
+    private val currStatePreference = stringPreferencesKey("currentState")
 
-    private lateinit var verifier: String
+    private val verifierPreference = stringPreferencesKey("verifier")
 
     override fun getCurrentUserFlow(): Flow<LoggedInUserData> {
         return loggedInUserDataStore.loggedInUserDataFlow
@@ -95,24 +106,30 @@ internal class AuthRepositoryImpl(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun loginWithOAuth(handle: String): Result<String> {
-        return runCatching {
+    override suspend fun loginWithOAuth(handle: String): Result<String> = coroutineScope {
+        return@coroutineScope runCatching {
             val did = atProtoRepository.resolveHandle(handle).getOrThrow()
             val resolvedDid = atProtoRepository.resolveDid(did).getOrThrow()
             val serverMetaData = atProtoRepository.getAuthServerMetaData(resolvedDid).getOrThrow()
 
-            currState = Uuid.generateV7().toString()
-
             val tokenEndpoint = requireNotNull(serverMetaData["token_endpoint"]?.jsonPrimitive?.content) { "No token endpoint found" }
             loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(tokenEndpoint = tokenEndpoint))
+            val verifier = encoder.encode(ByteArray(32).also { secureRandom.nextBytes(it) })
+            val currState = Uuid.generateV7().toString()
 
-            verifier = encoder.encode(ByteArray(32).also { secureRandom.nextBytes(it) })
+            launch {
+                appPreferences.edit { preferences ->
+                    preferences[currStatePreference] = currState
+                    preferences[verifierPreference] = verifier
+                }
+            }
+
             val challenge = encoder.encode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray()))
 
             val parEndpoint = requireNotNull(serverMetaData["pushed_authorization_request_endpoint"]?.jsonPrimitive?.content) { "No pushed authorization token endpoint found" }
             val authorizationEndpoint = requireNotNull(serverMetaData["authorization_endpoint"]?.jsonPrimitive?.content) { "No authorization endpoint found" }
 
-            val requestUri = doPar(parEndpoint, challenge, handle)
+            val requestUri = doPar(parEndpoint, challenge, handle, currState)
 
             val authUrl = authorizationEndpoint.toUri()
                 .buildUpon()
@@ -133,7 +150,7 @@ internal class AuthRepositoryImpl(
                 active = currentUser.active,
                 handle = currentUser.handle,
                 status = runCatching { ATProtoSessionStatus.valueOf(currentUser.status) }
-                    .onFailure { Log.d(LOG_TAG, "Unable to find status for ${currentUser.status}") }
+                    .onFailure { Log.w(LOG_TAG, "Unable to find status for ${currentUser.status}") }
                     .getOrNull(),
                 accessJwt = currentUser.token,
                 refreshJwt = currentUser.refreshToken,
@@ -158,7 +175,7 @@ internal class AuthRepositoryImpl(
                 active = currentUser.active,
                 handle = currentUser.handle,
                 status = runCatching { ATProtoSessionStatus.valueOf(currentUser.status) }
-                    .onFailure { Log.d(LOG_TAG, "Unable to find status for ${currentUser.status}") }
+                    .onFailure { Log.w(LOG_TAG, "Unable to find status for ${currentUser.status}") }
                     .getOrNull(),
                 accessJwt = currentUser.token,
                 refreshJwt = currentUser.refreshToken,
@@ -190,10 +207,43 @@ internal class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun handleOAuth(oAuthUri: String): Result<LoggedInUserData> {
+        return runCatching {
+            Log.d(LOG_TAG, "Got oAuthUri: $oAuthUri")
+            val uri = oAuthUri.toUri()
+            val state = requireNotNull(uri.getQueryParameter("state")) { "Uri contained no state query" }
+            var currState: String? = null
+            var verifier: String? = null
+            appPreferences.edit { preferences ->
+                currState = preferences[currStatePreference]
+                preferences.remove(currStatePreference)
+                verifier = preferences[verifierPreference]
+                preferences.remove(verifierPreference)
+            }
+            require(currState == state) { "Current state and received state do not match. Expected: $currState, but got $state" }
+
+            val iss = uri.getQueryParameter("iss")
+            Log.d(LOG_TAG, "Got issuer ${iss?.toUri()}")
+
+            val error = uri.getQueryParameter("error")
+            val errorDescription = uri.getQueryParameter("error_description")
+            if (error != null) {
+                Log.w(LOG_TAG, "Error: $error")
+                Log.w(LOG_TAG, "Description: $errorDescription")
+                throw Exception("$error: $errorDescription")
+            }
+
+            val code = requireNotNull(uri.getQueryParameter("code")) { "Uri contained no code query" }
+
+            TODO()
+        }
+    }
+
     private suspend fun doPar(
         parEndpoint: String,
         challenge: String,
         handle: String,
+        currState: String
     ): String = supervisorScope {
         var nonce: String? = null
         repeat(2) { attempt ->
@@ -238,5 +288,25 @@ internal class AuthRepositoryImpl(
             if (attempt == 0 && nonce != null) return@repeat // retry with nonce
         }
         error("PAR failed after nonce retry")
+    }
+
+    private suspend fun doExchange(code: String, verifier: String): TokenResponse {
+        val loggedInUserData = getCurrentUserFlow().first()
+        repeat(2) {
+            val dpop = proofBuilder.create(
+                keyPair = keyManager.getOrCreate(),
+                method = "POST",
+                url = requireNotNull(loggedInUserData.tokenEndpoint) { "Token endpoint must not be null" },
+                nonce = loggedInUserData.nonce
+            )
+
+            val requestBody = FormBody.Builder()
+                .add("grant_type", "authorization_code")
+                .add("client_id", clientId)
+                .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
+                .add("code", code)
+                .add("code_verifier", verifier)
+                .build()
+        }
     }
 }

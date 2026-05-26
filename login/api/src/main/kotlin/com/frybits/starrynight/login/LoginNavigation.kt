@@ -24,5 +24,5 @@ import kotlinx.serialization.Serializable
 public sealed interface LoginNavigation: NavKey {
 
     @Serializable
-    public data object LoginKey: LoginNavigation
+    public data class LoginKey(val oAuthUri: String? = null): LoginNavigation
 }
