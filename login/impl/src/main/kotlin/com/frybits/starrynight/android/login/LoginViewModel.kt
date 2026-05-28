@@ -87,7 +87,7 @@ internal class LoginViewModel(
             viewModelScope.launch {
                 _currentState.update { LoginCurrentState.InProgress }
                 authRepository.handleOAuth(oAuthUri.toString()).onSuccess {
-
+                    Log.d("Foobar", it.toString())
                 }.onFailure {
                     Log.d("Foobar", "Got a failure: $it")
                 }

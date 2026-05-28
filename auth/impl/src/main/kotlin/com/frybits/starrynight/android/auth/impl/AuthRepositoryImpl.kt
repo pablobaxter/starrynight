@@ -235,7 +235,14 @@ internal class AuthRepositoryImpl(
 
             val code = requireNotNull(uri.getQueryParameter("code")) { "Uri contained no code query" }
 
-            TODO()
+            val result = doExchange(code, verifier.orEmpty())
+
+            Log.d("Foobar", "Got result: $result")
+
+            val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
+            val updatedLoggedInUserData = loggedInUserData.copy(token = result.accessToken, refreshToken = result.refreshToken.orEmpty())
+            loggedInUserDataStore.storeLoggedInUserData(updatedLoggedInUserData)
+            return@runCatching updatedLoggedInUserData
         }
     }
 
@@ -244,8 +251,9 @@ internal class AuthRepositoryImpl(
         challenge: String,
         handle: String,
         currState: String
-    ): String = supervisorScope {
-        var nonce: String? = null
+    ): String {
+        val loggedInUserData = getCurrentUserFlow().first()
+        var nonce: String? = loggedInUserData.nonce
         repeat(2) { attempt ->
             val dpop = proofBuilder.create(
                 keyPair = keyManager.getOrCreate(),
@@ -276,7 +284,7 @@ internal class AuthRepositoryImpl(
 
             if (response.isSuccessful) {
                 val body = response.body()
-                return@supervisorScope body?.get("request_uri")?.jsonPrimitive?.content ?: return@repeat
+                return body?.get("request_uri")?.jsonPrimitive?.content ?: return@repeat
             } else {
                 val error = response.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
@@ -292,12 +300,13 @@ internal class AuthRepositoryImpl(
 
     private suspend fun doExchange(code: String, verifier: String): TokenResponse {
         val loggedInUserData = getCurrentUserFlow().first()
-        repeat(2) {
+        var nonce: String? = loggedInUserData.nonce
+        repeat(2) { attempt ->
             val dpop = proofBuilder.create(
                 keyPair = keyManager.getOrCreate(),
                 method = "POST",
                 url = requireNotNull(loggedInUserData.tokenEndpoint) { "Token endpoint must not be null" },
-                nonce = loggedInUserData.nonce
+                nonce = nonce
             )
 
             val requestBody = FormBody.Builder()
@@ -307,6 +316,26 @@ internal class AuthRepositoryImpl(
                 .add("code", code)
                 .add("code_verifier", verifier)
                 .build()
+
+            val response = authApi.exchangeCode(loggedInUserData.tokenEndpoint.orEmpty(), dpop, requestBody)
+
+            response.headers()["DPoP-Nonce"]?.let {
+                nonce = it
+                loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(nonce = it))
+            }
+
+            if (response.isSuccessful) {
+                return response.body() ?: return@repeat
+            } else {
+                val error = response.errorBody()?.use { errorBody ->
+                    withContext(ioDispatcher) { errorBody.string() }
+                }
+
+                Log.w(LOG_TAG, "Error during doPar:", Exception("Unknown error (${response.code()}) - ${error ?: "No error body"}"))
+            }
+
+            if (attempt == 0 && nonce != null) return@repeat // retry with nonce
         }
+        error("Token exchange failed after nonce retry")
     }
 }
