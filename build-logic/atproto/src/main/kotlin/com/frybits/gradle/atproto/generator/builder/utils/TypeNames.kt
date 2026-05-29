@@ -34,6 +34,8 @@ internal object TypeNames {
 
     val RetrofitPost = ClassName("retrofit2.http", "POST")
 
+    val RetrofitGet = ClassName("retrofit2.http", "GET")
+
     val RetrofitPath = ClassName("retrofit2.http", "Path")
 
     val RetrofitHeader = ClassName("retrofit2.http", "Header")

@@ -80,7 +80,8 @@ internal class LoggedInUserDataStoreImpl(
                 refreshToken = userData.refreshToken,
                 emailConfirmed = userData.emailConfirmed,
                 nonce = userData.nonce,
-                tokenEndpoint = userData.tokenEndpoint
+                tokenEndpoint = userData.tokenEndpoint,
+                tokenType = userData.tokenType
             )
         }
     }
@@ -96,7 +97,8 @@ internal class LoggedInUserDataStoreImpl(
             refreshToken = it.refreshToken,
             emailConfirmed = it.emailConfirmed,
             nonce = it.nonce,
-            tokenEndpoint = it.tokenEndpoint
+            tokenEndpoint = it.tokenEndpoint,
+            tokenType = it.tokenType
         )
     }
 

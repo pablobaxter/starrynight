@@ -23,6 +23,7 @@ import android.net.DnsResolver
 import android.os.Build
 import android.os.ext.SdkExtensions
 import android.util.Log
+import com.frybits.starrynight.android.network.AuthenticatorInterceptor
 import com.frybits.starrynight.android.network.DpopInterceptor
 import com.frybits.starrynight.utils.core.AppId
 import com.frybits.starrynight.utils.core.AppName
@@ -69,7 +70,8 @@ public object CoreNetworkBindings {
         @AppId packageName: String,
         @VersionName versionName: String,
         @VersionCode versionCode: Int,
-        dpopInterceptor: DpopInterceptor
+        dpopInterceptor: DpopInterceptor,
+        authenticator: AuthenticatorInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
@@ -79,6 +81,7 @@ public object CoreNetworkBindings {
                         .build()
                 )
             }
+            .authenticator(authenticator)
             .addInterceptor(dpopInterceptor)
             .addNetworkInterceptor {
                 val req = it.request()

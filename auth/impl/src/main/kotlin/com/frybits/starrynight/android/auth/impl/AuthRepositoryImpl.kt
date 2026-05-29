@@ -205,18 +205,18 @@ internal class AuthRepositoryImpl(
                 atProtoRepository.getSession(sessionData)
             }
 
-            return result.map {
+            return result.map { updatedSession ->
                 val loggedInUserData = LoggedInUserData(
-                    did = sessionData.id,
-                    handle = sessionData.handle,
-                    email = sessionData.email,
-                    active = sessionData.active,
-                    status = sessionData.status?.name.orEmpty(),
-                    token = sessionData.accessJwt,
-                    refreshToken = sessionData.refreshJwt,
-                    emailConfirmed = sessionData.emailConfirmed,
-                    nonce = sessionData.nonce,
-                    tokenEndpoint = sessionData.tokenEndpoint
+                    did = updatedSession.id,
+                    handle = updatedSession.handle,
+                    email = updatedSession.email,
+                    active = updatedSession.active,
+                    status = updatedSession.status?.name.orEmpty(),
+                    token = updatedSession.accessJwt,
+                    refreshToken = updatedSession.refreshJwt,
+                    emailConfirmed = updatedSession.emailConfirmed,
+                    nonce = updatedSession.nonce,
+                    tokenEndpoint = updatedSession.tokenEndpoint
                 )
                 loggedInUserDataStore.storeLoggedInUserData(loggedInUserData)
                 return@map loggedInUserData

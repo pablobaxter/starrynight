@@ -31,6 +31,7 @@ import com.frybits.gradle.atproto.lexicon.categories.IntegerField
 import com.frybits.gradle.atproto.lexicon.categories.ObjectField
 import com.frybits.gradle.atproto.lexicon.categories.ParamsField
 import com.frybits.gradle.atproto.lexicon.categories.ProcedureField
+import com.frybits.gradle.atproto.lexicon.categories.QueryField
 import com.frybits.gradle.atproto.lexicon.categories.RefField
 import com.frybits.gradle.atproto.lexicon.categories.StringField
 import com.frybits.gradle.atproto.lexicon.categories.UnionField
@@ -175,7 +176,11 @@ internal fun generateClass(lexiconType: HttpField, context: LexiconContext, envi
         context.authority
     }
 
-    procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPost).addMember("%S", "https://{host}/xrpc/$memberString").build())
+    when (lexiconType) {
+        is ProcedureField -> procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitPost).addMember("%S", "https://{host}/xrpc/$memberString").build())
+        is QueryField -> procedureFunSpecBuilder.addAnnotation(AnnotationSpec.builder(TypeNames.RetrofitGet).addMember("%S", "https://{host}/xrpc/$memberString").build())
+    }
+
 
     if (lexiconType is ProcedureField) {
         val input = lexiconType.input

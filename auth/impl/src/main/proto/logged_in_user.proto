@@ -14,4 +14,5 @@ message LoggedInUserProto {
     bool emailConfirmed = 8;
     optional string nonce = 9;
     optional string tokenEndpoint = 10;
+    optional string tokenType = 11;
 }
