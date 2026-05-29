@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.auth.utils
+package com.frybits.starrynight.android.utils.core.dpop
 
 import com.frybits.starrynight.utils.core.DefaultDispatcher
+import com.frybits.starrynight.utils.core.dpop.DpopProofBuilder
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -36,17 +37,6 @@ import kotlin.io.encoding.Base64
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-
-internal interface DpopProofBuilder {
-
-    suspend fun create(
-        keyPair: KeyPair,
-        method: String,
-        url: String,
-        accessToken: String? = null,
-        nonce: String? = null
-    ): String
-}
 
 @ContributesBinding(AppScope::class)
 @SingleIn(AppScope::class)

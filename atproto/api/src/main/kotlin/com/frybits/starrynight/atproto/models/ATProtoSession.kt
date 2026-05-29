@@ -29,7 +29,8 @@ public data class ATProtoSession(
     val emailConfirmed: Boolean,
     val emailAuthFactor: Boolean,
     val nonce: String? = null,
-    val tokenEndpoint: String? = null
+    val tokenEndpoint: String? = null,
+    val tokenType: String? = null
 )
 
 public enum class ATProtoSessionStatus {

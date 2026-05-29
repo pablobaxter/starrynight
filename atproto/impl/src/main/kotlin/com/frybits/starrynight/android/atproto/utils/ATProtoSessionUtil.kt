@@ -55,11 +55,14 @@ internal fun GetSessionResponse.toATProtoSession(prevSession: ATProtoSession): A
         accessJwt = prevSession.accessJwt,
         refreshJwt = prevSession.refreshJwt,
         emailConfirmed = emailConfirmed,
-        emailAuthFactor = emailAuthFactor
+        emailAuthFactor = emailAuthFactor,
+        nonce = prevSession.nonce,
+        tokenEndpoint = prevSession.tokenEndpoint,
+        tokenType = prevSession.tokenType
     )
 }
 
-internal fun RefreshSessionResponse.toATProtoSession(): ATProtoSession {
+internal fun RefreshSessionResponse.toATProtoSession(prevSession: ATProtoSession): ATProtoSession {
     return ATProtoSession(
         id = did.toString(),
         email = email,
@@ -71,6 +74,9 @@ internal fun RefreshSessionResponse.toATProtoSession(): ATProtoSession {
         accessJwt = accessJwt,
         refreshJwt = refreshJwt,
         emailConfirmed = emailConfirmed,
-        emailAuthFactor = emailAuthFactor
+        emailAuthFactor = emailAuthFactor,
+        nonce = prevSession.nonce,
+        tokenEndpoint = prevSession.tokenEndpoint,
+        tokenType = prevSession.tokenType
     )
 }

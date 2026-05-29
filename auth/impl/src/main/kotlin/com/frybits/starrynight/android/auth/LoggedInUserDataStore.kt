@@ -25,6 +25,7 @@ import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import androidx.datastore.tink.AeadSerializer
 import com.frybits.starrynight.auth.LoggedInUserData
+import com.frybits.starrynight.auth.LoggedInUserDataStore
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeyTemplate
 import com.google.crypto.tink.RegistryConfiguration
@@ -39,15 +40,6 @@ import kotlinx.coroutines.flow.map
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-
-internal interface LoggedInUserDataStore {
-
-    suspend fun storeLoggedInUserData(userData: LoggedInUserData)
-
-    suspend fun clearLoggedInUserData()
-
-    val loggedInUserDataFlow: Flow<LoggedInUserData>
-}
 
 @ContributesBinding(AppScope::class)
 @SingleIn(AppScope::class)
@@ -86,7 +78,9 @@ internal class LoggedInUserDataStoreImpl(
                 status = userData.status,
                 token = userData.token,
                 refreshToken = userData.refreshToken,
-                emailConfirmed = userData.emailConfirmed
+                emailConfirmed = userData.emailConfirmed,
+                nonce = userData.nonce,
+                tokenEndpoint = userData.tokenEndpoint
             )
         }
     }

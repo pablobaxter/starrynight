@@ -16,29 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.auth.utils
+package com.frybits.starrynight.auth
 
-import java.math.BigInteger
-import java.security.interfaces.ECPublicKey
-import kotlin.io.encoding.Base64
+import kotlinx.coroutines.flow.Flow
 
-internal fun ECPublicKey.toJwkMap(encoder: Base64): Map<String, String> {
-    return mapOf(
-        "kty" to "EC",
-        "crv" to "P-256",
-        "x" to encoder.encode(w.affineX.toFixed32()),
-        "y" to encoder.encode(w.affineY.toFixed32())
-    )
-}
+public interface LoggedInUserDataStore {
 
-internal fun BigInteger.toFixed32(): ByteArray {
-    return toByteArray().toFixed32()
-}
+    public suspend fun storeLoggedInUserData(userData: LoggedInUserData)
 
-internal fun ByteArray.toFixed32(): ByteArray {
-    return when {
-        size == 33 && this[0] == 0.toByte() -> copyOfRange(1, 33)
-        size < 32 -> ByteArray(32 - size) + this
-        else -> this
-    }
+    public suspend fun clearLoggedInUserData()
+
+    public val loggedInUserDataFlow: Flow<LoggedInUserData>
 }

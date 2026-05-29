@@ -54,7 +54,10 @@ internal fun LoginScreen(
     viewModel: LoginViewModel,
     oAuthUri: Uri? = null
 ) {
-    viewModel.handleOAuthUri(oAuthUri)
+    LaunchedEffect(oAuthUri) {
+        viewModel.handleOAuthUri(oAuthUri)
+    }
+
     val context = LocalContext.current
     val currentState by viewModel.currentState.collectAsStateWithLifecycle()
     LoginScreenImpl(

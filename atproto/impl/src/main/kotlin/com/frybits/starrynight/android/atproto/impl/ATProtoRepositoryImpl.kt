@@ -225,7 +225,7 @@ internal class ATProtoRepositoryImpl(
     override suspend fun getSession(session: ATProtoSession): Result<ATProtoSession> {
         return runCatching {
             val resolvedDid = resolveDid(session.id).getOrThrow()
-            val sessionResponse = getSessionApi.getSession("Bearer ${session.accessJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
+            val sessionResponse = getSessionApi.getSession("${session.tokenType ?: "Bearer"} ${session.accessJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
                 return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw Exception("No sessions response found")
             } else {
@@ -254,9 +254,9 @@ internal class ATProtoRepositoryImpl(
     override suspend fun refreshSession(session: ATProtoSession): Result<ATProtoSession> {
         return runCatching {
             val resolvedDid = resolveDid(session.id).getOrThrow()
-            val sessionResponse = refreshSessionApi.refreshSession("Bearer ${session.refreshJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
+            val sessionResponse = refreshSessionApi.refreshSession("${session.tokenType ?: "Bearer"} ${session.refreshJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
-                return@runCatching sessionResponse.body()?.toATProtoSession() ?: throw Exception("No sessions response found")
+                return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw Exception("No sessions response found")
             } else {
                 val error = sessionResponse.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
@@ -278,7 +278,7 @@ internal class ATProtoRepositoryImpl(
     override suspend fun deleteSession(session: ATProtoSession): Result<Unit> {
         return runCatching {
             val resolvedDid = resolveDid(session.id).getOrThrow()
-            val sessionResponse = deleteSessionApi.deleteSession("Bearer ${session.refreshJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
+            val sessionResponse = deleteSessionApi.deleteSession("${session.tokenType ?: "Bearer"} ${session.refreshJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
                 return@runCatching
             } else {

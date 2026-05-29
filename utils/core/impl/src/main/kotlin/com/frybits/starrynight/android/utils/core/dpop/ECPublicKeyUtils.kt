@@ -16,17 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.auth.models
+package com.frybits.starrynight.android.utils.core.dpop
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import java.math.BigInteger
+import java.security.interfaces.ECPublicKey
+import kotlin.io.encoding.Base64
 
-@Serializable
-internal data class TokenResponse(
-    @SerialName("access_token") val accessToken: String,
-    @SerialName("refresh_token") val refreshToken: String? = null,
-    @SerialName("token_type") val tokenType: String,
-    @SerialName("sub") val did: String,
-    val scope: String,
-    @SerialName("expires_in") val expiresInSeconds: Long,
-)
+internal fun ECPublicKey.toJwkMap(encoder: Base64): Map<String, String> {
+    return mapOf(
+        "crv" to "P-256",
+        "kty" to "EC",
+        "x" to encoder.encode(w.affineX.toFixed32()),
+        "y" to encoder.encode(w.affineY.toFixed32())
+    )
+}
+
+internal fun BigInteger.toFixed32(): ByteArray {
+    return toByteArray().toFixed32()
+}
+
+internal fun ByteArray.toFixed32(): ByteArray {
+    return when {
+        size == 33 && this[0] == 0.toByte() -> copyOfRange(1, 33)
+        size < 32 -> ByteArray(32 - size) + this
+        else -> this
+    }
+}

@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.auth.utils
+package com.frybits.starrynight.android.utils.core.dpop
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import com.frybits.starrynight.utils.core.DefaultDispatcher
+import com.frybits.starrynight.utils.core.dpop.DpopKeyManager
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -31,11 +32,6 @@ import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.spec.ECGenParameterSpec
-
-internal interface DpopKeyManager {
-
-    suspend fun getOrCreate(): KeyPair
-}
 
 private const val ALIAS = "atproto_dpop_key"
 private const val ANDROID_KEY_STORE = "AndroidKeyStore"

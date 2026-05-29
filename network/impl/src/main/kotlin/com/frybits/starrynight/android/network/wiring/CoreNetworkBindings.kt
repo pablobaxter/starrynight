@@ -22,8 +22,10 @@ import android.content.Context
 import android.net.DnsResolver
 import android.os.Build
 import android.os.ext.SdkExtensions
-import com.frybits.starrynight.utils.core.AppName
+import android.util.Log
+import com.frybits.starrynight.android.network.DpopInterceptor
 import com.frybits.starrynight.utils.core.AppId
+import com.frybits.starrynight.utils.core.AppName
 import com.frybits.starrynight.utils.core.VersionCode
 import com.frybits.starrynight.utils.core.VersionName
 import dev.zacsweers.metro.AppScope
@@ -62,11 +64,12 @@ public object CoreNetworkBindings {
 
     @Provides
     @SingleIn(AppScope::class)
-    public fun provideOkHttp(
+    internal fun provideOkHttp(
         @AppName appName: String,
         @AppId packageName: String,
         @VersionName versionName: String,
-        @VersionCode versionCode: Int
+        @VersionCode versionCode: Int,
+        dpopInterceptor: DpopInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
@@ -75,6 +78,13 @@ public object CoreNetworkBindings {
                         .header("User-Agent", "$packageName/$appName/$versionName($versionCode)")
                         .build()
                 )
+            }
+            .addInterceptor(dpopInterceptor)
+            .addNetworkInterceptor {
+                val req = it.request()
+                Log.d("Foobar", "Authorization: ${req.header("Authorization")?.take(30)}")
+                Log.d("Foobar", "DPoP: ${req.header("DPoP")?.take(30)}")
+                it.proceed(req)
             }
             .build()
     }

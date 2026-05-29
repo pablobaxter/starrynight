@@ -24,18 +24,18 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.frybits.starrynight.android.auth.LoggedInUserDataStore
 import com.frybits.starrynight.android.auth.models.TokenResponse
 import com.frybits.starrynight.android.auth.network.AuthApi
-import com.frybits.starrynight.android.auth.utils.DpopKeyManager
-import com.frybits.starrynight.android.auth.utils.DpopProofBuilder
 import com.frybits.starrynight.atproto.ATProtoRepository
 import com.frybits.starrynight.atproto.models.ATProtoSession
 import com.frybits.starrynight.atproto.models.ATProtoSessionStatus
 import com.frybits.starrynight.auth.AuthRepository
 import com.frybits.starrynight.auth.LoggedInUserData
+import com.frybits.starrynight.auth.LoggedInUserDataStore
 import com.frybits.starrynight.utils.core.ClientId
 import com.frybits.starrynight.utils.core.IODispatcher
+import com.frybits.starrynight.utils.core.dpop.DpopKeyManager
+import com.frybits.starrynight.utils.core.dpop.DpopProofBuilder
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -44,14 +44,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.FormBody
+import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.security.interfaces.ECPublicKey
 import kotlin.io.encoding.Base64
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -113,7 +113,20 @@ internal class AuthRepositoryImpl(
             val serverMetaData = atProtoRepository.getAuthServerMetaData(resolvedDid).getOrThrow()
 
             val tokenEndpoint = requireNotNull(serverMetaData["token_endpoint"]?.jsonPrimitive?.content) { "No token endpoint found" }
-            loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(tokenEndpoint = tokenEndpoint))
+            loggedInUserDataStore.storeLoggedInUserData(
+                LoggedInUserData(
+                    did = did,
+                    handle = handle,
+                    email = "",
+                    active = false,
+                    status = "",
+                    token = "",
+                    refreshToken = "",
+                    emailConfirmed = false,
+                    nonce = null,
+                    tokenEndpoint = tokenEndpoint
+                )
+            )
             val verifier = encoder.encode(ByteArray(32).also { secureRandom.nextBytes(it) })
             val currState = Uuid.generateV7().toString()
 
@@ -157,7 +170,8 @@ internal class AuthRepositoryImpl(
                 emailConfirmed = currentUser.emailConfirmed,
                 emailAuthFactor = false,
                 nonce = currentUser.nonce,
-                tokenEndpoint = currentUser.tokenEndpoint
+                tokenEndpoint = currentUser.tokenEndpoint,
+                tokenType = currentUser.tokenType
             )
             atProtoRepository.deleteSession(sessionData)
                 .onFailure { Log.w(LOG_TAG, "Failure deleting session remotely", it) }
@@ -180,7 +194,10 @@ internal class AuthRepositoryImpl(
                 accessJwt = currentUser.token,
                 refreshJwt = currentUser.refreshToken,
                 emailConfirmed = currentUser.emailConfirmed,
-                emailAuthFactor = false
+                emailAuthFactor = false,
+                nonce = currentUser.nonce,
+                tokenEndpoint = currentUser.tokenEndpoint,
+                tokenType = currentUser.tokenType
             )
             val result = if (force) {
                 atProtoRepository.refreshSession(sessionData)
@@ -237,10 +254,37 @@ internal class AuthRepositoryImpl(
 
             val result = doExchange(code, verifier.orEmpty())
 
-            Log.d("Foobar", "Got result: $result")
-
             val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
-            val updatedLoggedInUserData = loggedInUserData.copy(token = result.accessToken, refreshToken = result.refreshToken.orEmpty())
+            Log.d("Foobar", "Result = $result")
+            val sessionData = atProtoRepository.getSession(
+                ATProtoSession(
+                    id = loggedInUserData.did,
+                    accessJwt = result.accessToken,
+                    refreshJwt = result.refreshToken.orEmpty(),
+                    email = "",
+                    active = false,
+                    handle = "",
+                    status = null,
+                    emailConfirmed = false,
+                    emailAuthFactor = false,
+                    nonce = loggedInUserData.nonce,
+                    tokenEndpoint = loggedInUserData.tokenEndpoint,
+                    tokenType = result.tokenType
+                )
+            ).getOrThrow()
+            val updatedLoggedInUserData = LoggedInUserData(
+                did = sessionData.id,
+                handle = sessionData.handle,
+                email = sessionData.email,
+                active = sessionData.active,
+                status = sessionData.status?.name.orEmpty(),
+                token = sessionData.accessJwt,
+                refreshToken = sessionData.refreshJwt,
+                emailConfirmed = sessionData.emailConfirmed,
+                nonce = sessionData.nonce,
+                tokenEndpoint = sessionData.tokenEndpoint,
+                tokenType = sessionData.tokenType
+            )
             loggedInUserDataStore.storeLoggedInUserData(updatedLoggedInUserData)
             return@runCatching updatedLoggedInUserData
         }
@@ -337,5 +381,26 @@ internal class AuthRepositoryImpl(
             if (attempt == 0 && nonce != null) return@repeat // retry with nonce
         }
         error("Token exchange failed after nonce retry")
+    }
+}
+
+internal fun ECPublicKey.toJwkMap(encoder: Base64): Map<String, String> {
+    return mapOf(
+        "kty" to "EC",
+        "crv" to "P-256",
+        "x" to encoder.encode(w.affineX.toFixed32()),
+        "y" to encoder.encode(w.affineY.toFixed32())
+    )
+}
+
+internal fun BigInteger.toFixed32(): ByteArray {
+    return toByteArray().toFixed32()
+}
+
+internal fun ByteArray.toFixed32(): ByteArray {
+    return when {
+        size == 33 && this[0] == 0.toByte() -> copyOfRange(1, 33)
+        size < 32 -> ByteArray(32 - size) + this
+        else -> this
     }
 }

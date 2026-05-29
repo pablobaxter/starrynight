@@ -16,17 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.auth.models
+package com.frybits.starrynight.utils.core.dpop
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import java.security.KeyPair
 
-@Serializable
-internal data class TokenResponse(
-    @SerialName("access_token") val accessToken: String,
-    @SerialName("refresh_token") val refreshToken: String? = null,
-    @SerialName("token_type") val tokenType: String,
-    @SerialName("sub") val did: String,
-    val scope: String,
-    @SerialName("expires_in") val expiresInSeconds: Long,
-)
+public interface DpopKeyManager {
+
+    public suspend fun getOrCreate(): KeyPair
+}
