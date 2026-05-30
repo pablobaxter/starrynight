@@ -48,45 +48,52 @@ internal class AuthenticatorInterceptor(
 
     private val mutex: Mutex = Mutex()
 
-    override fun authenticate(route: Route?, response: Response): Request? = runBlocking {
-        return@runBlocking mutex.withLock {
-            if (response.responseCount >= 5) {
-                Log.d(LOG_TAG, "Throttling response retries")
+    override fun authenticate(route: Route?, response: Response): Request? {
+        val paths = response.request.url.pathSegments
+        // Skip refresh session paths
+        if (paths.last() == "com.atproto.server.refreshSession") {
+            return null
+        }
+        return runBlocking {
+            return@runBlocking mutex.withLock {
+                if (response.responseCount >= 5) {
+                    Log.d(LOG_TAG, "Throttling response retries")
+                    return@withLock null
+                }
+                val challenges = response.challenges()
+
+                challenges.forEach { challenge ->
+                    if (challenge.authParams["error"] == "use_dpop_nonce") {
+                        val accessToken = response.request.header("Authorization")
+                        val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
+                        val nonce = response.header("DPoP-Nonce")?.also { loggedInUserDataStore.storeLoggedInUserData(loggedInUserData.copy(nonce = it)) }
+                        val proof = try {
+                            dpopProofBuilder.create(
+                                keyPair = dpopKeyManager.getOrCreate(),
+                                method = response.request.method,
+                                url = response.request.url.toString(),
+                                accessToken = accessToken?.split(' ')?.last(),
+                                nonce = nonce
+                            )
+                        } catch (e: Exception) {
+                            Log.e(LOG_TAG, "Failed to create DPoP proof", e)
+                            throw e
+                        }
+
+                        return@withLock response.request.newBuilder()
+                            .header("DPoP", proof)
+                            .build()
+                    } else if (challenge.authParams["error"] == "invalid_token") {
+                        val authRepo = authRepositoryProvider()
+                        val loggedInUserData = authRepo.refreshToken(true).getOrThrow()
+
+                        return@withLock response.request.newBuilder()
+                            .header("Authorization", "${loggedInUserData.tokenType ?: "Bearer"} ${loggedInUserData.token}")
+                            .build()
+                    }
+                }
                 return@withLock null
             }
-            val challenges = response.challenges()
-
-            challenges.forEach { challenge ->
-                if (challenge.authParams["error"] == "use_dpop_nonce") {
-                    val accessToken = response.request.header("Authorization")
-                    val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
-                    val nonce = response.header("DPoP-Nonce")?.also { loggedInUserDataStore.storeLoggedInUserData(loggedInUserData.copy(nonce = it)) }
-                    val proof = try {
-                        dpopProofBuilder.create(
-                            keyPair = dpopKeyManager.getOrCreate(),
-                            method = response.request.method,
-                            url = response.request.url.toString(),
-                            accessToken = accessToken?.split(' ')?.last(),
-                            nonce = nonce
-                        )
-                    } catch (e: Exception) {
-                        Log.e(LOG_TAG, "Failed to create DPoP proof", e)
-                        throw e
-                    }
-
-                    return@withLock response.request.newBuilder()
-                        .header("DPoP", proof)
-                        .build()
-                } else if (challenge.authParams["error"] == "invalid_token") {
-                    val authRepo = authRepositoryProvider()
-                    val loggedInUserData = authRepo.refreshToken(true).getOrThrow()
-
-                    return@withLock response.request.newBuilder()
-                        .header("Authorization", "${loggedInUserData.tokenType ?: "Bearer"} ${loggedInUserData.token}")
-                        .build()
-                }
-            }
-            return@withLock null
         }
     }
 
