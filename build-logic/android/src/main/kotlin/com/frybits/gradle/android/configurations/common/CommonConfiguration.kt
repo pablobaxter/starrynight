@@ -37,6 +37,7 @@ import com.frybits.gradle.core.definitions.SystemProperty
 import com.frybits.gradle.utils.androidSourceCompatibility
 import com.frybits.gradle.utils.androidTargetCompatibility
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 
 /**
  * Base plugins for all android builds
@@ -45,6 +46,8 @@ public fun Project.androidPlugins(buildFile: AndroidBuildFile) {
     enableKotlinPluginIfNeeded()
     kotlinProjectPlugins(buildFile)
     baseProjectPlugins(buildFile)
+    // Build cache fix plugin
+    apply(plugin = "org.gradle.android.cache-fix")
 }
 
 /**

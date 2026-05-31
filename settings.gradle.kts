@@ -7,19 +7,19 @@ pluginManagement {
 
     plugins {
         id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-        id("com.android.settings") version providers.gradleProperty("com.frybits.agp.version")
+        id("org.gradle.android.cache-fix") version "3.0.3"
 
+        id("com.android.settings") version providers.gradleProperty("com.frybits.agp.version")
         id("com.android.application") version providers.gradleProperty("com.frybits.agp.version")
         id("com.android.library") version providers.gradleProperty("com.frybits.agp.version")
         id("org.jetbrains.kotlin.android") version providers.gradleProperty("com.frybits.kotlin.version")
         id("org.jetbrains.kotlin.jvm") version providers.gradleProperty("com.frybits.kotlin.version")
-        id("org.jetbrains.kotlin.plugin.serialization") version "2.4.0-RC"
+        id("org.jetbrains.kotlin.plugin.serialization") version providers.gradleProperty("com.frybits.kotlin.version")
         id("com.google.devtools.ksp") version providers.gradleProperty("com.frybits.ksp.version")
-        id("org.gradle.android.cache-fix") version "3.0.3"
         id("dev.zacsweers.metro") version providers.gradleProperty("com.frybits.metro.version")
         id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
-        id("androidx.room") version "2.8.4"
-        id("com.squareup.wire") version "6.4.0"
+        id("androidx.room") version providers.gradleProperty("com.frybits.room.version")
+        id("com.squareup.wire") version providers.gradleProperty("com.frybits.square.wire.version")
     }
 
     includeBuild("build-logic")

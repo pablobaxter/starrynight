@@ -72,6 +72,14 @@ internal class FrybitsSettingsPlugin : Plugin<Settings> {
                         "metro-version",
                         providers.gradleProperty("com.frybits.metro.version").get()
                     )
+                    version(
+                        "room",
+                        providers.gradleProperty("com.frybits.room.version").get()
+                    )
+                    version(
+                        "square-wire",
+                        providers.gradleProperty("com.frybits.square.wire.version").get()
+                    )
                 }
             }
         }
