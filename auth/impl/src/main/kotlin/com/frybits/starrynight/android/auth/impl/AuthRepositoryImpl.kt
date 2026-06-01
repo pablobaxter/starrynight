@@ -48,10 +48,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.FormBody
-import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.security.interfaces.ECPublicKey
 import kotlin.io.encoding.Base64
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -381,26 +379,5 @@ internal class AuthRepositoryImpl(
             if (attempt == 0 && nonce != null) return@repeat // retry with nonce
         }
         error("Token exchange failed after nonce retry")
-    }
-}
-
-internal fun ECPublicKey.toJwkMap(encoder: Base64): Map<String, String> {
-    return mapOf(
-        "kty" to "EC",
-        "crv" to "P-256",
-        "x" to encoder.encode(w.affineX.toFixed32()),
-        "y" to encoder.encode(w.affineY.toFixed32())
-    )
-}
-
-internal fun BigInteger.toFixed32(): ByteArray {
-    return toByteArray().toFixed32()
-}
-
-internal fun ByteArray.toFixed32(): ByteArray {
-    return when {
-        size == 33 && this[0] == 0.toByte() -> copyOfRange(1, 33)
-        size < 32 -> ByteArray(32 - size) + this
-        else -> this
     }
 }

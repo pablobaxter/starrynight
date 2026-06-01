@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.frybits.starrynight.android.theme.StarryNightTheme
+import com.frybits.starrynight.home.HomeNavigation
+import com.frybits.starrynight.navigation.LocalNavigator
 
 @Composable
 internal fun LoginScreen(
@@ -75,6 +77,7 @@ private fun LoginScreenImpl(
 ) {
     Scaffold(
         content = { paddingValues ->
+            val navigator = LocalNavigator.current
             var inProgress by remember { mutableStateOf(false) }
 
             LaunchedEffect(currentState) {
@@ -91,6 +94,8 @@ private fun LoginScreenImpl(
                     }
                     is LoginCurrentState.LoggedIn -> {
                         inProgress = false
+                        navigator.clearBackStack()
+                        navigator.navigateTo(HomeNavigation.HomeKey)
                     }
                 }
             }

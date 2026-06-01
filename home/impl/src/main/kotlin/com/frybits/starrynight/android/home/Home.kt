@@ -18,12 +18,35 @@
 
 package com.frybits.starrynight.android.home
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 
 @Composable
 internal fun Home(viewModel: HomeViewModel = metroViewModel()) {
-    Text("Foobar")
+    HomeImpl()
+}
+
+@Composable
+private fun HomeImpl() {
+    Scaffold(
+        topBar = {
+
+        },
+        bottomBar = {
+
+        },
+        content = { paddingValues ->
+            Box(
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                Text("Foobar")
+            }
+        }
+    )
 }

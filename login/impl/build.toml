@@ -17,6 +17,7 @@ implementation = [
     { type = "library", name = "metrox.viewmodel.compose" },
 
     { type = "project", name = ":auth:api" },
+    { type = "project", name = ":home:api" },
     { type = "project", name = ":login:api" },
     { type = "project", name = ":navigation:api" },
     { type = "project", name = ":theme" },
