@@ -253,7 +253,6 @@ internal class AuthRepositoryImpl(
             val result = doExchange(code, verifier.orEmpty())
 
             val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
-            Log.d("Foobar", "Result = $result")
             val sessionData = atProtoRepository.getSession(
                 ATProtoSession(
                     id = loggedInUserData.did,

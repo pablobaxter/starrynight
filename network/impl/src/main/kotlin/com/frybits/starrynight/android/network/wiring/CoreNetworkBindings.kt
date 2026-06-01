@@ -22,7 +22,6 @@ import android.content.Context
 import android.net.DnsResolver
 import android.os.Build
 import android.os.ext.SdkExtensions
-import android.util.Log
 import com.frybits.starrynight.android.network.AuthenticatorInterceptor
 import com.frybits.starrynight.android.network.DpopInterceptor
 import com.frybits.starrynight.utils.core.AppId
@@ -83,12 +82,6 @@ public object CoreNetworkBindings {
             }
             .authenticator(authenticator)
             .addInterceptor(dpopInterceptor)
-            .addNetworkInterceptor {
-                val req = it.request()
-                Log.d("Foobar", "Authorization: ${req.header("Authorization")?.take(30)}")
-                Log.d("Foobar", "DPoP: ${req.header("DPoP")?.take(30)}")
-                it.proceed(req)
-            }
             .build()
     }
 
