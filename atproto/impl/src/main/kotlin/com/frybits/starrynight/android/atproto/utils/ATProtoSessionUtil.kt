@@ -56,7 +56,6 @@ internal fun GetSessionResponse.toATProtoSession(prevSession: ATProtoSession): A
         refreshJwt = prevSession.refreshJwt,
         emailConfirmed = emailConfirmed,
         emailAuthFactor = emailAuthFactor,
-        nonce = prevSession.nonce,
         tokenEndpoint = prevSession.tokenEndpoint,
         tokenType = prevSession.tokenType
     )
@@ -75,7 +74,6 @@ internal fun RefreshSessionResponse.toATProtoSession(prevSession: ATProtoSession
         refreshJwt = refreshJwt,
         emailConfirmed = emailConfirmed,
         emailAuthFactor = emailAuthFactor,
-        nonce = prevSession.nonce,
         tokenEndpoint = prevSession.tokenEndpoint,
         tokenType = prevSession.tokenType
     )

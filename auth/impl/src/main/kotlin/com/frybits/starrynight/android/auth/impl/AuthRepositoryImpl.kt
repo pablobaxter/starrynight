@@ -34,8 +34,6 @@ import com.frybits.starrynight.auth.LoggedInUserData
 import com.frybits.starrynight.auth.LoggedInUserDataStore
 import com.frybits.starrynight.utils.core.ClientId
 import com.frybits.starrynight.utils.core.IODispatcher
-import com.frybits.starrynight.utils.core.dpop.DpopKeyManager
-import com.frybits.starrynight.utils.core.dpop.DpopProofBuilder
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -50,6 +48,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.FormBody
 import java.security.MessageDigest
 import java.security.SecureRandom
+import kotlin.Exception
 import kotlin.io.encoding.Base64
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -63,8 +62,6 @@ internal class AuthRepositoryImpl(
     private val atProtoRepository: ATProtoRepository,
     private val loggedInUserDataStore: LoggedInUserDataStore,
     private val encoder: Base64,
-    private val keyManager: DpopKeyManager,
-    private val proofBuilder: DpopProofBuilder,
     private val authApi: AuthApi,
     @param:IODispatcher private val ioDispatcher: CoroutineDispatcher,
     @param:ClientId private val clientId: String,
@@ -87,7 +84,7 @@ internal class AuthRepositoryImpl(
             }
 
             loggedInUserDataStore.storeLoggedInUserData(
-                LoggedInUserData(
+                getCurrentUserFlow().first().copy(
                     did = sessionData.id,
                     handle = sessionData.handle,
                     email = sessionData.email,
@@ -96,7 +93,6 @@ internal class AuthRepositoryImpl(
                     token = sessionData.accessJwt,
                     refreshToken = sessionData.refreshJwt,
                     emailConfirmed = sessionData.emailConfirmed,
-                    nonce = sessionData.nonce,
                     tokenEndpoint = sessionData.tokenEndpoint
                 )
             )
@@ -112,16 +108,9 @@ internal class AuthRepositoryImpl(
 
             val tokenEndpoint = requireNotNull(serverMetaData["token_endpoint"]?.jsonPrimitive?.content) { "No token endpoint found" }
             loggedInUserDataStore.storeLoggedInUserData(
-                LoggedInUserData(
+                getCurrentUserFlow().first().copy(
                     did = did,
                     handle = handle,
-                    email = "",
-                    active = false,
-                    status = "",
-                    token = "",
-                    refreshToken = "",
-                    emailConfirmed = false,
-                    nonce = null,
                     tokenEndpoint = tokenEndpoint
                 )
             )
@@ -167,7 +156,6 @@ internal class AuthRepositoryImpl(
                 refreshJwt = currentUser.refreshToken,
                 emailConfirmed = currentUser.emailConfirmed,
                 emailAuthFactor = false,
-                nonce = currentUser.nonce,
                 tokenEndpoint = currentUser.tokenEndpoint,
                 tokenType = currentUser.tokenType
             )
@@ -193,7 +181,6 @@ internal class AuthRepositoryImpl(
                 refreshJwt = currentUser.refreshToken,
                 emailConfirmed = currentUser.emailConfirmed,
                 emailAuthFactor = false,
-                nonce = currentUser.nonce,
                 tokenEndpoint = currentUser.tokenEndpoint,
                 tokenType = currentUser.tokenType
             )
@@ -204,7 +191,7 @@ internal class AuthRepositoryImpl(
             }
 
             return result.map { updatedSession ->
-                val loggedInUserData = LoggedInUserData(
+                val loggedInUserData = getCurrentUserFlow().first().copy(
                     did = updatedSession.id,
                     handle = updatedSession.handle,
                     email = updatedSession.email,
@@ -213,7 +200,6 @@ internal class AuthRepositoryImpl(
                     token = updatedSession.accessJwt,
                     refreshToken = updatedSession.refreshJwt,
                     emailConfirmed = updatedSession.emailConfirmed,
-                    nonce = updatedSession.nonce,
                     tokenEndpoint = updatedSession.tokenEndpoint
                 )
                 loggedInUserDataStore.storeLoggedInUserData(loggedInUserData)
@@ -252,7 +238,7 @@ internal class AuthRepositoryImpl(
 
             val result = doExchange(code, verifier.orEmpty())
 
-            val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
+            val loggedInUserData = getCurrentUserFlow().first()
             val sessionData = atProtoRepository.getSession(
                 ATProtoSession(
                     id = loggedInUserData.did,
@@ -264,12 +250,11 @@ internal class AuthRepositoryImpl(
                     status = null,
                     emailConfirmed = false,
                     emailAuthFactor = false,
-                    nonce = loggedInUserData.nonce,
                     tokenEndpoint = loggedInUserData.tokenEndpoint,
                     tokenType = result.tokenType
                 )
             ).getOrThrow()
-            val updatedLoggedInUserData = LoggedInUserData(
+            val updatedLoggedInUserData = getCurrentUserFlow().first().copy(
                 did = sessionData.id,
                 handle = sessionData.handle,
                 email = sessionData.email,
@@ -278,7 +263,6 @@ internal class AuthRepositoryImpl(
                 token = sessionData.accessJwt,
                 refreshToken = sessionData.refreshJwt,
                 emailConfirmed = sessionData.emailConfirmed,
-                nonce = sessionData.nonce,
                 tokenEndpoint = sessionData.tokenEndpoint,
                 tokenType = sessionData.tokenType
             )
@@ -293,90 +277,53 @@ internal class AuthRepositoryImpl(
         handle: String,
         currState: String
     ): String {
-        val loggedInUserData = getCurrentUserFlow().first()
-        var nonce: String? = loggedInUserData.nonce
-        repeat(2) { attempt ->
-            val dpop = proofBuilder.create(
-                keyPair = keyManager.getOrCreate(),
-                method = "POST",
-                url = parEndpoint,
-                nonce = nonce
-            )
+        val request = FormBody.Builder()
+            .add("client_id", clientId)
+            .add("response_type", "code")
+            .add("code_challenge", challenge)
+            .add("code_challenge_method", "S256")
+            .add("state", currState)
+            .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
+            .add("scope", "atproto transition:generic")
+            .add("application_type", "native")
+            .add("grant_types", "[authorization_code,refresh_token]")
+            .add("login_hint", handle)
+            .build()
 
-            val request = FormBody.Builder()
-                .add("client_id", clientId)
-                .add("response_type", "code")
-                .add("code_challenge", challenge)
-                .add("code_challenge_method", "S256")
-                .add("state", currState)
-                .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
-                .add("scope", "atproto transition:generic")
-                .add("application_type", "native")
-                .add("grant_types", "[authorization_code,refresh_token]")
-                .add("login_hint", handle)
-                .build()
+        val response = authApi.doPar(parEndpoint, request)
 
-            val response = authApi.doPar(parEndpoint, dpop, request)
+        if (response.isSuccessful) {
+            val body = response.body()
+            return body?.get("request_uri")?.jsonPrimitive?.content ?: throw Exception("No response from doPar")
+        } else {
+            val error = response.errorBody()?.use { errorBody ->
+                withContext(ioDispatcher) { errorBody.string() }
+            } ?: throw Exception("Unknown error during doPar: (${response.code()}) - No error body")
 
-            response.headers()["DPoP-Nonce"]?.let {
-                nonce = it
-                loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(nonce = it))
-            }
-
-            if (response.isSuccessful) {
-                val body = response.body()
-                return body?.get("request_uri")?.jsonPrimitive?.content ?: return@repeat
-            } else {
-                val error = response.errorBody()?.use { errorBody ->
-                    withContext(ioDispatcher) { errorBody.string() }
-                }
-
-                Log.w(LOG_TAG, "Error during doPar:", Exception("Unknown error (${response.code()}) - ${error ?: "No error body"}"))
-            }
-
-            if (attempt == 0 && nonce != null) return@repeat // retry with nonce
+            throw Exception("Error during doPar: (${response.code()}) - $error")
         }
-        error("PAR failed after nonce retry")
     }
 
     private suspend fun doExchange(code: String, verifier: String): TokenResponse {
         val loggedInUserData = getCurrentUserFlow().first()
-        var nonce: String? = loggedInUserData.nonce
-        repeat(2) { attempt ->
-            val dpop = proofBuilder.create(
-                keyPair = keyManager.getOrCreate(),
-                method = "POST",
-                url = requireNotNull(loggedInUserData.tokenEndpoint) { "Token endpoint must not be null" },
-                nonce = nonce
-            )
+        val requestBody = FormBody.Builder()
+            .add("grant_type", "authorization_code")
+            .add("client_id", clientId)
+            .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
+            .add("code", code)
+            .add("code_verifier", verifier)
+            .build()
 
-            val requestBody = FormBody.Builder()
-                .add("grant_type", "authorization_code")
-                .add("client_id", clientId)
-                .add("redirect_uri", "https://starrynight.frybits.com/mobile/login")
-                .add("code", code)
-                .add("code_verifier", verifier)
-                .build()
+        val response = authApi.exchangeCode(loggedInUserData.tokenEndpoint.orEmpty(), requestBody)
 
-            val response = authApi.exchangeCode(loggedInUserData.tokenEndpoint.orEmpty(), dpop, requestBody)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("No response from doExchange")
+        } else {
+            val error = response.errorBody()?.use { errorBody ->
+                withContext(ioDispatcher) { errorBody.string() }
+            } ?: throw Exception("Unknown error during doExchange: (${response.code()}) - No error body")
 
-            response.headers()["DPoP-Nonce"]?.let {
-                nonce = it
-                loggedInUserDataStore.storeLoggedInUserData(getCurrentUserFlow().first().copy(nonce = it))
-            }
-
-            if (response.isSuccessful) {
-                return response.body() ?: return@repeat
-            } else {
-                val error = response.errorBody()?.use { errorBody ->
-                    withContext(ioDispatcher) { errorBody.string() }
-                }
-
-                Log.w(LOG_TAG, "Error during doPar:", Exception("Unknown error (${response.code()}) - ${error ?: "No error body"}"))
-            }
-
-            if (attempt == 0 && nonce != null) return@repeat // retry with nonce
+            throw Exception("Error during doExchange: (${response.code()}) - $error")
         }
-        error("Token exchange failed after nonce retry")
     }
 }

@@ -28,7 +28,7 @@ internal enum class ChallengeType {
 
 internal fun Challenge.parse(): ChallengeType {
     return when (authParams["error"]) {
-        "use_dpop_nonce" -> ChallengeType.NONCE
+        "use_dpop_nonce", "invalid_dpop_proof" -> ChallengeType.NONCE
         "invalid_token" -> ChallengeType.AUTH
         else -> ChallengeType.UNKNOWN
     }

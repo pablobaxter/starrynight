@@ -28,7 +28,6 @@ public data class ATProtoSession(
     val refreshJwt: String,
     val emailConfirmed: Boolean,
     val emailAuthFactor: Boolean,
-    val nonce: String? = null,
     val tokenEndpoint: String? = null,
     val tokenType: String? = null
 )
