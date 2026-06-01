@@ -54,11 +54,9 @@ internal class DpopInterceptor(
             val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
             val nonce = loggedInUserData.nonce
 
-            val keyPair = dpopKeyManager.getOrCreate()
-
             val proof = try {
                 dpopProofBuilder.create(
-                    keyPair = keyPair,
+                    keyPair = dpopKeyManager.getOrCreate(),
                     method = request.method,
                     url = request.url.toString(),
                     accessToken = accessToken.split(' ').last(),
@@ -75,37 +73,7 @@ internal class DpopInterceptor(
                     .build()
             )
 
-            val newNonce = response.header("DPoP-Nonce")
-            loggedInUserDataStore.storeLoggedInUserData(loggedInUserData.copy(nonce = newNonce))
-
-            val challenges = response.challenges().map { it.parse() }
-
-            // If there is a nonce challenge, retry with new nonce
-            if (challenges.any { it == ChallengeType.NONCE }) {
-                Log.d(LOG_TAG, "Hit nonce challenge")
-                val newProof = try {
-                    dpopProofBuilder.create(
-                        keyPair = keyPair,
-                        method = request.method,
-                        url = request.url.toString(),
-                        accessToken = accessToken.split(' ').last(),
-                        nonce = newNonce
-                    )
-                } catch (e: Exception) {
-                    Log.e(LOG_TAG, "Failed to create DPoP proof", e)
-                    throw e
-                }
-
-                val newResponse = chain.proceed(
-                    request.newBuilder()
-                        .header("DPoP", newProof)
-                        .build()
-                )
-
-                // Store the absolute latest nonce
-                newResponse.header("DPoP-Nonce")?.let { loggedInUserDataStore.storeLoggedInUserData(loggedInUserData.copy(nonce = it)) }
-                return@runBlocking newResponse
-            }
+            response.header("DPoP-Nonce")?.let { loggedInUserDataStore.storeLoggedInUserData(loggedInUserData.copy(nonce = it)) }
 
             return@runBlocking response
         }

@@ -62,9 +62,31 @@ internal class AuthenticatorInterceptor(
                     Log.d(LOG_TAG, "Throttling response retries")
                     return@withLock null
                 }
-                val challenges = response.challenges().map { it.parse() }
+                val challenges = response.challenges().mapTo(hashSetOf()) { it.parse() }
 
-                if (challenges.any { it == ChallengeType.AUTH }) {
+                if (challenges.contains(ChallengeType.NONCE)) {
+                    val accessToken = response.request.header("Authorization")
+                    val loggedInUserData = loggedInUserDataStore.loggedInUserDataFlow.first()
+                    val nonce = response.header("DPoP-Nonce")?.also { loggedInUserDataStore.storeLoggedInUserData(loggedInUserData.copy(nonce = it)) }
+                    val proof = try {
+                        dpopProofBuilder.create(
+                            keyPair = dpopKeyManager.getOrCreate(),
+                            method = response.request.method,
+                            url = response.request.url.toString(),
+                            accessToken = accessToken?.split(' ')?.last(),
+                            nonce = nonce
+                        )
+                    } catch (e: Exception) {
+                        Log.e(LOG_TAG, "Failed to create DPoP proof", e)
+                        throw e
+                    }
+
+                    return@withLock response.request.newBuilder()
+                        .header("DPoP", proof)
+                        .build()
+                }
+
+                if (challenges.contains(ChallengeType.AUTH)) {
                     val authRepo = authRepositoryProvider()
                     val loggedInUserData = authRepo.refreshToken(true).getOrThrow()
 
@@ -73,6 +95,7 @@ internal class AuthenticatorInterceptor(
                         .build()
                 }
 
+                Log.d(LOG_TAG, "No challenge found")
                 return@withLock null
             }
         }
