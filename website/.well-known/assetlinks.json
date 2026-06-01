@@ -1,0 +1,12 @@
+[
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.frybits.starrynight.android",
+            "sha256_cert_fingerprints": [
+                "5E:F4:0C:5E:CA:42:9F:5C:66:42:BF:38:C7:3A:B5:7E:AF:A6:4F:38:C7:F5:36:89:0C:56:E5:90:52:18:41:B0"
+            ]
+        }
+    }
+]

@@ -1,0 +1,12 @@
+{
+    "client_id": "https://starrynight.frybits.com/oauth-client-metadata.json",
+    "application_type": "native",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "scope": "atproto transition:generic",
+    "response_types": ["code"],
+    "redirect_uris": ["https://starrynight.frybits.com/mobile/login"],
+    "token_endpoint_auth_method": "none",
+    "dpop_bound_access_tokens": true,
+    "client_name": "Starry Night",
+    "client_uri": "https://starrynight.frybits.com"
+}
