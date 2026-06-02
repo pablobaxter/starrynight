@@ -62,10 +62,15 @@ internal fun LoginScreen(
 
     val context = LocalContext.current
     val currentState by viewModel.currentState.collectAsStateWithLifecycle()
+    val navigator = LocalNavigator.current
     LoginScreenImpl(
         currentState = currentState,
         onLogin = viewModel::onLogin,
-        onLaunchUri = { viewModel.onLaunchUri(context, it) }
+        onLaunchUri = { viewModel.onLaunchUri(context, it) },
+        onNavigateToHome = {
+            navigator.clearBackStack()
+            navigator.navigateTo(HomeNavigation.HomeKey)
+        }
     )
 }
 
@@ -73,11 +78,11 @@ internal fun LoginScreen(
 private fun LoginScreenImpl(
     currentState: LoginCurrentState,
     onLogin: (username: String) -> Unit = {},
-    onLaunchUri: (uri: Uri) -> Unit = {}
+    onLaunchUri: (uri: Uri) -> Unit = {},
+    onNavigateToHome: () -> Unit = {}
 ) {
     Scaffold(
         content = { paddingValues ->
-            val navigator = LocalNavigator.current
             var inProgress by remember { mutableStateOf(false) }
 
             LaunchedEffect(currentState) {
@@ -94,8 +99,7 @@ private fun LoginScreenImpl(
                     }
                     is LoginCurrentState.LoggedIn -> {
                         inProgress = false
-                        navigator.clearBackStack()
-                        navigator.navigateTo(HomeNavigation.HomeKey)
+                        onNavigateToHome()
                     }
                 }
             }

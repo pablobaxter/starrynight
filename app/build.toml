@@ -40,7 +40,6 @@ implementation = [
     { type = "project", name = ":login:api" },
     { type = "project", name = ":navigation:api" },
     { type = "project", name = ":network:api" },
-    { type = "project", name = ":persistence:api" },
     { type = "project", name = ":utils:core:api" },
 
     # Data modules
