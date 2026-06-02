@@ -34,6 +34,10 @@ import com.frybits.starrynight.auth.LoggedInUserData
 import com.frybits.starrynight.auth.LoggedInUserDataStore
 import com.frybits.starrynight.utils.core.ClientId
 import com.frybits.starrynight.utils.core.IODispatcher
+import com.frybits.starrynight.utils.core.errors.EmptyResponseNetworkException
+import com.frybits.starrynight.utils.core.errors.UnknownException
+import com.frybits.starrynight.utils.core.errors.WrappedException
+import com.frybits.starrynight.utils.core.errors.parseException
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -48,7 +52,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.FormBody
 import java.security.MessageDigest
 import java.security.SecureRandom
-import kotlin.Exception
 import kotlin.io.encoding.Base64
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -80,7 +83,7 @@ internal class AuthRepositoryImpl(
     override suspend fun login(handle: String, password: String): Result<Unit> {
         return runCatching {
             val sessionData = atProtoRepository.createSession(handle, password).getOrElse {
-                throw Exception("Error creating session", it)
+                throw WrappedException("Error creating session", it)
             }
 
             loggedInUserDataStore.storeLoggedInUserData(
@@ -231,7 +234,7 @@ internal class AuthRepositoryImpl(
             if (error != null) {
                 Log.w(LOG_TAG, "Error: $error")
                 Log.w(LOG_TAG, "Description: $errorDescription")
-                throw Exception("$error: $errorDescription")
+                throw UnknownException("$error: $errorDescription")
             }
 
             val code = requireNotNull(uri.getQueryParameter("code")) { "Uri contained no code query" }
@@ -294,13 +297,13 @@ internal class AuthRepositoryImpl(
 
         if (response.isSuccessful) {
             val body = response.body()
-            return body?.get("request_uri")?.jsonPrimitive?.content ?: throw Exception("No response from doPar")
+            return body?.get("request_uri")?.jsonPrimitive?.content ?: throw EmptyResponseNetworkException(response.code(), "No response from doPar")
         } else {
             val error = response.errorBody()?.use { errorBody ->
                 withContext(ioDispatcher) { errorBody.string() }
-            } ?: throw Exception("Unknown error during doPar: (${response.code()}) - No error body")
+            }
 
-            throw Exception("Error during doPar: (${response.code()}) - $error")
+            throw response.parseException(error)
         }
     }
 
@@ -317,13 +320,13 @@ internal class AuthRepositoryImpl(
         val response = authApi.exchangeCode(loggedInUserData.tokenEndpoint.orEmpty(), requestBody)
 
         if (response.isSuccessful) {
-            return response.body() ?: throw Exception("No response from doExchange")
+            return response.body() ?: throw EmptyResponseNetworkException(response.code(), "No response from doExchange")
         } else {
             val error = response.errorBody()?.use { errorBody ->
                 withContext(ioDispatcher) { errorBody.string() }
-            } ?: throw Exception("Unknown error during doExchange: (${response.code()}) - No error body")
+            }
 
-            throw Exception("Error during doExchange: (${response.code()}) - $error")
+            throw response.parseException(error)
         }
     }
 }

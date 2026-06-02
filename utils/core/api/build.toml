@@ -5,5 +5,7 @@ type = "javaLibrary"
 [dependencies]
 
 implementation = [
-    { type = "library", name = "metro.runtime" }
+    { type = "library", name = "metro.runtime" },
+    { type = "library", name = "retrofit" },
+    { type = "library", name = "kotlinx.serialization.json" },
 ]

@@ -21,6 +21,7 @@ implementation = [
     { type = "project", name = ":login:api" },
     { type = "project", name = ":navigation:api" },
     { type = "project", name = ":theme" },
+    { type = "project", name = ":utils:core:api" },
 ]
 
 debugImplementation = [

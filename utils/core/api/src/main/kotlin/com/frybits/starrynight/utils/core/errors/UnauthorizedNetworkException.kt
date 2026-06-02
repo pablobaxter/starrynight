@@ -16,19 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.login
+package com.frybits.starrynight.utils.core.errors
 
-import com.frybits.starrynight.utils.core.errors.StarryNightException
-
-internal sealed interface LoginCurrentState {
-
-    data object None: LoginCurrentState
-
-    data class Error(val exception: StarryNightException): LoginCurrentState
-
-    data object InProgress: LoginCurrentState
-
-    data class OAuth(val uri: String): LoginCurrentState
-
-    data object LoggedIn: LoginCurrentState
-}
+public class UnauthorizedNetworkException(code: Int, message: String): StarryNightNetworkException(code, message)

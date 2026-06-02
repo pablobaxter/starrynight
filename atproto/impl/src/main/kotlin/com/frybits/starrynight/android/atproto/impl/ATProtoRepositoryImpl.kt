@@ -36,6 +36,10 @@ import com.frybits.starrynight.atproto.models.ResolvedDid
 import com.frybits.starrynight.network.DnsRecordRepository
 import com.frybits.starrynight.network.models.TXT
 import com.frybits.starrynight.utils.core.IODispatcher
+import com.frybits.starrynight.utils.core.errors.UnknownException
+import com.frybits.starrynight.utils.core.errors.EmptyResponseNetworkException
+import com.frybits.starrynight.utils.core.errors.WrappedException
+import com.frybits.starrynight.utils.core.errors.parseException
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -44,7 +48,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -69,7 +72,6 @@ internal class ATProtoRepositoryImpl(
     private val deleteSessionApi: DeleteSessionApi,
     private val dnsRecordRepository: DnsRecordRepository,
     private val didDao: DidDao,
-    private val json: Json,
     @param:IODispatcher private val ioDispatcher: CoroutineDispatcher
 ): ATProtoRepository {
 
@@ -88,14 +90,14 @@ internal class ATProtoRepositoryImpl(
 
                 val response = atProtoServicesApi.resolveHandleViaWellKnown(username)
                 if (response.isSuccessful) {
-                    val did = response.body() ?: throw Exception("Empty did returned")
+                    val did = response.body() ?: throw EmptyResponseNetworkException(response.code(), "Empty did returned")
                     return@recoverCatching Did(did)
                 } else {
                     val error = response.errorBody()?.use { errorBody ->
                         withContext(ioDispatcher) { errorBody.string() }
-                    } ?: throw Exception("Unknown error (${response.code()}) - No error body")
+                    }
 
-                    throw Exception("Unknown error (${response.code()}) - $error")
+                    throw response.parseException(error)
                 }
             }
         }.map { it.toString() }
@@ -123,15 +125,15 @@ internal class ATProtoRepositoryImpl(
                 "plc" -> {
                     val response = atProtoServicesApi.resolveDidViaPlcDirectory(did)
                     if (response.isSuccessful) {
-                        val plcData = response.body() ?: throw Exception("Empty pld data returned")
+                        val plcData = response.body() ?: throw EmptyResponseNetworkException(response.code(), "Empty pld data returned")
                         require(plcData.did == did) { "Did does not match plc did: plc=${plcData.did}, did=$did" }
                         plcData
                     } else {
                         val error = response.errorBody()?.use { errorBody ->
                             withContext(ioDispatcher) { errorBody.string() }
-                        } ?: throw Exception("Unknown error (${response.code()}) - No error body")
+                        }
 
-                        throw Exception("Unknown error (${response.code()}) - $error")
+                        throw response.parseException(error)
                     }
                 }
                 "web" -> {
@@ -139,7 +141,7 @@ internal class ATProtoRepositoryImpl(
                     val userPath = didSplit.drop(3).joinToString("/").ifEmpty { ".well-known" }
                     val response = atProtoServicesApi.resolveDidViaHost(host, userPath)
                     if (response.isSuccessful) {
-                        val plcDataJson = response.body() ?: throw Exception("Empty pld data returned")
+                        val plcDataJson = response.body() ?: throw EmptyResponseNetworkException(response.code(), "Empty pld data returned")
                         val plcDid = plcDataJson["id"]?.jsonPrimitive?.content.orEmpty()
                         val alsoKnownAs = plcDataJson["alsoKnownAs"]?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
                         val services = buildMap {
@@ -161,12 +163,12 @@ internal class ATProtoRepositoryImpl(
                     } else {
                         val error = response.errorBody()?.use { errorBody ->
                             withContext(ioDispatcher) { errorBody.string() }
-                        } ?: throw Exception("Unknown error (${response.code()}) - No error body")
+                        }
 
-                        throw Exception("Unknown error (${response.code()}) - $error")
+                        throw response.parseException(error)
                     }
                 }
-                else -> throw Exception("Unknown type for did=$did - type: $type")
+                else -> throw UnknownException("Unknown type for did=$did - type: $type")
             }
 
             val pdsService = requireNotNull(plcData.services["atproto_pds"]) { "No PDS service found for did=${plcData.did}. Services found: ${plcData.services}" }
@@ -189,11 +191,11 @@ internal class ATProtoRepositoryImpl(
     override suspend fun createSession(username: String, password: String): Result<ATProtoSession> {
         return runCatching {
             val did = resolveHandle(username).getOrElse {
-                throw Exception("Error resolving handle", it)
+                throw WrappedException("Error resolving handle", it)
             }
 
             val resolvedDid = resolveDid(did).getOrElse {
-                throw Exception("Error resolving did", it)
+                throw WrappedException("Error resolving did", it)
             }
 
             val response = createSessionApi.createSession(
@@ -202,22 +204,14 @@ internal class ATProtoRepositoryImpl(
             )
             if (response.isSuccessful) {
                 val sessionResponse =
-                    response.body() ?: throw Exception("No sessions response found")
+                    response.body() ?: throw EmptyResponseNetworkException(response.code(), "No sessions response found")
                 return@runCatching sessionResponse.toATProtoSession()
             } else {
                 val error = response.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${response.code()}) - No error body")
-
-                if (response.code() == 400) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    throw Exception("Bad request (400) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
-                } else if (response.code() == 401) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    throw Exception("Unauthorized (401) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
                 }
 
-                throw Exception("Unknown error (${response.code()}) - $error")
+                throw response.parseException(error)
             }
         }
     }
@@ -227,26 +221,13 @@ internal class ATProtoRepositoryImpl(
             val resolvedDid = resolveDid(session.id).getOrThrow()
             val sessionResponse = getSessionApi.getSession("${session.tokenType ?: "Bearer"} ${session.accessJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
-                return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw Exception("No sessions response found")
+                return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw EmptyResponseNetworkException(sessionResponse.code(), "No sessions response found")
             } else {
                 val error = sessionResponse.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${sessionResponse.code()}) - No error body")
-
-                if (sessionResponse.code() == 400) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    if (errorJson["error"]?.jsonPrimitive?.content == "ExpiredToken") {
-                        LOGGER.warning("Access token expired, refreshing")
-                        return@runCatching refreshSession(session).getOrThrow()
-                    } else {
-                        throw Exception("Bad request (400) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
-                    }
-                } else if (sessionResponse.code() == 401) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    throw Exception("Unauthorized (401) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
                 }
 
-                throw Exception("Unknown error (${sessionResponse.code()}) - $error")
+                throw sessionResponse.parseException(error)
             }
         }
     }
@@ -256,21 +237,13 @@ internal class ATProtoRepositoryImpl(
             val resolvedDid = resolveDid(session.id).getOrThrow()
             val sessionResponse = refreshSessionApi.refreshSession("${session.tokenType ?: "Bearer"} ${session.refreshJwt}", URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             if (sessionResponse.isSuccessful) {
-                return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw Exception("No sessions response found")
+                return@runCatching sessionResponse.body()?.toATProtoSession(session) ?: throw EmptyResponseNetworkException(sessionResponse.code(), "No sessions response found")
             } else {
                 val error = sessionResponse.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${sessionResponse.code()}) - No error body")
-
-                if (sessionResponse.code() == 400) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    throw Exception("Bad request (400) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
-                } else if (sessionResponse.code() == 401) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    throw Exception("Unauthorized (401) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
                 }
 
-                throw Exception("Unknown error (${sessionResponse.code()}) - $error")
+                throw sessionResponse.parseException(error)
             }
         }
     }
@@ -284,17 +257,9 @@ internal class ATProtoRepositoryImpl(
             } else {
                 val error = sessionResponse.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${sessionResponse.code()}) - No error body")
-
-                if (sessionResponse.code() == 400) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    throw Exception("Bad request (400) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
-                } else if (sessionResponse.code() == 401) {
-                    val errorJson = json.decodeFromString<JsonObject>(error)
-                    throw Exception("Unauthorized (401) - ${errorJson["error"]?.jsonPrimitive?.content}: ${errorJson["message"]?.jsonPrimitive?.content}")
                 }
 
-                throw Exception("Unknown error (${sessionResponse.code()}) - $error")
+                throw sessionResponse.parseException(error)
             }
         }
     }
@@ -303,7 +268,7 @@ internal class ATProtoRepositoryImpl(
         return runCatching {
             val pdsMetaDataResponse = atProtoServicesApi.getServerMetaData(URI.create(resolvedDid.pds).schemeSpecificPart.removePrefix("//"))
             val authServer = if (pdsMetaDataResponse.isSuccessful) {
-                val json = pdsMetaDataResponse.body() ?: throw Exception("No auth server response found")
+                val json = pdsMetaDataResponse.body() ?: throw EmptyResponseNetworkException(pdsMetaDataResponse.code(), "No auth server response found")
                 requireNotNull(
                     json["authorization_servers"]
                         ?.jsonArray
@@ -314,20 +279,20 @@ internal class ATProtoRepositoryImpl(
             } else {
                 val error = pdsMetaDataResponse.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - No error body")
+                }
 
-                throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - $error")
+                throw pdsMetaDataResponse.parseException(error)
             }
 
             val authServerMetaDataResponse = atProtoServicesApi.getAuthServerMetaData(URI.create(authServer).schemeSpecificPart.removePrefix("//"))
             if (authServerMetaDataResponse.isSuccessful) {
-                return@runCatching authServerMetaDataResponse.body() ?: throw Exception("No auth server response found")
+                return@runCatching authServerMetaDataResponse.body() ?: throw EmptyResponseNetworkException(authServerMetaDataResponse.code(), "No auth server response found")
             } else {
-                val error = pdsMetaDataResponse.errorBody()?.use { errorBody ->
+                val error = authServerMetaDataResponse.errorBody()?.use { errorBody ->
                     withContext(ioDispatcher) { errorBody.string() }
-                } ?: throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - No error body")
+                }
 
-                throw Exception("Unknown error (${pdsMetaDataResponse.code()}) - $error")
+                throw authServerMetaDataResponse.parseException(error)
             }
         }
     }
@@ -337,7 +302,7 @@ internal class ATProtoRepositoryImpl(
             val didTxt = message.answer.map { it.data }
                 .filterIsInstance<TXT>()
                 .flatMap { it.txt }
-                .firstOrNull { it.trim('"').startsWith("did=") } ?: throw Exception("No did object found")
+                .firstOrNull { it.trim('"').startsWith("did=") } ?: throw UnknownException("No did object found")
 
             return@mapCatching Did(didTxt.removePrefix("did="))
         }

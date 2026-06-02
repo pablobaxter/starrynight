@@ -19,6 +19,7 @@
 package com.frybits.starrynight.android.login
 
 import android.net.Uri
+import android.util.Patterns
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldLabelPosition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +52,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.frybits.starrynight.android.theme.StarryNightTheme
 import com.frybits.starrynight.home.HomeNavigation
 import com.frybits.starrynight.navigation.LocalNavigator
+
+private val WEB_URL_REGEX = Patterns.WEB_URL.toRegex()
 
 @Composable
 internal fun LoginScreen(
@@ -101,6 +105,10 @@ private fun LoginScreenImpl(
                         inProgress = false
                         onNavigateToHome()
                     }
+                    is LoginCurrentState.Error -> {
+                        inProgress = false
+                        currentState.exception.printStackTrace()
+                    }
                 }
             }
 
@@ -112,18 +120,18 @@ private fun LoginScreenImpl(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    modifier = Modifier.weight(1F),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.weight(1F).padding(64.dp),
+                    contentAlignment = Alignment.TopCenter
                 ) {
                     Text(
                         text = "Starry Night",
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.displaySmall
                     )
                 }
 
                 Box(
                     modifier = Modifier.weight(1F),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.TopCenter
                 ) {
                     Column(
                         modifier = Modifier,
@@ -131,8 +139,12 @@ private fun LoginScreenImpl(
                     ) {
                         val textState = rememberTextFieldState()
                         OutlinedTextField(
+                            prefix = { Text("@") },
                             state = textState,
                             label = { Text("Username") },
+                            labelPosition = TextFieldLabelPosition.Attached(
+                                alwaysMinimize = true
+                            ),
                             lineLimits = TextFieldLineLimits.SingleLine,
                             enabled = !inProgress
                         )
@@ -140,7 +152,7 @@ private fun LoginScreenImpl(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
-                            enabled = !inProgress,
+                            enabled = !inProgress && WEB_URL_REGEX.matches(textState.text),
                             onClick = {
                                 onLogin(textState.text.toString())
                             }

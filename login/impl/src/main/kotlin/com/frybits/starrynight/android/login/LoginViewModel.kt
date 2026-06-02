@@ -25,6 +25,8 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.frybits.starrynight.auth.AuthRepository
+import com.frybits.starrynight.utils.core.errors.StarryNightException
+import com.frybits.starrynight.utils.core.errors.WrappedException
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -64,9 +66,10 @@ internal class LoginViewModel(
                 _currentState.update {
                     LoginCurrentState.OAuth(uri)
                 }
-            }.onFailure {
+            }.onFailure { e ->
+                val exception = (e as? StarryNightException) ?: WrappedException("External exception", e)
                 _currentState.update {
-                    LoginCurrentState.None
+                    LoginCurrentState.Error(exception)
                 }
             }
         }
