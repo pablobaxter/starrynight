@@ -20,7 +20,7 @@ implementation = [
     { type = "project", name = ":home:api" },
     { type = "project", name = ":login:api" },
     { type = "project", name = ":navigation:api" },
-    { type = "project", name = ":theme" },
+    { type = "project", name = ":starrynight:theme" },
     { type = "project", name = ":utils:core:api" },
 ]
 

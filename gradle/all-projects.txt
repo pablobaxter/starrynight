@@ -1,4 +1,3 @@
-:app
 :atproto:api
 :atproto:data
 :atproto:impl
@@ -12,7 +11,8 @@
 :network:api
 :network:impl
 :persistence:impl
-:starrynight
-:theme
+:starrynight:app
+:starrynight:impl
+:starrynight:theme
 :utils:core:api
 :utils:core:impl

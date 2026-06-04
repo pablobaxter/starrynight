@@ -2,6 +2,7 @@
 type = "androidApplication"
 
 applicationId = "com.frybits.starrynight.android"
+namespace = "com.frybits.starrynight.android.app"
 
 targetSdk = 37
 
@@ -19,9 +20,6 @@ implementation = [
     { type = "library", name = "metrox.viewmodel" },
     { type = "library", name = "tink.android" },
 
-    # Main library
-    { type = "project", name = ":starrynight" },
-
     # Api modules
     { type = "project", name = ":atproto:api" },
     { type = "project", name = ":auth:api" },
@@ -34,6 +32,9 @@ implementation = [
     # Data modules
     { type = "project", name = ":atproto:data" },
 
+    # Main impl module
+    { type = "project", name = ":starrynight:impl" },
+
     # Impl modules
     { type = "project", name = ":atproto:impl" },
     { type = "project", name = ":auth:impl" },
@@ -44,5 +45,5 @@ implementation = [
     { type = "project", name = ":utils:core:impl" },
 
     # UI
-    { type = "project", name = ":theme" },
+    { type = "project", name = ":starrynight:theme" },
 ]

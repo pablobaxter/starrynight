@@ -34,5 +34,5 @@ implementation = [
     { type = "project", name = ":utils:core:api" },
 
     # UI
-    { type = "project", name = ":theme" },
+    { type = "project", name = ":starrynight:theme" },
 ]
