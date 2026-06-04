@@ -5,7 +5,8 @@
             "namespace": "android_app",
             "package_name": "com.frybits.starrynight.android",
             "sha256_cert_fingerprints": [
-                "5E:F4:0C:5E:CA:42:9F:5C:66:42:BF:38:C7:3A:B5:7E:AF:A6:4F:38:C7:F5:36:89:0C:56:E5:90:52:18:41:B0"
+                "5E:F4:0C:5E:CA:42:9F:5C:66:42:BF:38:C7:3A:B5:7E:AF:A6:4F:38:C7:F5:36:89:0C:56:E5:90:52:18:41:B0",
+                "E7:15:EA:6C:10:46:5F:58:2A:9B:9C:B5:FE:07:1D:B9:5E:BB:EC:F0:56:87:FB:2B:61:64:0B:97:77:7E:2D:FC"
             ]
         }
     }
