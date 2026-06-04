@@ -1,0 +1,38 @@
+# Project type
+type = "androidLibrary"
+
+namespace = "com.frybits.starrynight.android"
+
+enableCompose = true
+enableMetro = true
+
+[buildConfigs]
+default = [
+    { type = "String", key = "APP_NAME", property = { type = "literal", value = "\"Starry Night\"" } },
+    { type = "String", key = "CLIENT_ID", property = { type = "literal", value = "\"https://starrynight.frybits.com/oauth-client-metadata.json\"" } }
+]
+
+# Libraries to be used (maven address or version catalog name)
+[dependencies]
+
+# Used to add libraries into the "implementation" configuration
+implementation = [
+    { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
+    { type = "library", name = "androidx.activity.compose" },
+    { type = "library", name = "androidx.compose.material3" },
+    { type = "library", name = "androidx.navigation3.runtime" },
+    { type = "library", name = "androidx.navigation3.ui" },
+    { type = "library", name = "google.material" },
+    { type = "library", name = "metrox.android" },
+    { type = "library", name = "metrox.viewmodel.compose" },
+
+    # Api modules
+    { type = "project", name = ":auth:api" },
+    { type = "project", name = ":home:api" },
+    { type = "project", name = ":login:api" },
+    { type = "project", name = ":navigation:api" },
+    { type = "project", name = ":utils:core:api" },
+
+    # UI
+    { type = "project", name = ":theme" },
+]

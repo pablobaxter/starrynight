@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,8 +20,6 @@ package com.frybits.starrynight.android.app.di
 
 import android.app.Application
 import com.frybits.starrynight.utils.core.AppId
-import com.frybits.starrynight.utils.core.AppName
-import com.frybits.starrynight.utils.core.ClientId
 import com.frybits.starrynight.utils.core.VersionCode
 import com.frybits.starrynight.utils.core.VersionName
 import dev.zacsweers.metro.AppScope
@@ -37,11 +35,9 @@ internal interface StarryNightGraph: MetroAppComponentProviders, ViewModelGraph 
     interface Factory {
         fun create(
             @Provides application: Application,
-            @Provides @AppName appName: String,
             @Provides @AppId appId: String,
             @Provides @VersionName versionName: String,
             @Provides @VersionCode versionCode: Int,
-            @Provides @ClientId clientId: String,
         ): StarryNightGraph
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app
+package com.frybits.starrynight.android
 
 import android.app.Activity
 import android.net.Uri
@@ -29,10 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
-import com.frybits.starrynight.android.app.ui.StarryNightAppNav
-import com.frybits.starrynight.android.app.ui.entry.StarryNight
-import com.frybits.starrynight.android.app.ui.splash.SplashKey
 import com.frybits.starrynight.android.theme.StarryNightTheme
+import com.frybits.starrynight.android.ui.StarryNightAppNav
+import com.frybits.starrynight.android.ui.entry.StarryNight
+import com.frybits.starrynight.android.ui.splash.SplashKey
 import com.frybits.starrynight.login.LoginNavigation
 import com.frybits.starrynight.navigation.LocalNavigator
 import dev.zacsweers.metro.AppScope

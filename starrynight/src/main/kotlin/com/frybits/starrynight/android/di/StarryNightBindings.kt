@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app.di
+package com.frybits.starrynight.android.di
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.frybits.starrynight.android.app.ui.splash.SplashKey
-import com.frybits.starrynight.android.app.ui.splash.SplashScreen
+import com.frybits.starrynight.android.BuildConfig
+import com.frybits.starrynight.android.ui.splash.SplashKey
+import com.frybits.starrynight.android.ui.splash.SplashScreen
+import com.frybits.starrynight.utils.core.AppName
+import com.frybits.starrynight.utils.core.ClientId
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
@@ -30,7 +33,15 @@ import dev.zacsweers.metro.Provides
 
 @ContributesTo(AppScope::class)
 @BindingContainer
-public class StarryNightBindings {
+public object StarryNightBindings {
+
+    @Provides
+    @AppName
+    internal val appName: String = BuildConfig.APP_NAME
+
+    @Provides
+    @ClientId
+    internal val clientId: String = BuildConfig.CLIENT_ID
 
     @IntoSet
     @Provides

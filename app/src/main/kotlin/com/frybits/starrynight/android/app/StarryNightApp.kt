@@ -29,11 +29,9 @@ internal class StarryNightApp : Application(), MetroApplication {
     private val appGraph by lazy {
         createGraphFactory<StarryNightGraph.Factory>().create(
             application = this,
-            appName = BuildConfig.APP_NAME,
             appId = BuildConfig.APPLICATION_ID,
             versionName = BuildConfig.VERSION_NAME,
             versionCode = BuildConfig.VERSION_CODE,
-            clientId = BuildConfig.CLIENT_ID,
         )
     }
 

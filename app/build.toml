@@ -5,33 +5,22 @@ applicationId = "com.frybits.starrynight.android"
 
 targetSdk = 37
 
-enableCompose = true
 enableMetro = true
 
 [buildConfigs]
-default = [
-    { type = "String", key = "APP_NAME", property = { type = "literal", value = "\"Starry Night\"" } },
-    { type = "String", key = "CLIENT_ID", property = { type = "literal", value = "\"https://starrynight.frybits.com/oauth-client-metadata.json\"" } }
-]
 
 # Libraries to be used (maven address or version catalog name)
 [dependencies]
 
 # Used to add libraries into the "implementation" configuration
 implementation = [
-    { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
-    { type = "library", name = "androidx.activity.compose" },
-    { type = "library", name = "androidx.compose.material3" },
-    { type = "library", name = "androidx.compose.material3.adaptive" },
-    { type = "library", name = "androidx.compose.viewmodel.navigation3" },
     { type = "library", name = "androidx.navigation3.runtime" },
-    { type = "library", name = "androidx.navigation3.ui" },
-    { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },
     { type = "library", name = "metrox.viewmodel" },
-    { type = "library", name = "metrox.viewmodel.compose" },
-    { type = "library", name = "kotlinx.coroutines.core" },
     { type = "library", name = "tink.android" },
+
+    # Main library
+    { type = "project", name = ":starrynight" },
 
     # Api modules
     { type = "project", name = ":atproto:api" },

@@ -12,6 +12,7 @@
 :network:api
 :network:impl
 :persistence:impl
+:starrynight
 :theme
 :utils:core:api
 :utils:core:impl

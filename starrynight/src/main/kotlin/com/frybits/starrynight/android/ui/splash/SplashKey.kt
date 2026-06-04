@@ -1,6 +1,6 @@
 /*
  * Starry Nights - A BlueSky Android Client
- * Copyright (C) 2026 Pablo Baxter
+ * Copyright (C) 2026 pablo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.frybits.starrynight.android.app.ui.entry
+package com.frybits.starrynight.android.ui.splash
 
-internal sealed interface LoginState {
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
 
-    data object Unknown: LoginState
-    data object LoggedIn: LoginState
-    data object LoggedOut: LoginState
-}
+@Serializable
+internal data object SplashKey: NavKey
