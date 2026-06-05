@@ -1,4 +1,5 @@
 [versions]
+dagp = "3.14.1"
 kotlin = "2.3.0"
 kotlinpoet = "2.3.0"
 kotlinx-serialization = "1.11.0"
@@ -11,6 +12,7 @@ tomlkt = "0.6.0"
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle-api" }
+dagp = { group = "com.autonomousapps.build-health", name = "com.autonomousapps.build-health.gradle.plugin", version.ref = "dagp" }
 kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-poet = { group = "com.squareup", name = "kotlinpoet", version.ref = "kotlinpoet" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }

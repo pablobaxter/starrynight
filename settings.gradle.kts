@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        maven(url = "https://central.sonatype.com/repository/maven-snapshots/")
     }
 
     plugins {
@@ -20,6 +21,7 @@ pluginManagement {
         id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
         id("androidx.room") version providers.gradleProperty("com.frybits.room.version")
         id("com.squareup.wire") version providers.gradleProperty("com.frybits.square.wire.version")
+        id("com.autonomousapps.build-health") version providers.gradleProperty("com.frybits.dagp")
     }
 
     includeBuild("build-logic")
@@ -39,12 +41,16 @@ buildscript {
         if (r8Version.isPresent) {
             classpath(r8Version.map { "com.android.tools:r8:$it" })
         }
+
+        // Fix issue with DAGP for latest Kotlin version
+        classpath("org.jetbrains.kotlin:kotlin-metadata-jvm:${providers.gradleProperty("com.frybits.kotlin.version").get()}")
     }
 }
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention")
     id("com.android.settings")
+    id("com.autonomousapps.build-health")
     id("com.android.application") apply false
     id("com.android.library") apply false
     id("org.jetbrains.kotlin.android") apply false

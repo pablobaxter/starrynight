@@ -20,9 +20,11 @@ package com.frybits.gradle.configurations
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.tools.r8.Version
+import com.autonomousapps.DependencyAnalysisExtension
 import com.frybits.gradle.utils.isRoot
 import com.google.devtools.ksp.gradle.KSP_VERSION
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
 
@@ -40,6 +42,15 @@ internal fun Project.rootBeforeProjectConfiguration() {
  */
 internal fun Project.rootAfterProjectConfiguration() {
     require(isRoot) { "This method should only be used with the root project" }
+    configure<DependencyAnalysisExtension> {
+        issues {
+            all {
+                onAny {
+                    severity("fail")
+                }
+            }
+        }
+    }
 }
 
 // Helper function to log the versions of major tools used for the build

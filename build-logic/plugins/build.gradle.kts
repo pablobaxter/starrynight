@@ -45,6 +45,7 @@ dependencies {
     compileOnly(gradleKotlinDsl())
 
     compileOnly(logic.agp.zip(providers.gradleProperty("agp")) { lib, version -> "$lib:$version" })
+    compileOnly(logic.dagp)
     compileOnly(logic.kotlin.gradle)
     compileOnly(logic.ksp)
     compileOnly(logic.r8)
