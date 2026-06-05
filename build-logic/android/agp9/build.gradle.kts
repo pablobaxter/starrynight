@@ -9,7 +9,7 @@ dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
 
-    compileOnly(logic.agp.map { "$it:9.2.0-alpha04" })
+    compileOnly(logic.agp.map { "$it:9.3.0-alpha10" })
 }
 
 kotlin {

@@ -9,7 +9,7 @@ enableRoom = true
 
 implementation = [
     { type = "project", name = ":atproto:data" },
-    { type = "library", name = "androidx.datastore.preferences" },
+    { type = "library", name = "androidx.datastore.preferences.android" },
     { type = "library", name = "room.runtime" }
 ]
 

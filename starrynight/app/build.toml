@@ -15,7 +15,7 @@ enableMetro = true
 
 # Used to add libraries into the "implementation" configuration
 implementation = [
-    { type = "library", name = "androidx.navigation3.runtime" },
+    { type = "library", name = "androidx.navigation3.runtime.android" },
     { type = "library", name = "metrox.android" },
     { type = "library", name = "metrox.viewmodel" },
     { type = "library", name = "tink.android" },

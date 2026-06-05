@@ -20,7 +20,7 @@ implementation = [
     { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
     { type = "library", name = "androidx.activity.compose" },
     { type = "library", name = "androidx.compose.material3" },
-    { type = "library", name = "androidx.navigation3.runtime" },
+    { type = "library", name = "androidx.navigation3.runtime.android" },
     { type = "library", name = "androidx.navigation3.ui" },
     { type = "library", name = "google.material" },
     { type = "library", name = "metrox.android" },

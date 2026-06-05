@@ -11,7 +11,7 @@ implementation = [
     { type = "library", name = "androidx.browser" },
     { type = "library", name = "androidx.compose.material3" },
     { type = "library", name = "androidx.compose.viewmodel" },
-    { type = "library", name = "androidx.navigation3.runtime" },
+    { type = "library", name = "androidx.navigation3.runtime.android" },
     { type = "library", name = "kotlinx.coroutines.core" },
     { type = "library", name = "androidx.compose.ui.tooling.preview" },
     { type = "library", name = "metrox.viewmodel.compose" },
