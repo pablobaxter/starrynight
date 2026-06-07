@@ -10,7 +10,7 @@ enableCompose = true
 implementation = [
     { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
     { type = "library", name = "androidx.compose.material3" },
-    { type = "library", name = "androidx.compose.ui.text" },
+    { type = "library", name = "androidx.compose.ui.text.google.fonts" },
     { type = "library", name = "androidx.compose.ui.tooling.preview" },
 ]
 
