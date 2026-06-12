@@ -16,7 +16,6 @@ implementation = [
     { type = "library", name = "androidx.compose.ui.text" },
     { type = "library", name = "androidx.compose.ui.unit" },
     { type = "library", name = "androidx.core" },
-#    { type = "library", name = "androidx.core.ktx" },
     { type = "library", name = "androidx.lifecycle.common" },
     { type = "library", name = "androidx.lifecycle.runtime.compose" },
     { type = "library", name = "kotlinx.coroutines.core" },

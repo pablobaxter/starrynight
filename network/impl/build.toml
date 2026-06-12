@@ -7,13 +7,17 @@ enableMetro = true
 [dependencies]
 
 implementation = [
-    { type = "project", name = ":utils:core:api" },
-    { type = "project", name = ":network:api" },
     { type = "project", name = ":auth:api" },
-    { type = "library", name = "kotlinx.coroutines.core" },
     { type = "library", name = "kotlinx.serialization" },
-    { type = "library", name = "kotlinx.serialization.json" },
-    { type = "library", name = "retrofit" },
     { type = "library", name = "retrofit.scalar" },
     { type = "library", name = "retrofit.kotlin.serialization" },
+]
+
+api = [
+    { type = "project", name = ":network:api" },
+    { type = "project", name = ":utils:core:api" },
+    { type = "library", name = "okhttp" },
+    { type = "library", name = "kotlinx.coroutines.core" },
+    { type = "library", name = "kotlinx.serialization.json" },
+    { type = "library", name = "retrofit" },
 ]
