@@ -21,7 +21,7 @@ pluginManagement {
         id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
         id("androidx.room") version providers.gradleProperty("com.frybits.room.version")
         id("com.squareup.wire") version providers.gradleProperty("com.frybits.square.wire.version")
-        id("com.autonomousapps.build-health") version providers.gradleProperty("com.frybits.dagp")
+        id("com.autonomousapps.build-health") version providers.gradleProperty("com.frybits.dagp.version")
     }
 
     includeBuild("build-logic")

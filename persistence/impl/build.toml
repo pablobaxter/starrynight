@@ -8,9 +8,18 @@ enableRoom = true
 [dependencies]
 
 implementation = [
-    { type = "project", name = ":atproto:data" },
     { type = "library", name = "androidx.datastore.preferences.android" },
-    { type = "library", name = "room.runtime" }
+    { type = "library", name = "androidx.collection" },
+    { type = "library", name = "androidx.sqlite" },
+    { type = "library", name = "kotlinx.coroutines.core" },
+    { type = "library", name = "room.common" }
+]
+
+api = [
+    { type = "project", name = ":atproto:data" },
+    { type = "library", name = "androidx.datastore.preferences.core" },
+    { type = "library", name = "androidx.datastore.core" },
+    { type = "library", name = "room.runtime" },
 ]
 
 ksp = [

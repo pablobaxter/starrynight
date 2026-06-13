@@ -15,7 +15,6 @@ enableMetro = true
 
 # Used to add libraries into the "implementation" configuration
 implementation = [
-    { type = "library", name = "androidx.navigation3.runtime.android" },
     { type = "library", name = "metrox.android" },
     { type = "library", name = "metrox.viewmodel" },
     { type = "library", name = "tink.android" },
@@ -23,9 +22,6 @@ implementation = [
     # Api modules
     { type = "project", name = ":atproto:api" },
     { type = "project", name = ":auth:api" },
-    { type = "project", name = ":home:api" },
-    { type = "project", name = ":login:api" },
-    { type = "project", name = ":navigation:api" },
     { type = "project", name = ":network:api" },
     { type = "project", name = ":utils:core:api" },
 
@@ -43,7 +39,4 @@ implementation = [
     { type = "project", name = ":network:impl" },
     { type = "project", name = ":persistence:impl" },
     { type = "project", name = ":utils:core:impl" },
-
-    # UI
-    { type = "project", name = ":starrynight:theme" },
 ]
