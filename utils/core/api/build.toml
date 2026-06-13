@@ -5,7 +5,11 @@ type = "javaLibrary"
 [dependencies]
 
 implementation = [
+    { type = "library", name = "kotlinx.serialization.json" },
+    { type = "library", name = "kotlinx.serialization" },
+]
+
+api = [
     { type = "library", name = "metro.runtime" },
     { type = "library", name = "retrofit" },
-    { type = "library", name = "kotlinx.serialization.json" },
 ]

@@ -7,8 +7,10 @@ enableMetro = true
 [dependencies]
 
 implementation = [
+    { type = "library", name = "kotlinx.serialization.json" },
+]
+
+api = [
     { type = "project", name = ":utils:core:api" },
     { type = "library", name = "kotlinx.coroutines.core" },
-    { type = "library", name = "kotlinx.serialization" },
-    { type = "library", name = "kotlinx.serialization.json" },
 ]

@@ -18,21 +18,39 @@ default = [
 # Used to add libraries into the "implementation" configuration
 implementation = [
     { type = "platform", module = { type = "library", name = "androidx.compose.bom" } },
+    { type = "library", name = "androidx.activity" },
     { type = "library", name = "androidx.activity.compose" },
+    { type = "library", name = "androidx.animation" },
     { type = "library", name = "androidx.compose.material3" },
-    { type = "library", name = "androidx.navigation3.runtime.android" },
+    { type = "library", name = "androidx.compose.foundation" },
+    { type = "library", name = "androidx.compose.ui" },
+    { type = "library", name = "androidx.compose.ui.graphics" },
+    { type = "library", name = "androidx.compose.viewmodel" },
+    { type = "library", name = "androidx.foundation.layout" },
+    { type = "library", name = "androidx.lifecycle.common" },
+    { type = "library", name = "androidx.lifecycle.runtime.compose" },
+    { type = "library", name = "kotlinx.coroutines.core" },
+    { type = "library", name = "kotlinx.serialization" },
     { type = "library", name = "androidx.navigation3.ui" },
     { type = "library", name = "google.material" },
-    { type = "library", name = "metrox.android" },
     { type = "library", name = "metrox.viewmodel.compose" },
 
     # Api modules
-    { type = "project", name = ":auth:api" },
     { type = "project", name = ":home:api" },
     { type = "project", name = ":login:api" },
     { type = "project", name = ":navigation:api" },
-    { type = "project", name = ":utils:core:api" },
 
     # UI
     { type = "project", name = ":starrynight:theme" },
+]
+
+api = [
+    { type = "project", name = ":auth:api" },
+    { type = "project", name = ":utils:core:api" },
+
+    { type = "library", name = "androidx.compose.runtime" },
+    { type = "library", name = "androidx.lifecycle.viewmodel" },
+    { type = "library", name = "metrox.android" },
+    { type = "library", name = "metrox.viewmodel" },
+    { type = "library", name = "androidx.navigation3.runtime.android" },
 ]
