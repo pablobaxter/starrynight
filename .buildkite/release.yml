@@ -1,0 +1,3 @@
+steps:
+  - label: "Running release pipeline"
+    command: echo "I'm released!"
