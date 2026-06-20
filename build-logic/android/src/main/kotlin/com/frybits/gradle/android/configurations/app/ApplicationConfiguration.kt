@@ -22,7 +22,6 @@ import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.ApplicationVariantBuilder
-import com.android.build.api.variant.CanMinifyCodeBuilder
 import com.android.build.api.variant.GeneratesApkBuilder
 import com.frybits.gradle.core.definitions.AndroidAppBuildFile
 import com.frybits.gradle.core.definitions.AndroidBuildFile
@@ -32,6 +31,7 @@ private val AGP_9 = AndroidPluginVersion(9, 0)
 /**
  * Configures Android Application projects
  */
+@Suppress("UnstableApiUsage")
 public fun Project.androidAppConfiguration(buildFile: AndroidBuildFile, android: ApplicationExtension) {
     require(buildFile is AndroidAppBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
 
@@ -39,6 +39,26 @@ public fun Project.androidAppConfiguration(buildFile: AndroidBuildFile, android:
     if (AndroidPluginVersion.getCurrent() < AGP_9) {
         android.buildTypes.configureEach {
             proguardFiles(android.getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
+    }
+
+    android.signingConfigs {
+        register("release") {
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+
+            storeFile = isolated.rootProject.projectDirectory.file("starrynight-release.jks").asFile
+            storePassword = providers.environmentVariable("STARRYNIGHT_JKS_PASSWORD").orNull
+            keyAlias = providers.environmentVariable("STARRYNIGHT_KEY_ALIAS").orNull
+            keyPassword = providers.environmentVariable("STARRYNIGHT_KEY_PASSWORD").orNull
+        }
+    }
+
+    android.buildTypes {
+        named("release") {
+            signingConfig = android.signingConfigs.named("release").get()
         }
     }
 }
@@ -50,6 +70,7 @@ public fun Project.androidAppVariantBuilderConfiguration(buildFile: AndroidBuild
     require(buildFile is AndroidAppBuildFile) { "Attempting to configure ${buildFile::class} with Android App configurations" }
     configureTargetSdk(buildFile, applicationVariantBuilder)
     minifyCodeConfiguration(applicationVariantBuilder)
+    minifyResources(applicationVariantBuilder)
 }
 
 /**
@@ -78,9 +99,27 @@ private fun configureTargetSdk(buildFile: AndroidAppBuildFile, generatesApkBuild
 }
 
 @Suppress("UnstableApiUsage")
-private fun Project.minifyCodeConfiguration(minifyCodeBuilder: CanMinifyCodeBuilder) {
-    val minifyProvider = providers.gradleProperty("com.frybits.android.minify").map { it.toBoolean() }
-    if (minifyProvider.isPresent) {
-        minifyCodeBuilder.isMinifyEnabled = minifyProvider.get()
+private fun Project.minifyCodeConfiguration(applicationVariantBuilder: ApplicationVariantBuilder) {
+    val minifyProvider =
+        providers.gradleProperty("com.frybits.android.minify").map { it.toBoolean() }
+    if (applicationVariantBuilder.buildType == "release") {
+        applicationVariantBuilder.isMinifyEnabled = minifyProvider.getOrElse(true)
+    } else {
+        if (minifyProvider.isPresent) {
+            applicationVariantBuilder.isMinifyEnabled = minifyProvider.get()
+        }
+    }
+}
+
+@Suppress("UnstableApiUsage")
+private fun Project.minifyResources(applicationVariantBuilder: ApplicationVariantBuilder) {
+    val minifyProvider =
+        providers.gradleProperty("com.frybits.android.minify").map { it.toBoolean() }
+    if (applicationVariantBuilder.buildType == "release") {
+        applicationVariantBuilder.shrinkResources = minifyProvider.getOrElse(true)
+    } else {
+        if (minifyProvider.isPresent) {
+            applicationVariantBuilder.shrinkResources = minifyProvider.get()
+        }
     }
 }

@@ -1,3 +1,6 @@
 steps:
-  - label: "Running release pipeline"
-    command: echo "I'm released!!"
+  - label: "Run Unit Tests"
+    command: ./gradlew test
+
+  - label: "Run Build-Logic Tests"
+    command: ./gradlew -p build-logic test
