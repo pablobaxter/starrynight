@@ -5,5 +5,5 @@ steps:
   - label: "Run Build-Logic Tests"
     command: ./gradlew -p build-logic test
 
-  - label: "Build StarryNight Release"
+  - label: "Build StarryNight Release "
     command: ./gradlew :starrynight:app:assembleRelease
