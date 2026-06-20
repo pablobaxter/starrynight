@@ -46,6 +46,8 @@ internal class FrybitsSettingsPlugin : Plugin<Settings> {
 
         rootProject.name = providers.gradleProperty("com.frybits.name").get()
 
+        enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+
         @Suppress("UnstableApiUsage")
         dependencyResolutionManagement {
             repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
