@@ -1,17 +1,17 @@
 steps:
   - label: "Run Unit Tests"
     agents:
-      queue: "linux-medium"
+      queue: "android-queue"
     command: ./gradlew test
 
   - label: "Run Build-Logic Tests"
     agents:
-      queue: "linux-medium"
+      queue: "android-queue"
     command: ./gradlew -p build-logic test
 
   - label: "Build StarryNight Release"
     agents:
-      queue: "linux-medium"
+      queue: "android-queue"
     command: |
       buildkite-agent secret get STARRYNIGHT_JKS | base64 --decode > starrynight-release.jks
       ./gradlew :starrynight:app:assembleRelease
