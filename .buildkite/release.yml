@@ -14,10 +14,11 @@ steps:
       queue: "android-medium"
     command: |
       buildkite-agent secret get STARRYNIGHT_JKS | base64 --decode > starrynight-release.jks
-      ./gradlew :starrynight:app:assembleRelease
+      ./gradlew :starrynight:app:bundleRelease :starrynight:app:assembleRelease
     secrets:
       STARRYNIGHT_JKS_PASSWORD: STARRYNIGHT_KEYSTORE_PASSWORD
       STARRYNIGHT_KEY_ALIAS: STARRYNIGHT_ANDROID_KEYSTORE_ALIAS
       STARRYNIGHT_KEY_PASSWORD: STARRYNIGHT_ALIAS_PASSWORD
     artifact_paths:
       - "starrynight/app/build/outputs/apk/**/*"
+      - "starrynight/app/build/outputs/bundle/**/*"
