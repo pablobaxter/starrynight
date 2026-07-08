@@ -26,7 +26,7 @@ class KotlinConfigurationTest {
         val project = ProjectBuilder.builder().build()
         project.apply(plugin = "org.jetbrains.kotlin.jvm")
 
-        project.kotlinProjectConfiguration(AndroidLibraryBuildFile())
+        project.kotlinProjectPlugins(AndroidLibraryBuildFile())
 
         assertTrue(project.plugins.hasPlugin("kotlinx-serialization"))
     }
@@ -36,7 +36,7 @@ class KotlinConfigurationTest {
         val project = ProjectBuilder.builder().build()
         project.apply(plugin = "org.jetbrains.kotlin.jvm")
 
-        project.kotlinProjectConfiguration(AndroidLibraryBuildFile())
+        project.kotlinProjectPlugins(AndroidLibraryBuildFile())
 
         assertTrue(project.plugins.hasPlugin("com.google.devtools.ksp"))
     }
@@ -49,6 +49,7 @@ class KotlinConfigurationTest {
             .build()
         project.apply(plugin = "org.jetbrains.kotlin.jvm")
 
+        project.kotlinProjectPlugins(AndroidLibraryBuildFile())
         project.kotlinProjectConfiguration(AndroidLibraryBuildFile())
 
         val extension = project.extensions.getByName<HasConfigurableKotlinCompilerOptions<KotlinJvmCompilerOptions>>("kotlin")

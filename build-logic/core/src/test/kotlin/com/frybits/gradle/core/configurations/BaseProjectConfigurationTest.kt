@@ -22,9 +22,8 @@ import com.frybits.gradle.core.definitions.JavaLibraryBuildFile
 import com.frybits.gradle.core.definitions.Library
 import com.frybits.gradle.core.definitions.Platform
 import com.frybits.gradle.core.definitions.Project as FrybitsProject
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
-import org.gradle.api.ProjectConfigurationException
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ExternalModuleDependencyBundle
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
@@ -56,6 +55,8 @@ class BaseProjectConfigurationTest {
     fun `BuildFile with empty dependencies does not populate configurations`() {
         val buildFile = JavaLibraryBuildFile()
         val project = ProjectBuilder.builder().build()
+        val versionCatalog = DummyVersionCatalog(project)
+        project.extensions.add<VersionCatalogsExtension>("libs", DummyVersionCatalogExtension(versionCatalog))
 
         project.baseProjectConfiguration(buildFile)
 
@@ -176,13 +177,8 @@ class BaseProjectConfigurationTest {
         val versionCatalog = DummyVersionCatalog(project)
         project.extensions.add<VersionCatalogsExtension>("libs", DummyVersionCatalogExtension(versionCatalog))
 
-        project.baseProjectConfiguration(buildFile)
         assertFailsWith<UnknownConfigurationException> {
-            try {
-                (project as DefaultProject).evaluate()
-            } catch (e: ProjectConfigurationException) {
-                throw e.cause ?: Exception("No cause for exception")
-            }
+            project.baseProjectConfiguration(buildFile)
         }
     }
 
@@ -193,18 +189,13 @@ class BaseProjectConfigurationTest {
         )
         val project = ProjectBuilder.builder().build()
 
-        project.baseProjectConfiguration(buildFile)
-        assertFailsWith<InvalidUserDataException> {
-            try {
-                (project as DefaultProject).evaluate()
-            } catch (e: ProjectConfigurationException) {
-                throw e.cause ?: Exception("No cause for exception")
-            }
+        assertFailsWith<UnknownDomainObjectException> {
+            project.baseProjectConfiguration(buildFile)
         }
     }
 }
 
-private class DummyVersionCatalog(private val project: Project) : VersionCatalog {
+internal class DummyVersionCatalog(private val project: Project) : VersionCatalog {
 
     override fun findLibrary(alias: String): Optional<Provider<MinimalExternalModuleDependency>> {
         val dependency = DummyDependency(project.dependencies.create(alias) as ExternalModuleDependency)
@@ -249,7 +240,7 @@ private class DummyDependency(private val dependency: ExternalModuleDependency):
     }
 }
 
-private class DummyVersionCatalogExtension(private val versionCatalog: VersionCatalog): VersionCatalogsExtension {
+internal class DummyVersionCatalogExtension(private val versionCatalog: VersionCatalog): VersionCatalogsExtension {
 
     override fun find(name: String): Optional<VersionCatalog> {
         return Optional.of(versionCatalog)
