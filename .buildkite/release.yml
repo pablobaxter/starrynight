@@ -8,6 +8,8 @@ steps:
     agents:
       queue: "android-medium"
     command: ./gradlew -p build-logic test
+    artifact_paths:
+      - "build-logic/**/build/reports/**/*"
 
   - label: "Build StarryNight Release"
     agents:
