@@ -18,17 +18,17 @@
 
 package com.frybits.starrynight.android.persistence.converters
 
-import androidx.room.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import kotlin.time.Instant
 
 internal class InstantTypeConverter {
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromTimeStamp(time: Long?): Instant? {
         return time?.let { Instant.fromEpochMilliseconds(time) }
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun dateToTimeStamp(instant: Instant?): Long? {
         return instant?.toEpochMilliseconds()
     }

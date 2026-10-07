@@ -18,7 +18,7 @@
 
 package com.frybits.gradle.core.configurations
 
-import androidx.room.gradle.RoomExtension
+import androidx.room3.gradle.RoomExtension
 import com.frybits.gradle.core.definitions.BuildFile
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -29,7 +29,7 @@ import org.gradle.kotlin.dsl.configure
  */
 internal fun Project.handleRoomPlugins(buildFile: BuildFile) {
     if (buildFile.enableRoom) {
-        apply(plugin = "androidx.room")
+        apply(plugin = "androidx.room3")
     }
 }
 

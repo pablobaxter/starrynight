@@ -6,7 +6,7 @@ plugins {
 testing {
     @Suppress("UnstableApiUsage", "unused")
     suites {
-        val test by getting(JvmTestSuite::class) {
+        getByName<JvmTestSuite>("test") {
             useKotlinTest()
 
             dependencies {

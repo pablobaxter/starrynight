@@ -18,9 +18,9 @@
 
 package com.frybits.starrynight.android.persistence
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room3.ColumnTypeConverters
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
 import com.frybits.starrynight.android.persistence.converters.InstantTypeConverter
 import com.frybits.starrynight.atproto.data.DidDatabase
 import com.frybits.starrynight.atproto.data.models.HandleRoomData
@@ -33,7 +33,7 @@ import com.frybits.starrynight.atproto.data.models.PdsRoomData
     ],
     version = 1
 )
-@TypeConverters(
+@ColumnTypeConverters(
     InstantTypeConverter::class
 )
 internal abstract class AppDatabase :

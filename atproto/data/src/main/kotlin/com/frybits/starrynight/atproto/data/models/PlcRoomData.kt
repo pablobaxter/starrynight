@@ -18,14 +18,14 @@
 
 package com.frybits.starrynight.atproto.data.models
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 
 public data class PlcRoomData(
     @Embedded val pdsRoomData: PdsRoomData,
     @Relation(
-        parentColumn = "did",
-        entityColumn = "did"
+        parentColumns = ["did"],
+        entityColumns = ["did"]
     )
     val handles: List<HandleRoomData>
 )

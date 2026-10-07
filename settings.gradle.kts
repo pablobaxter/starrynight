@@ -19,7 +19,7 @@ pluginManagement {
         id("com.google.devtools.ksp") version providers.gradleProperty("com.frybits.ksp.version")
         id("dev.zacsweers.metro") version providers.gradleProperty("com.frybits.metro.version")
         id("org.jetbrains.kotlin.plugin.compose") version providers.gradleProperty("com.frybits.kotlin.version")
-        id("androidx.room") version providers.gradleProperty("com.frybits.room.version")
+        id("androidx.room3") version providers.gradleProperty("com.frybits.room.version")
         id("com.squareup.wire") version providers.gradleProperty("com.frybits.square.wire.version")
         id("com.autonomousapps.build-health") version providers.gradleProperty("com.frybits.dagp.version")
     }
@@ -60,7 +60,7 @@ plugins {
     id("org.gradle.android.cache-fix") apply false
     id("dev.zacsweers.metro") apply false
     id("org.jetbrains.kotlin.plugin.compose") apply false
-    id("androidx.room") apply false
+    id("androidx.room3") apply false
     id("com.squareup.wire") apply false
     id("com.frybits.plugin")
 }

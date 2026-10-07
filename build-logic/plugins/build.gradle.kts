@@ -7,18 +7,18 @@ plugins {
 testing {
     @Suppress("UnstableApiUsage", "unused")
     suites {
-        val test by getting(JvmTestSuite::class) {
+        getByName<JvmTestSuite>("test") {
             useKotlinTest()
         }
 
-        val functionalTest by registering(JvmTestSuite::class) {
+        register<JvmTestSuite>("functionalTest") {
             useKotlinTest()
         }
     }
 }
 
 // Special thanks to https://github.com/melix/jmh-gradle-plugin/blob/master/build-logic/src/main/kotlin/me.champeau.convention-funcTest.gradle.kts
-val pluginsUnderTest by configurations.registering
+val pluginsUnderTest = configurations.register("pluginsUnderTest")
 
 gradlePlugin {
     plugins {
